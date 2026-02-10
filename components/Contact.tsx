@@ -56,9 +56,6 @@ const Contact: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col items-center md:items-end gap-2">
-            <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">
-              Work at Skill Room Bangladesh IT
-            </div>
             <div className="text-slate-400 text-sm">
               © {new Date().getFullYear()} S M Fajla Rabbi. All Rights Reserved.
             </div>

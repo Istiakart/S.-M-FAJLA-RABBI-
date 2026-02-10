@@ -12,7 +12,7 @@ const SERVICES: Service[] = [
   {
     title: 'Meta Ads Scaling',
     icon: <TrendingUp className="w-6 h-6" />,
-    description: 'Data-backed Facebook & Instagram ad campaigns focused on ROI. Specializing in interest-stacking as taught in Skill Room Bangladesh IT.'
+    description: 'Data-backed Facebook & Instagram ad campaigns focused on ROI. Specializing in interest-stacking as taught in ClickNova IT Agency.'
   },
   {
     title: 'Sales Funnel Design',

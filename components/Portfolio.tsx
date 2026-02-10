@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Project } from '../types';
 import { generateCaseStudySummary } from '../services/geminiService';
-import { Sparkles, BrainCircuit } from 'lucide-react';
+import { Sparkles, BrainCircuit, ExternalLink } from 'lucide-react';
 
 const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -40,8 +40,19 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const { value, unit } = splitResults(project.results);
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500">
-      <div className="p-6 md:p-8">
+    <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full">
+      {project.imageUrl && (
+        <div className="w-full aspect-[16/9] overflow-hidden bg-slate-100 relative group">
+          <img 
+            src={project.imageUrl} 
+            alt={project.title} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        </div>
+      )}
+      
+      <div className="p-6 md:p-8 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-6">
           <div className="flex-1">
             <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2">
@@ -59,32 +70,31 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
           {project.description}
         </p>
 
-        <div className="mb-8">
-          {!aiSummary && !isGenerating ? (
-            <button 
-              onClick={handleGenerateAISummary}
-              className="group flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              Generate AI ROI Insight
-            </button>
-          ) : (
-            <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-fade-in relative overflow-hidden">
-              {isGenerating && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-[shimmer_2s_infinite] -translate-x-full"></div>
-              )}
-              <div className="flex items-start gap-3">
-                <BrainCircuit className={`w-4 h-4 mt-0.5 ${isGenerating ? 'text-blue-300 animate-pulse' : 'text-blue-600'}`} />
-                <div>
-                  <div className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Skill Room AI Summary</div>
-                  <p className="text-xs text-slate-700 leading-relaxed font-semibold italic">
-                    {isGenerating ? "Analyzing performance data via Gemini..." : aiSummary}
-                  </p>
+        {project.category !== 'Website Build' && (
+          <div className="mb-8">
+            {!aiSummary && !isGenerating ? (
+              <button 
+                onClick={handleGenerateAISummary}
+                className="group flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                Generate AI ROI Insight
+              </button>
+            ) : (
+              <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-fade-in relative overflow-hidden">
+                <div className="flex items-start gap-3">
+                  <BrainCircuit className={`w-4 h-4 mt-0.5 ${isGenerating ? 'text-blue-300 animate-pulse' : 'text-blue-600'}`} />
+                  <div>
+                    <div className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">ClickNova AI Summary</div>
+                    <p className="text-xs text-slate-700 leading-relaxed font-semibold italic">
+                      {isGenerating ? "Analyzing performance data via Gemini..." : aiSummary}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
           {project.metrics?.slice(0, 4).map((m, i) => (
@@ -98,66 +108,83 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
 
         <div className={`overflow-hidden transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="pt-4 pb-8">
-            <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Performance Timeline</h5>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={project.chartData} 
-                  margin={{ top: 10, right: 10, left: isMobile ? -40 : -20, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  />
-                  <Tooltip 
-                    cursor={{ fill: '#f8fafc' }}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '12px' }}
-                  />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={32}>
-                    {project.chartData?.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === (project.chartData?.length || 0) - 1 ? '#2563eb' : '#e2e8f0'} className="hover:fill-blue-400 transition-colors" />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {project.category !== 'Website Build' && (
+              <>
+                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Performance Timeline</h5>
+                <div className="h-64 w-full mb-8">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart 
+                      data={project.chartData} 
+                      margin={{ top: 10, right: 10, left: isMobile ? -40 : -20, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#94a3b8', fontSize: 10 }}
+                      />
+                      <Tooltip 
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '12px' }}
+                      />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={32}>
+                        {project.chartData?.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === (project.chartData?.length || 0) - 1 ? '#2563eb' : '#e2e8f0'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </>
+            )}
             
-            <div className="bg-blue-900 text-white p-6 rounded-2xl mt-8 shadow-inner">
+            <div className="bg-blue-900 text-white p-6 rounded-2xl shadow-inner">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
                   <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </div>
                 <h5 className="font-bold text-blue-200 uppercase text-[10px] tracking-widest">Strategy Highlight</h5>
               </div>
-              <div className="text-xl font-bold mb-3">Skill Room Bangladesh IT Method</div>
+              <div className="text-xl font-bold mb-3">ClickNova Methodology</div>
               <p className="text-blue-100 text-sm leading-relaxed font-medium">
-                Implementing <strong>Interest-Stacking Techniques</strong> and granular behavior targeting optimized at <strong>Skill Room Bangladesh IT</strong>. We leverage advanced pixel data to ensure maximum budget efficiency: <span className="text-white font-bold">{project.efficiency}</span>.
+                Implementing <strong>conversion-focused systems</strong> optimized at <strong>ClickNova IT Agency</strong>. We leverage precise technical execution to ensure maximum ROI: <span className="text-white font-bold">{project.efficiency}</span>.
               </p>
             </div>
           </div>
         </div>
 
-        <button 
-          onClick={() => setIsExpanded(!isExpanded)}
-          className={`w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border-2 ${
-            isExpanded 
-              ? 'bg-slate-50 border-slate-200 text-slate-500' 
-              : 'bg-white border-slate-100 text-slate-700 hover:border-blue-100 hover:text-blue-600 shadow-sm'
-          }`}
-        >
-          {isExpanded ? 'Hide Details' : 'Full Performance Breakdown'}
-          <svg className={`w-4 h-4 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+        <div className="mt-auto flex gap-3">
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`flex-1 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border-2 ${
+              isExpanded 
+                ? 'bg-slate-50 border-slate-200 text-slate-500' 
+                : 'bg-white border-slate-100 text-slate-700 hover:border-blue-100 hover:text-blue-600 shadow-sm'
+            }`}
+          >
+            {isExpanded ? 'Hide Details' : 'View Breakdown'}
+            <svg className={`w-4 h-4 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {project.link && (
+            <a 
+              href={project.link} 
+              target="_blank" 
+              rel="noreferrer"
+              className="bg-blue-600 text-white p-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center"
+              title="Visit Project"
+            >
+              <ExternalLink size={20} />
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -168,8 +195,8 @@ interface PortfolioProps {
 }
 
 const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
-  const [activeFilter, setActiveFilter] = useState<'All' | 'E-commerce' | 'Leads' | 'Engagement'>('All');
-  const [limit, setLimit] = useState(2);
+  const [activeFilter, setActiveFilter] = useState<'All' | 'E-commerce' | 'Leads' | 'Engagement' | 'Website Build'>('All');
+  const [limit, setLimit] = useState(4);
 
   const filteredProjects = useMemo(() => {
     return projects.filter(p => activeFilter === 'All' || p.category === activeFilter);
@@ -182,12 +209,10 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
     setLimit(prev => Math.min(prev + 2, filteredProjects.length));
   };
 
-  const filters: ('All' | 'E-commerce' | 'Leads' | 'Engagement')[] = ['All', 'E-commerce', 'Leads', 'Engagement'];
+  const filters: ('All' | 'E-commerce' | 'Leads' | 'Engagement' | 'Website Build')[] = ['All', 'E-commerce', 'Leads', 'Engagement', 'Website Build'];
 
   return (
     <section id="portfolio" className="py-24 bg-white relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl text-center md:text-left">
@@ -196,7 +221,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
             </div>
             <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 leading-tight">Data Speaks Louder <br className="hidden md:block"/>Than Words.</h3>
             <p className="text-lg text-slate-600 leading-relaxed font-medium">
-              Explore real growth metrics from recent campaigns executed with <strong>Skill Room Bangladesh IT</strong>. Precision targeting leads to measurable ROI.
+              Explore real growth metrics and digital assets executed with <strong>ClickNova IT Agency</strong>. Precision scaling leads to measurable success.
             </p>
           </div>
           
@@ -204,7 +229,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
              {filters.map(filter => (
                <button 
                  key={filter}
-                 onClick={() => { setActiveFilter(filter); setLimit(2); }}
+                 onClick={() => { setActiveFilter(filter); setLimit(4); }}
                  className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all relative ${
                    activeFilter === filter 
                    ? 'bg-white text-blue-600 shadow-md scale-105' 
@@ -228,56 +253,22 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
           ) : (
             <div className="col-span-full py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
               <div className="text-4xl mb-4">📈</div>
-              <h4 className="text-xl font-bold text-slate-500">No campaigns found in this category.</h4>
-              <p className="text-slate-400 mt-2">Try a different filter to see more performance data.</p>
+              <h4 className="text-xl font-bold text-slate-500">No projects found in this category.</h4>
             </div>
           )}
-          
-          {hasMore && (
+        </div>
+
+        {hasMore && (
+           <div className="mt-16 text-center">
              <button 
                onClick={handleLoadMore}
-               className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-12 text-center group cursor-pointer hover:border-blue-300 hover:bg-white transition-all duration-300"
+               className="bg-slate-50 text-slate-700 px-10 py-4 rounded-2xl font-bold hover:bg-slate-100 transition-all border border-slate-200"
              >
-               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-slate-300 mb-6 group-hover:text-blue-500 group-hover:scale-110 transition-all shadow-sm">
-                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-               </div>
-               <h4 className="text-xl font-bold text-slate-400 group-hover:text-slate-600 transition-colors">Expand Portfolio</h4>
-               <p className="text-slate-400 text-sm max-w-[200px] mt-2 font-medium">Load more verified campaign results.</p>
+               Load More Projects
              </button>
-          )}
-
-          {!hasMore && displayedProjects.length > 0 && (
-            <div className="bg-blue-600 rounded-3xl flex flex-col items-center justify-center p-12 text-center shadow-xl shadow-blue-100 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000"></div>
-              <h4 className="text-2xl font-bold text-white mb-3">Your Brand Next?</h4>
-              <p className="text-blue-100 text-sm max-w-[240px] mb-8 font-medium">I am currently accepting <span className="text-white font-bold">2 new partners</span> for the next quarter.</p>
-              <a 
-                href="#contact" 
-                className="bg-white text-blue-600 px-8 py-3.5 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg active:scale-95"
-              >
-                Discuss My Growth
-              </a>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-20 text-center">
-          <a 
-            href="#contact"
-            className="inline-flex items-center gap-2 font-bold text-slate-600 hover:text-blue-600 transition-all group py-2 px-4 rounded-full hover:bg-blue-50"
-          >
-            <span>Request Detailed PDF Report</span>
-            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-          </a>
-        </div>
+           </div>
+        )}
       </div>
-      
-      <style>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </section>
   );
 };

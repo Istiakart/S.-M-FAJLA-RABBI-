@@ -97,7 +97,7 @@ const Footer: React.FC<FooterProps> = ({ onAdminLogin }) => {
         <div className="pt-10 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-slate-500 text-sm font-medium text-center md:text-left">
             <p>© {currentYear} S M Fajla Rabbi. All Rights Reserved.</p>
-            <p className="mt-1 text-slate-600 text-xs">Partner at <span className="text-slate-400">Skill Room Bangladesh IT</span></p>
+            <p className="mt-1 text-slate-600 text-xs">Partner at <span className="text-slate-400">ClickNova IT Agency</span></p>
           </div>
         </div>
       </div>

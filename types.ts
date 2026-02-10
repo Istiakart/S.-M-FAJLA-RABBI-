@@ -4,10 +4,12 @@ import React from 'react';
 export interface Project {
   id: string;
   title: string;
-  category: string;
+  category: 'E-commerce' | 'Leads' | 'Engagement' | 'Website Build';
   results: string;
   efficiency: string;
   description: string;
+  imageUrl?: string;
+  link?: string;
   metrics?: {
     label: string;
     value: string;

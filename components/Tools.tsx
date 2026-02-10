@@ -50,7 +50,7 @@ const Tools: React.FC = () => {
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
             <span className="text-xs font-bold text-slate-600">
-              Verified Methodology at <span className="text-blue-600">Skill Room Bangladesh IT</span>
+              Verified Methodology at <span className="text-blue-600">ClickNova IT Agency</span>
             </span>
           </div>
         </div>

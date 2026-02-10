@@ -19,7 +19,9 @@ import {
   Lock,
   Eye,
   EyeOff,
-  CheckCircle2
+  CheckCircle2,
+  Image as ImageIcon,
+  Link as LinkIcon
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 
@@ -54,6 +56,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     results: '',
     efficiency: '',
     description: '',
+    imageUrl: '',
+    link: ''
   });
 
   useEffect(() => {
@@ -105,6 +109,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     });
   };
 
+  const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const base64 = await blobToBase64(file);
+    setNewProject({ ...newProject, imageUrl: `data:${file.type};base64,${base64}` });
+  };
+
   const handleAiUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -115,8 +126,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       const data = await analyzeMarketingImage(base64, file.type);
       
       setNewProject({
+        ...newProject,
         title: data.title || '',
-        category: (['E-commerce', 'Leads', 'Engagement'].includes(data.category) ? data.category : 'E-commerce') as any,
+        category: (['E-commerce', 'Leads', 'Engagement', 'Website Build'].includes(data.category) ? data.category : 'E-commerce') as any,
         results: data.results || '',
         efficiency: data.efficiency || '',
         description: data.description || '',
@@ -131,7 +143,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   };
 
   const resetForm = () => {
-    setNewProject({ title: '', category: 'E-commerce', results: '', efficiency: '', description: '' });
+    setNewProject({ 
+      title: '', 
+      category: 'E-commerce', 
+      results: '', 
+      efficiency: '', 
+      description: '', 
+      imageUrl: '', 
+      link: '' 
+    });
     setEditingProjectId(null);
   };
 
@@ -183,13 +203,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       category: project.category as any,
       results: project.results,
       efficiency: project.efficiency,
-      description: project.description
+      description: project.description,
+      imageUrl: project.imageUrl || '',
+      link: project.link || ''
     });
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const deleteProject = (id: string) => {
-    if (confirm("Are you sure you want to delete this campaign?")) {
+    if (confirm("Are you sure you want to delete this project?")) {
       const updated = projects.filter(p => p.id !== id);
       setProjects(updated);
       localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(updated));
@@ -343,7 +365,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
           <div className="animate-fade-in grid lg:grid-cols-3 gap-12">
             <div className="lg:col-span-1" ref={formRef}>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-black text-slate-900">{editingProjectId ? 'Edit Sample' : 'Add Sample'}</h2>
+                <h2 className="text-3xl font-black text-slate-900">{editingProjectId ? 'Edit Project' : 'Add Project'}</h2>
                 {editingProjectId && (
                   <button onClick={resetForm} className="flex items-center gap-1 text-xs font-bold text-red-500 uppercase tracking-widest hover:underline">
                     <X size={14} /> Cancel Edit
@@ -367,7 +389,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                     </div>
                     <div className="text-center">
                       <div className="font-bold text-slate-900">AI Magic Upload</div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Upload ad result screenshot</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Auto-fill via Ad Screenshot</div>
                     </div>
                     <input type="file" accept="image/*" className="hidden" onChange={handleAiUpload} />
                   </label>
@@ -381,18 +403,59 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                 </div>
                 <div>
                   <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Category</label>
-                  <select className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none" value={newProject.category} onChange={(e) => setNewProject({...newProject, category: e.target.value})}>
-                    <option>E-commerce</option><option>Leads</option><option>Engagement</option>
+                  <select className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none" value={newProject.category} onChange={(e) => setNewProject({...newProject, category: e.target.value as any})}>
+                    <option value="E-commerce">E-commerce</option>
+                    <option value="Leads">Leads</option>
+                    <option value="Engagement">Engagement</option>
+                    <option value="Website Build">Website Build</option>
                   </select>
                 </div>
+
+                <div>
+                   <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Work Image (Optional)</label>
+                   <div className="flex gap-4 items-center">
+                     {newProject.imageUrl ? (
+                       <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200">
+                         <img src={newProject.imageUrl} className="w-full h-full object-cover" />
+                         <button 
+                           onClick={() => setNewProject({...newProject, imageUrl: ''})}
+                           className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl-lg"
+                         >
+                           <X size={12} />
+                         </button>
+                       </div>
+                     ) : (
+                       <label className="w-full flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 border-dashed p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition-all text-slate-400">
+                         <ImageIcon size={18} />
+                         <span className="text-xs font-bold uppercase tracking-wider">Upload Image</span>
+                         <input type="file" accept="image/*" className="hidden" onChange={handleProjectImageUpload} />
+                       </label>
+                     )}
+                   </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Project Link (URL)</label>
+                  <div className="relative">
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input 
+                      type="url" 
+                      placeholder="https://example.com"
+                      className="w-full bg-slate-50 border border-slate-200 p-3 pl-10 rounded-xl outline-none" 
+                      value={newProject.link} 
+                      onChange={(e) => setNewProject({...newProject, link: e.target.value})} 
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Results</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none" value={newProject.results} onChange={(e) => setNewProject({...newProject, results: e.target.value})} />
+                    <input type="text" placeholder="e.g. 142 Messages" className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none" value={newProject.results} onChange={(e) => setNewProject({...newProject, results: e.target.value})} />
                   </div>
                   <div>
                     <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Efficiency</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none" value={newProject.efficiency} onChange={(e) => setNewProject({...newProject, efficiency: e.target.value})} />
+                    <input type="text" placeholder="e.g. BDT 8.20/Lead" className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none" value={newProject.efficiency} onChange={(e) => setNewProject({...newProject, efficiency: e.target.value})} />
                   </div>
                 </div>
                 <div>
@@ -403,22 +466,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                   onClick={handleAddOrUpdateProject} 
                   className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-xl ${
                     editingProjectId 
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 ring-4 ring-white' 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200' 
                       : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'
                   }`}
                 >
-                  <Save size={18} /> {editingProjectId ? 'Update Campaign' : 'Publish'}
+                  <Save size={18} /> {editingProjectId ? 'Update Project' : 'Publish to Portfolio'}
                 </button>
               </div>
             </div>
             <div className="lg:col-span-2">
-              <h2 className="text-3xl font-black text-slate-900 mb-8">Active Samples</h2>
+              <h2 className="text-3xl font-black text-slate-900 mb-8">Active Portfolio</h2>
               <div className="space-y-4">
                 {projects.map((p) => (
                   <div key={p.id} className={`bg-white p-6 rounded-3xl border transition-all duration-300 flex items-center justify-between group ${editingProjectId === p.id ? 'border-blue-400 bg-blue-50/30' : 'border-slate-200 hover:border-blue-200'}`}>
                     <div className="flex gap-4 items-center">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black transition-colors ${editingProjectId === p.id ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-600'}`}>
-                        {p.category.charAt(0)}
+                        {p.imageUrl ? (
+                          <img src={p.imageUrl} className="w-full h-full object-cover rounded-xl" />
+                        ) : (
+                          p.category.charAt(0)
+                        )}
                       </div>
                       <div>
                         <div className="font-bold text-slate-900">{p.title}</div>
@@ -461,7 +528,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         {activeTab === 'settings' && (
           <div className="animate-fade-in max-w-2xl">
             <h2 className="text-3xl font-black text-slate-900 mb-8">Security Settings</h2>
-            <p className="text-slate-500 mb-10 font-medium">Update your administrative credentials to keep your dashboard secure. These changes take effect immediately.</p>
+            <p className="text-slate-500 mb-10 font-medium">Update your administrative credentials to keep your dashboard secure.</p>
             
             {updateSuccess && (
               <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl flex items-center gap-3 animate-fade-in">
@@ -510,18 +577,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                 <ShieldCheck size={18} /> Update Security
               </button>
             </form>
-
-            <div className="mt-8 p-6 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4 items-start">
-              <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
-                <ShieldCheck size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-amber-900 mb-1">Important Privacy Notice</p>
-                <p className="text-xs text-amber-700 font-medium leading-relaxed">
-                  Credentials are stored locally in your browser's persistent storage. If you clear your site data, the login will reset to the system default.
-                </p>
-              </div>
-            </div>
           </div>
         )}
       </main>

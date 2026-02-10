@@ -33,10 +33,10 @@ const About: React.FC = () => {
               Helping Brands <span className="text-blue-600">Profitably Scale.</span>
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-              In a crowded digital landscape, I focus on the one metric that matters: <strong>ROI</strong>. As a results-oriented Digital Marketer, I specialize in the Meta ecosystem (Facebook & Instagram), turning fragmented audiences into high-value conversion streams.
+              Digital Marketing is more than just reach; it’s about <strong>Revenue</strong>. Specialized in Meta Ads, I help brands scale by bridging the gap between creative storytelling and technical data.
             </p>
             <p className="text-lg text-slate-600 mb-8 leading-relaxed font-medium">
-              My approach blends technical precision with creative strategy. Through my collaboration with <strong>Skill Room Bangladesh IT</strong> and the successful execution of my <strong>AI-driven 100% challenge program</strong>, I ensure every Taka of your budget works with maximum efficiency to deliver guaranteed performance.
+              With a focus on <strong>Peak Conversion Optimization</strong>, I manage your campaigns with surgical precision. From audience segmentation to A/B testing, I ensure your marketing budget works tirelessly to deliver the highest possible Return on Ad Spend (ROAS).
             </p>
             
             <div className="grid grid-cols-2 gap-6 mt-10">

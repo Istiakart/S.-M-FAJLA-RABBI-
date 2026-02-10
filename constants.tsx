@@ -10,7 +10,7 @@ import { Project, Service, Tool } from './types';
 export const SERVICES: Service[] = [
   {
     title: "Meta Ads Scaling",
-    description: "Data-backed Facebook & Instagram ad campaigns focused on ROI. Specializing in interest-stacking as taught in Skill Room Bangladesh IT to ensure your budget is spent where it performs best.",
+    description: "Data-backed Facebook & Instagram ad campaigns focused on ROI. Specializing in interest-stacking as taught in ClickNova IT Agency to ensure your budget is spent where it performs best.",
     icon: <TrendingUp className="w-6 h-6" />
   },
   {
