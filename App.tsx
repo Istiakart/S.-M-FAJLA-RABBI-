@@ -16,8 +16,7 @@ const App: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  useEffect(() => {
-    // Initialize Projects from LocalStorage or Constants
+  const loadProjects = () => {
     const storedProjects = localStorage.getItem('rabbi_portfolio_projects');
     if (storedProjects) {
       setProjects(JSON.parse(storedProjects));
@@ -25,6 +24,10 @@ const App: React.FC = () => {
       setProjects(INITIAL_PROJECTS);
       localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(INITIAL_PROJECTS));
     }
+  };
+
+  useEffect(() => {
+    loadProjects();
 
     // Visitor Tracking Logic
     const logVisit = () => {
@@ -37,7 +40,6 @@ const App: React.FC = () => {
         page: window.location.hash || 'Home'
       };
       
-      // Keep only last 500 visits to prevent storage bloat
       const updatedVisits = [newVisit, ...visits].slice(0, 500);
       localStorage.setItem('rabbi_portfolio_visits', JSON.stringify(updatedVisits));
     };
@@ -48,7 +50,12 @@ const App: React.FC = () => {
   }, []);
 
   if (isAdminMode) {
-    return <AdminPanel onClose={() => setIsAdminMode(false)} />;
+    return (
+      <AdminPanel 
+        onClose={() => setIsAdminMode(false)} 
+        onProjectsUpdate={loadProjects}
+      />
+    );
   }
 
   return (
