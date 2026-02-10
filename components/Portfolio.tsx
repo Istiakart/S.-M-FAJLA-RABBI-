@@ -18,6 +18,12 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Reset internal state if project ID changes
+  useEffect(() => {
+    setAiSummary(null);
+    setIsExpanded(false);
+  }, [project.id]);
+
   const handleGenerateAISummary = async () => {
     if (aiSummary || isGenerating) return;
     setIsGenerating(true);
@@ -40,7 +46,7 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const { value, unit } = splitResults(project.results);
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full">
+    <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
       {project.imageUrl && (
         <div className="w-full aspect-[16/9] overflow-hidden bg-slate-100 relative group">
           <img 
@@ -199,14 +205,16 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
   const [limit, setLimit] = useState(4);
 
   const filteredProjects = useMemo(() => {
-    return projects.filter(p => activeFilter === 'All' || p.category === activeFilter);
+    // Show newest first
+    const sorted = [...projects].sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    return sorted.filter(p => activeFilter === 'All' || p.category === activeFilter);
   }, [projects, activeFilter]);
 
   const displayedProjects = filteredProjects.slice(0, limit);
   const hasMore = limit < filteredProjects.length;
 
   const handleLoadMore = () => {
-    setLimit(prev => Math.min(prev + 2, filteredProjects.length));
+    setLimit(prev => Math.min(prev + 4, filteredProjects.length));
   };
 
   const filters: ('All' | 'E-commerce' | 'Leads' | 'Engagement' | 'Website Build')[] = ['All', 'E-commerce', 'Leads', 'Engagement', 'Website Build'];
@@ -262,7 +270,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
            <div className="mt-16 text-center">
              <button 
                onClick={handleLoadMore}
-               className="bg-slate-50 text-slate-700 px-10 py-4 rounded-2xl font-bold hover:bg-slate-100 transition-all border border-slate-200"
+               className="bg-slate-50 text-slate-700 px-10 py-4 rounded-2xl font-bold hover:bg-slate-100 transition-all border border-slate-200 shadow-sm"
              >
                Load More Projects
              </button>

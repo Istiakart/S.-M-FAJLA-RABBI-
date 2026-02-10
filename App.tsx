@@ -17,13 +17,26 @@ const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   const loadProjects = () => {
-    const storedProjects = localStorage.getItem('rabbi_portfolio_projects');
-    if (storedProjects) {
-      setProjects(JSON.parse(storedProjects));
+    const storedProjectsRaw = localStorage.getItem('rabbi_portfolio_projects');
+    let currentProjects: Project[] = [];
+    
+    if (storedProjectsRaw) {
+      currentProjects = JSON.parse(storedProjectsRaw);
+      
+      // Sync Logic: Add any hardcoded initial projects that are missing in localStorage
+      const currentIds = new Set(currentProjects.map(p => p.id));
+      const missingProjects = INITIAL_PROJECTS.filter(p => !currentIds.has(p.id));
+      
+      if (missingProjects.length > 0) {
+        currentProjects = [...currentProjects, ...missingProjects];
+        localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(currentProjects));
+      }
     } else {
-      setProjects(INITIAL_PROJECTS);
+      currentProjects = INITIAL_PROJECTS;
       localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(INITIAL_PROJECTS));
     }
+    
+    setProjects(currentProjects);
   };
 
   useEffect(() => {
