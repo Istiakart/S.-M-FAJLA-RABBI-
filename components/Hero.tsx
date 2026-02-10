@@ -4,17 +4,16 @@ import React from 'react';
 const Hero: React.FC = () => {
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-slate-50">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-indigo-100 rounded-full blur-3xl opacity-30 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[400px] h-[400px] bg-purple-100 rounded-full blur-3xl opacity-30 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-100 rounded-full blur-3xl opacity-30 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[400px] h-[400px] bg-cyan-100 rounded-full blur-3xl opacity-30 pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 text-left">
           <div className="flex-1 animate-fade-in order-2 lg:order-1">
-            <div className="inline-flex items-center gap-2 bg-white border border-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-xs md:text-sm font-bold mb-6 md:mb-8 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-white border border-blue-100 text-blue-700 px-4 py-2 rounded-full text-xs md:text-sm font-bold mb-6 md:mb-8 shadow-sm">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
               </span>
               S M FAJLA RABBI | DATA-DRIVEN GROWTH SPECIALIST
             </div>
@@ -31,14 +30,12 @@ const Hero: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <a 
                 href="#contact" 
-                aria-label="Get a free quote from S M Fajla Rabbi"
-                className="w-full sm:w-auto bg-indigo-600 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 active:scale-95 text-center"
+                className="w-full sm:w-auto bg-blue-600 text-white px-10 py-4 rounded-xl text-lg font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95 text-center"
               >
                 Get a Quote
               </a>
               <a 
                 href="#portfolio" 
-                aria-label="View campaign performance and case studies"
                 className="w-full sm:w-auto bg-white border-2 border-slate-200 text-slate-700 px-10 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 transition-all text-center"
               >
                 View Performance
@@ -50,23 +47,21 @@ const Hero: React.FC = () => {
             <div className="relative z-10 w-full max-w-[320px] md:max-w-[480px] mx-auto">
               <div className="aspect-[1/1] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl border-[8px] md:border-[12px] border-white bg-slate-900 group">
                 <img 
-                  src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1770854400&v=beta&t=BOwyCPMxx4i4RwImayvLr8L4E7ZA922l9oY0sz5hK9w" 
+                  src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" 
                   alt="S M Fajla Rabbi Professional Portrait" 
-                  aria-label="Professional portrait of S M Fajla Rabbi"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1519085184903-b811b1347343?q=80&w=1974&auto=format&fit=crop';
                   }}
                 />
               </div>
               
-              {/* Floating Stat Cards - Optimized for Mobile */}
               <div className="absolute -bottom-4 -left-2 md:-bottom-6 md:-left-6 bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 animate-bounce-slow z-20">
-                <div className="text-indigo-600 font-black text-xl md:text-3xl">BDT 8.20</div>
+                <div className="text-blue-600 font-black text-xl md:text-3xl">BDT 8.20</div>
                 <div className="text-slate-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest mt-0.5 md:mt-1">Cost Per Conversation</div>
               </div>
               <div className="absolute top-8 -right-2 md:top-12 md:-right-6 bg-white p-3 md:p-6 rounded-xl md:rounded-2xl shadow-xl border border-slate-100 z-20">
-                <div className="text-emerald-600 font-black text-xl md:text-3xl">$0.0003</div>
+                <div className="text-cyan-600 font-black text-xl md:text-3xl">$0.0003</div>
                 <div className="text-slate-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest mt-0.5 md:mt-1">Cost Per Engagement</div>
               </div>
             </div>

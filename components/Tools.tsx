@@ -7,10 +7,6 @@ interface Tool {
   icon: string;
 }
 
-/**
- * Verified Performance Stack used at Skill Room Bangladesh IT.
- * Defined locally for high-speed rendering and zero external dependency.
- */
 const TOOLS: Tool[] = [
   { 
     name: "Meta Ads Manager", 
@@ -49,13 +45,12 @@ const Tools: React.FC = () => {
             My Performance Stack
           </h4>
           
-          {/* Skill Room Bangladesh IT Verification Badge */}
           <div className="mt-6 inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm">
-            <svg className="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
             <span className="text-xs font-bold text-slate-600">
-              Verified Methodology at <span className="text-indigo-600">Skill Room Bangladesh IT</span>
+              Verified Methodology at <span className="text-blue-600">Skill Room Bangladesh IT</span>
             </span>
           </div>
         </div>
@@ -64,10 +59,10 @@ const Tools: React.FC = () => {
           {TOOLS.map((tool, i) => (
             <div 
               key={i} 
-              className="group bg-white p-8 rounded-[2rem] border border-slate-100 flex flex-col items-center gap-4 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-2"
+              className="group bg-white p-8 rounded-[2rem] border border-slate-100 flex flex-col items-center gap-4 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-2"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-indigo-500/10 blur-xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700 opacity-0 group-hover:opacity-100"></div>
+                <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700 opacity-0 group-hover:opacity-100"></div>
                 <img 
                   src={tool.icon} 
                   alt={`${tool.name} logo`} 
@@ -76,7 +71,7 @@ const Tools: React.FC = () => {
               </div>
               
               <div className="text-center mt-2">
-                <span className="block text-base font-bold text-slate-800 transition-colors group-hover:text-indigo-600">
+                <span className="block text-base font-bold text-slate-800 transition-colors group-hover:text-blue-600">
                   {tool.name}
                 </span>
                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
