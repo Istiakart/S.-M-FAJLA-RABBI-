@@ -30,6 +30,27 @@ export const SERVICES: Service[] = [
  */
 export const PROJECTS: Project[] = [
   {
+    id: "web-build-1",
+    title: "Meta-Optimized E-commerce Hub",
+    category: "Website Build",
+    results: "Live Platform",
+    efficiency: "98% PageSpeed",
+    description: "Developed a high-performance business platform engineered specifically for Meta Ads compatibility. Features lightning-fast load times and deep GTM/Meta Pixel integration to ensure zero data loss during scaling.",
+    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop",
+    link: "https://example.com",
+    metrics: [
+      { label: "Load Time", value: "< 1.2s", description: "LCP Optimization" },
+      { label: "SEO Score", value: "100/100", description: "Lighthouse Audit" },
+      { label: "Mobile Score", value: "96%", description: "Core Web Vitals" },
+      { label: "Tech Stack", value: "React/Tailwind", description: "Modern Architecture" }
+    ],
+    chartData: [
+      { name: 'Before', value: 45 },
+      { name: 'After Optimization', value: 98 },
+    ],
+    demographics: "Fully responsive across all modern browsers and mobile devices. Engineered for global access."
+  },
+  {
     id: "hoodie-sales",
     title: "E-commerce Clothing Scale-up",
     category: "E-commerce",
