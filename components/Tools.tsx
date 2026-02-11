@@ -7,7 +7,19 @@ interface Tool {
   icon: string;
 }
 
+const AI_STUDIO_LOGO = "data:image/png;base64,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";
+
 const TOOLS: Tool[] = [
+  { 
+    name: "WordPress", 
+    subtitle: "CMS & Development", 
+    icon: "https://www.vectorlogo.zone/logos/wordpress/wordpress-icon.svg" 
+  },
+  { 
+    name: "Shopify", 
+    subtitle: "E-commerce Builds", 
+    icon: "https://www.vectorlogo.zone/logos/shopify/shopify-icon.svg" 
+  },
   { 
     name: "Meta Ads Manager", 
     subtitle: "Scaling & Tracking", 
@@ -21,12 +33,22 @@ const TOOLS: Tool[] = [
   { 
     name: "Meta Pixel", 
     subtitle: "Advanced Retargeting", 
-    icon: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQArQMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAAAwcBBgIFCAT/xAA7EAABBAADAgsGBQMFAAAAAAABAAIDBAUGESExBxITMjNBUWFygbEUQmJxocEiI1KR0RUWQyRTgrLh/8QAGQEBAAMBAQAAAAAAAAAAAAAAAAEDBAUC/8VAIhEBAAICAgICAwEAAAAAAAAAAAECAxEEEiExIkETI3EU/9oADAMBABIBCMLWRU8WxOxdxu47YHEOfG3sH8qyOEbKtnF2MxGi+SSeBnFNbXUObv/CP1eqqXcSCCCO1euHSmu3uUZrW3r6ERFuUCIpIIH2Z4q8fPme2NvzcdFEzqBeWR6nsWVsPiI0YmwwsiYNGsaGgdwVM8Jlz2rNtiIc2qxkXnpxj/BvouXx/nm21ZPFNNVREXVZRCERBvOQ86HDHMw3FZC6kdkcp/w9x+H0VsAtkZs0cxw6toIXnzBcJt41fZTox8aR21ztNkbesk9ivTAcMbg+FV6DJpJhE3TjyHXX+B2DqXM5dKVtuPbVhmZjU+lc8IGTP6cZMVwpn+kJ1mhb/iPaPh9FoiunhAxyphmB2Ksjmvs2ozHHF16HYXHsAVKjctPFva1PkpyxEW8ClrjneSiU0HvLVKtG/pH+Irisv6R/iKwgLZsmZsny9ZEU5dJh0h1kj3lh/U37jrWsovN6RevWUxaa+YejalqC7Wjs1ZGywyN4zHN3ELRs+5KFzlMUwiICyBxpoG/5e8fF6rUcmZsny7Y5ObjS0JD+ZGDtYf1N+461c9SzBdrR2asrZYZG8Zr2nUELl2rfj33DVExkh5z0IJB2EbCFhWpn7JXtokxPCI9LW+aBo6XvHxeqqs6g6EaEbCD1Lo4stcldwz3pNZ1ItgyHU9szZQaQSI3GU/8AEa+ui19b7wQ1OVxi9bI2QQNYD3vP8N+qZ7dccyikbtC1idASdwXnnGbRu4xetE68rO93lrs+ivXMlz2DAMQta6GOu8t29emz66Lz63cFk4Vfdl2efoREXQZ2V9uC4TcxrEGU6MZc93Oceawdp7kwXCbeN32U6MfGedrnHmsb2lXdlzL9PL9AVqo40jtsszh+KR3f3dyzZ88Y41HtZjxzYyzgFTL1Bteq3jSO2zTO50jv47l8+bsz1su09/uS9W5SXiSX5W6SS9TR+lte71XaY/jdPAqDrd1+gGxjc57uwLmc85Z619NNOPHFr5Jn+NVMCh7rq67QA6MYOdI7sCpDH8buY/fdbuu2DZHEObG3sH8qyOEbKtnF2MxGi+SSeBnFNbXUObv/CP1eqqXcSCCCO1euHSmu3uUZrW3r6ERFuUCIpIIH2Z4q8fPme2NvzcdFEzqBeWR6nsWVsPiI0" 
+    icon: "https://www.vectorlogo.zone/logos/facebook/facebook-icon.svg" 
+  },
+  { 
+    name: "Google Tag Manager", 
+    subtitle: "Server-side Tracking", 
+    icon: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Google_Tag_Manager_Logo.svg" 
   },
   { 
     name: "AI Studio & GPT", 
     subtitle: "Copy & Strategy", 
-    icon: "https://www.vectorlogo.zone/logos/openai/openai-icon.svg" 
+    icon: AI_STUDIO_LOGO 
+  },
+  { 
+    name: "PageSpeed", 
+    subtitle: "Speed Optimization", 
+    icon: "https://www.vectorlogo.zone/logos/google/google-icon.svg" 
   }
 ];
 
@@ -55,7 +77,7 @@ const Tools: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {TOOLS.map((tool, i) => (
             <div 
               key={i} 
@@ -63,11 +85,14 @@ const Tools: React.FC = () => {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700 opacity-0 group-hover:opacity-100"></div>
-                <img 
-                  src={tool.icon} 
-                  alt={`${tool.name} logo`} 
-                  className="h-12 w-auto relative z-10 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500 ease-out"
-                />
+                <div className="h-12 w-12 flex items-center justify-center relative z-10">
+                  <img 
+                    src={tool.icon} 
+                    alt={`${tool.name} logo`} 
+                    className="max-h-full max-w-full object-contain transition-all duration-500 ease-out group-hover:scale-110"
+                    loading="lazy"
+                  />
+                </div>
               </div>
               
               <div className="text-center mt-2">

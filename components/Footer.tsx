@@ -7,6 +7,7 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onAdminLogin }) => {
   const currentYear = new Date().getFullYear();
+  const EMAIL_ADDRESS = "istiakrobbi25@gmail.com";
 
   return (
     <footer className="bg-slate-900 text-white pt-20 pb-10 border-t border-slate-800">
@@ -71,10 +72,13 @@ const Footer: React.FC<FooterProps> = ({ onAdminLogin }) => {
           <div>
             <h4 className="text-lg font-bold mb-6">Get In Touch</h4>
             <div className="space-y-4">
-              <p className="text-slate-400 flex items-center gap-3 text-sm">
+              <a 
+                href={`mailto:${EMAIL_ADDRESS}`}
+                className="text-slate-400 flex items-center gap-3 text-sm hover:text-blue-400 transition-colors"
+              >
                 <svg className="w-5 h-5 text-blue-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                istiakrobbi25@gmail.com
-              </p>
+                {EMAIL_ADDRESS}
+              </a>
               <div className="flex gap-4 mt-8">
                 <button 
                   onClick={onAdminLogin}
