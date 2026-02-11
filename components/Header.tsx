@@ -17,7 +17,10 @@ const Header: React.FC = () => {
     { name: 'About', href: '#about' },
     { name: 'Services', href: '#services' },
     { name: 'Portfolio', href: '#portfolio' },
+    { name: 'Zoom Meeting', href: '#zoom-booking' },
   ];
+
+  const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScbNBhZ3cCFP0AAPtpZoRxuXhIgLk646BdSm_RCjnAZpjrneA/viewform?usp=publish-editor";
 
   return (
     <header 
@@ -29,7 +32,7 @@ const Header: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-600 shadow-md ring-2 ring-blue-50">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-600 shadow-md ring-2 ring-blue-50 shrink-0">
             <img 
               src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" 
               alt="S M Fajla Rabbi Logo" 
@@ -39,10 +42,9 @@ const Header: React.FC = () => {
               }}
             />
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-slate-900 hidden sm:block">
+          <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
             S M FAJLA <span className="text-blue-600">RABBI</span>
           </span>
-          <span className="text-lg font-extrabold text-slate-900 sm:hidden">RABBI</span>
         </div>
         
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
@@ -56,10 +58,12 @@ const Header: React.FC = () => {
             </a>
           ))}
           <a 
-            href="#contact" 
+            href={GOOGLE_FORM_URL} 
+            target="_blank"
+            rel="noopener noreferrer"
             className="bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-md shadow-blue-100"
           >
-            Get a Quote
+            Book Session
           </a>
         </nav>
 
@@ -98,11 +102,13 @@ const Header: React.FC = () => {
             </a>
           ))}
           <a 
-            href="#contact" 
+            href={GOOGLE_FORM_URL} 
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => setIsMobileMenuOpen(false)}
             className="mt-2 bg-blue-600 text-white px-6 py-4 rounded-xl text-center font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
           >
-            Get a Quote
+            Book Session
           </a>
         </nav>
       </div>

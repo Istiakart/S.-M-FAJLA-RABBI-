@@ -1,27 +1,72 @@
 
 import React from 'react';
-import { TrendingUp, Filter, Zap } from 'lucide-react';
+import { 
+  Globe, 
+  Share2, 
+  Megaphone, 
+  Search, 
+  PenTool,
+  TrendingUp, 
+  Filter, 
+  Zap 
+} from 'lucide-react';
 import { Project, Service, Tool } from './types';
 
 /**
  * Core services provided by S M Fajla Rabbi.
- * Icons match the set used in the Services component for visual consistency.
+ * Updated to reflect the 5 main categories and sub-options requested.
  */
 export const SERVICES: Service[] = [
   {
-    title: "Meta Ads Scaling",
-    description: "Data-backed Facebook & Instagram ad campaigns focused on ROI. Specializing in interest-stacking as taught in ClickNova IT Agency to ensure your budget is spent where it performs best.",
-    icon: <TrendingUp className="w-6 h-6" />
+    title: "Web Design & Development",
+    description: "Custom, fast, and mobile-responsive websites that turn visitors into customers.",
+    icon: <Globe className="w-6 h-6" />,
+    subServices: [
+      "WordPress & Shopify Development",
+      "Landing Page Design",
+      "E-commerce Solutions",
+      "Website Speed Optimization"
+    ]
   },
   {
-    title: "Sales Funnel Design",
-    description: "Building high-converting messaging funnels that turn clicks into conversations. I optimize the entire customer journey to lower CAC and increase lifetime value.",
-    icon: <Filter className="w-6 h-6" />
+    title: "Social Media Marketing (SMM)",
+    description: "Building your brand presence where your customers spend most of their time.",
+    icon: <Share2 className="w-6 h-6" />,
+    subServices: [
+      "Social Media Management (FB, IG, LinkedIn)",
+      "Content Creation & Planning",
+      "Community Engagement"
+    ]
   },
   {
-    title: "AI-Enhanced Marketing",
-    description: "Leveraging AI tools for creative testing and audience analysis to minimize ad spend and maximize engagement. We use GPT for copy and strategy to stay ahead of the curve.",
-    icon: <Zap className="w-6 h-6" />
+    title: "Paid Advertising (Ads)",
+    description: "Data-driven ad campaigns to get immediate results and high ROI.",
+    icon: <Megaphone className="w-6 h-6" />,
+    subServices: [
+      "Facebook & Instagram Ads",
+      "Google Search & Display Ads",
+      "YouTube Advertising"
+    ]
+  },
+  {
+    title: "Search Engine Optimization (SEO)",
+    description: "Helping your business rank on the first page of Google organically.",
+    icon: <Search className="w-6 h-6" />,
+    subServices: [
+      "Keyword Research & Strategy",
+      "On-Page & Technical SEO",
+      "Backlink Building"
+    ]
+  },
+  {
+    title: "Content & Copywriting",
+    description: "Compelling words that sell your story and your products.",
+    icon: <PenTool className="w-6 h-6" />,
+    subServices: [
+      "Ad Copywriting",
+      "SEO Blog Writing",
+      "Email Newsletters"
+    ]
   }
 ];
 
@@ -113,9 +158,6 @@ export const PROJECTS: Project[] = [
   }
 ];
 
-/**
- * High-performance agency-grade tool stack.
- */
 export const TOOLS: Tool[] = [
   { 
     name: "Meta Ads Manager", 

@@ -6,6 +6,7 @@ import About from './components/About';
 import Services from './components/Services';
 import Portfolio from './components/Portfolio';
 import Tools from './components/Tools';
+import ZoomBooking from './components/ZoomBooking';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
@@ -80,6 +81,7 @@ const App: React.FC = () => {
         <Services />
         <Portfolio projects={projects} />
         <Tools />
+        <ZoomBooking />
         <Contact />
       </main>
       <Footer onAdminLogin={() => setIsAdminMode(true)} />

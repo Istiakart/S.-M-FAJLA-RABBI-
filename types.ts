@@ -34,6 +34,7 @@ export interface Service {
   title: string;
   description: string;
   icon: React.ReactNode;
+  subServices?: string[];
 }
 
 export interface Tool {
