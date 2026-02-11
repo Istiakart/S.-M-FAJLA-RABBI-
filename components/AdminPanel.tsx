@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Project, Visit } from '../types';
+import * as OTPAuth from 'otpauth';
 import { 
   LayoutDashboard, 
   Plus, 
@@ -24,7 +25,9 @@ import {
   Link as LinkIcon,
   Copy,
   KeyRound,
-  RefreshCw
+  RefreshCw,
+  QrCode,
+  SmartphoneNfc
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 
@@ -35,8 +38,10 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginStep, setLoginStep] = useState<'creds' | '2fa'>('creds');
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [useSyncToken, setUseSyncToken] = useState(false);
   const [syncTokenInput, setSyncTokenInput] = useState('');
@@ -53,6 +58,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [syncToken, setSyncToken] = useState('');
+  
+  // 2FA Setup state
+  const [isSettingUp2FA, setIsSettingUp2FA] = useState(false);
+  const [tempSecret, setTempSecret] = useState('');
+  const [setupCode, setSetupCode] = useState('');
 
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +79,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   useEffect(() => {
     // Initialize Auth Defaults if not present
     if (!localStorage.getItem('admin_credentials')) {
-      localStorage.setItem('admin_credentials', JSON.stringify({ username: 'admin', password: 'password123' }));
+      localStorage.setItem('admin_credentials', JSON.stringify({ 
+        username: 'admin', 
+        password: 'password123',
+        twoFactorSecret: null 
+      }));
     }
 
     const storedProjects = JSON.parse(localStorage.getItem('rabbi_portfolio_projects') || '[]');
@@ -88,6 +102,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+
     if (useSyncToken) {
       try {
         const decoded = JSON.parse(atob(syncTokenInput));
@@ -102,11 +118,74 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       }
     }
 
-    const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
-    if (loginUsername === creds.username && loginPassword === creds.password) {
-      setIsAuthenticated(true);
+    if (loginStep === 'creds') {
+      if (loginUsername === creds.username && loginPassword === creds.password) {
+        if (creds.twoFactorSecret) {
+          setLoginStep('2fa');
+        } else {
+          setIsAuthenticated(true);
+        }
+      } else {
+        alert('Invalid Username or Password!');
+      }
     } else {
-      alert('Invalid Username or Password! Note: Credentials are local to this device/browser.');
+      // Verify TOTP
+      const totp = new OTPAuth.TOTP({
+        issuer: "Rabbi Portfolio",
+        label: creds.username,
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: creds.twoFactorSecret,
+      });
+
+      const delta = totp.validate({ token: twoFactorCode, window: 1 });
+      if (delta !== null) {
+        setIsAuthenticated(true);
+      } else {
+        alert('Invalid 2FA Code!');
+      }
+    }
+  };
+
+  const initiate2FASetup = () => {
+    const secret = new OTPAuth.Secret().base32;
+    setTempSecret(secret);
+    setIsSettingUp2FA(true);
+  };
+
+  const confirm2FASetup = () => {
+    const totp = new OTPAuth.TOTP({
+      issuer: "Rabbi Portfolio",
+      label: newUsername,
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: tempSecret,
+    });
+
+    const delta = totp.validate({ token: setupCode, window: 1 });
+    if (delta !== null) {
+      const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+      const updatedCreds = { ...creds, twoFactorSecret: tempSecret };
+      localStorage.setItem('admin_credentials', JSON.stringify(updatedCreds));
+      setSyncToken(btoa(JSON.stringify(updatedCreds)));
+      setIsSettingUp2FA(false);
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
+    } else {
+      alert("Invalid code. Please try again.");
+    }
+  };
+
+  const disable2FA = () => {
+    if (confirm("Are you sure you want to disable Google Authenticator?")) {
+      const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+      const updatedCreds = { ...creds, twoFactorSecret: null };
+      localStorage.setItem('admin_credentials', JSON.stringify(updatedCreds));
+      setSyncToken(btoa(JSON.stringify(updatedCreds)));
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
     }
   };
 
@@ -116,7 +195,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       alert("Please enter both a new username and password.");
       return;
     }
-    const newCreds = { username: newUsername, password: newPassword };
+    const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+    const newCreds = { ...creds, username: newUsername, password: newPassword };
     localStorage.setItem('admin_credentials', JSON.stringify(newCreds));
     setSyncToken(btoa(JSON.stringify(newCreds)));
     setUpdateSuccess(true);
@@ -263,67 +343,90 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
               </div>
               <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Admin Portal</h1>
               <p className="text-slate-500 text-sm font-medium">
-                {useSyncToken ? 'Paste token from another device' : 'Enter your credentials'}
+                {loginStep === 'creds' ? (useSyncToken ? 'Paste token from another device' : 'Enter your credentials') : 'Verify Authenticator Code'}
               </p>
             </div>
 
             <div className="space-y-4 mb-6">
-              {!useSyncToken ? (
-                <>
+              {loginStep === 'creds' ? (
+                !useSyncToken ? (
+                  <>
+                    <div className="relative">
+                      <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input 
+                        type="text" 
+                        placeholder="Username" 
+                        className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
+                        value={loginUsername}
+                        onChange={(e) => setLoginUsername(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input 
+                        type={showLoginPassword ? "text" : "password"} 
+                        placeholder="Password" 
+                        className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                      >
+                        {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </>
+                ) : (
                   <div className="relative">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
-                      type="text" 
-                      placeholder="Username" 
-                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
-                      value={loginUsername}
-                      onChange={(e) => setLoginUsername(e.target.value)}
-                      autoFocus
+                    <KeyRound className="absolute left-4 top-4 text-slate-400 w-5 h-5" />
+                    <textarea 
+                      placeholder="Paste Sync Token here..." 
+                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all h-32 resize-none text-xs"
+                      value={syncTokenInput}
+                      onChange={(e) => setSyncTokenInput(e.target.value)}
                     />
                   </div>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
-                      type={showLoginPassword ? "text" : "password"} 
-                      placeholder="Password" 
-                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
-                    >
-                      {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </>
+                )
               ) : (
                 <div className="relative">
-                  <KeyRound className="absolute left-4 top-4 text-slate-400 w-5 h-5" />
-                  <textarea 
-                    placeholder="Paste Sync Token here..." 
-                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all h-32 resize-none text-xs"
-                    value={syncTokenInput}
-                    onChange={(e) => setSyncTokenInput(e.target.value)}
+                  <SmartphoneNfc className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input 
+                    type="text" 
+                    maxLength={6}
+                    placeholder="6-digit code" 
+                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-black text-center text-2xl tracking-[0.5em] transition-all"
+                    value={twoFactorCode}
+                    onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
+                    autoFocus
                   />
                 </div>
               )}
             </div>
 
-            <button 
-              type="button" 
-              onClick={() => { setUseSyncToken(!useSyncToken); setSyncTokenInput(''); }}
-              className="w-full text-center text-xs font-bold text-blue-600 uppercase tracking-widest mb-6 hover:underline"
-            >
-              {useSyncToken ? 'Back to standard login' : 'Login with Sync Token'}
-            </button>
+            {loginStep === 'creds' && (
+              <button 
+                type="button" 
+                onClick={() => { setUseSyncToken(!useSyncToken); setSyncTokenInput(''); }}
+                className="w-full text-center text-xs font-bold text-blue-600 uppercase tracking-widest mb-6 hover:underline"
+              >
+                {useSyncToken ? 'Back to standard login' : 'Login with Sync Token'}
+              </button>
+            )}
 
             <div className="flex gap-4">
-              <button type="button" onClick={onClose} className="flex-1 py-4 font-bold text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
+              <button 
+                type="button" 
+                onClick={() => loginStep === 'creds' ? onClose() : setLoginStep('creds')} 
+                className="flex-1 py-4 font-bold text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {loginStep === 'creds' ? 'Cancel' : 'Back'}
+              </button>
               <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">
-                {useSyncToken ? 'Sync & Login' : 'Login'}
+                {loginStep === 'creds' ? (useSyncToken ? 'Sync & Login' : 'Next') : 'Verify'}
               </button>
             </div>
           </form>
@@ -331,7 +434,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
           <div className="mt-6 p-4 bg-slate-800/50 rounded-2xl border border-slate-700 text-center">
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
               SECURITY NOTE: Credentials are stored locally in your browser. <br/>
-              Changes on one device won't sync to others automatically.
+              Authenticator is highly recommended for high-stakes accounts.
             </p>
           </div>
         </div>
@@ -595,94 +698,202 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         )}
 
         {activeTab === 'settings' && (
-          <div className="animate-fade-in max-w-2xl">
-            <h2 className="text-3xl font-black text-slate-900 mb-4">Security Settings</h2>
-            
-            <div className="mb-10 bg-blue-50 border border-blue-100 p-6 rounded-3xl">
-              <div className="flex items-start gap-3">
-                <RefreshCw className="text-blue-600 w-5 h-5 mt-1 shrink-0" />
-                <p className="text-slate-600 text-sm font-medium leading-relaxed">
-                  <strong>Device-Specific Storage:</strong> Your login credentials and portfolio changes are stored in this browser's local memory. 
-                  If you want to use another device (like your phone), use the <strong>Sync Token</strong> below to copy your access.
-                </p>
+          <div className="animate-fade-in max-w-4xl grid lg:grid-cols-2 gap-12">
+            <div className="space-y-12">
+              <div>
+                <h2 className="text-3xl font-black text-slate-900 mb-4">Security Settings</h2>
+                <div className="bg-blue-50 border border-blue-100 p-6 rounded-3xl">
+                  <div className="flex items-start gap-3">
+                    <RefreshCw className="text-blue-600 w-5 h-5 mt-1 shrink-0" />
+                    <p className="text-slate-600 text-sm font-medium leading-relaxed">
+                      <strong>Device Sync:</strong> Always use the <strong>Sync Token</strong> to transfer settings (including 2FA) to new devices.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            {updateSuccess && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl flex items-center gap-3 animate-fade-in">
-                <CheckCircle2 size={20} />
-                <span className="font-bold">Credentials updated successfully!</span>
-              </div>
-            )}
 
-            <div className="space-y-8">
+              {updateSuccess && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl flex items-center gap-3 animate-fade-in">
+                  <CheckCircle2 size={20} />
+                  <span className="font-bold">Settings updated!</span>
+                </div>
+              )}
+
               <form onSubmit={handleUpdateCredentials} className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl space-y-6">
                 <h3 className="font-bold text-slate-900 flex items-center gap-2">
                   <Edit3 size={18} className="text-blue-600" />
-                  Update Credentials
+                  Basic Credentials
                 </h3>
-                <div>
-                  <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Admin Username</label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
-                    <input 
-                      type="text" 
-                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                      value={newUsername}
-                      onChange={(e) => setNewUsername(e.target.value)}
-                    />
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Username</label>
+                    <div className="relative">
+                      <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
+                      <input 
+                        type="text" 
+                        className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-black text-slate-400 uppercase mb-2 block">New Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
-                    <input 
-                      type={showNewPassword ? "text" : "password"} 
-                      placeholder="Enter new strong password"
-                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
-                    >
-                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
+                  <div>
+                    <label className="text-xs font-black text-slate-400 uppercase mb-2 block">New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
+                      <input 
+                        type={showNewPassword ? "text" : "password"} 
+                        placeholder="••••••••"
+                        className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                      >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
+                  className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl"
                 >
-                  <ShieldCheck size={18} /> Update Security
+                  <Save size={18} /> Save Credentials
                 </button>
               </form>
 
               <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl space-y-6">
                 <h3 className="font-bold text-white flex items-center gap-2">
                   <Smartphone size={18} className="text-blue-400" />
-                  Sync to Another Device
+                  Cross-Device Sync
                 </h3>
-                <p className="text-slate-400 text-xs">
-                  Copy this token and use it on your phone or other laptop's login screen to instantly sync your admin credentials.
-                </p>
                 <div className="bg-slate-800 p-4 rounded-xl break-all font-mono text-[10px] text-blue-300 border border-slate-700 relative">
                   {syncToken}
                   <button 
                     onClick={() => copyToClipboard(syncToken)}
                     className="absolute top-2 right-2 p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-all text-white"
-                    title="Copy Token"
                   >
                     <Copy size={14} />
                   </button>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
-                  <CheckCircle2 size={14} />
-                  Token is updated automatically whenever you change credentials.
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-emerald-500" />
+                    2FA Security
+                  </h3>
+                  {JSON.parse(localStorage.getItem('admin_credentials') || '{}').twoFactorSecret ? (
+                    <span className="px-3 py-1 bg-emerald-100 text-emerald-600 text-[10px] font-black uppercase rounded-full">Active</span>
+                  ) : (
+                    <span className="px-3 py-1 bg-slate-100 text-slate-400 text-[10px] font-black uppercase rounded-full">Disabled</span>
+                  )}
                 </div>
+
+                {!isSettingUp2FA ? (
+                   <div>
+                     {JSON.parse(localStorage.getItem('admin_credentials') || '{}').twoFactorSecret ? (
+                       <div className="space-y-6">
+                         <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4">
+                           <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0">
+                             <CheckCircle2 size={24} />
+                           </div>
+                           <p className="text-xs font-medium text-emerald-800">
+                             Your account is protected with Google Authenticator. Login will require a 6-digit code.
+                           </p>
+                         </div>
+                         <button 
+                           onClick={disable2FA}
+                           className="w-full py-4 border-2 border-red-50 text-red-500 font-bold rounded-xl hover:bg-red-50 transition-all"
+                         >
+                           Disable 2FA
+                         </button>
+                       </div>
+                     ) : (
+                       <div className="space-y-6 text-center">
+                         <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto text-slate-300">
+                            <QrCode size={40} />
+                         </div>
+                         <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                           Add an extra layer of security. Use Google Authenticator or any TOTP app to protect your dashboard.
+                         </p>
+                         <button 
+                           onClick={initiate2FASetup}
+                           className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
+                         >
+                           <QrCode size={18} /> Setup Authenticator
+                         </button>
+                       </div>
+                     )}
+                   </div>
+                ) : (
+                  <div className="space-y-8 animate-fade-in">
+                    <div className="text-center space-y-6">
+                      <h4 className="font-bold text-slate-800">Step 1: Scan QR Code</h4>
+                      <div className="bg-white p-4 border border-slate-100 rounded-2xl shadow-inner inline-block">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`otpauth://totp/Rabbi Portfolio:${newUsername}?secret=${tempSecret}&issuer=Rabbi Portfolio`)}`} 
+                          alt="2FA QR Code" 
+                          className="w-40 h-40"
+                        />
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest break-all px-6">
+                        Secret Key: {tempSecret}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                       <h4 className="font-bold text-slate-800 text-center">Step 2: Enter 6-digit Code</h4>
+                       <input 
+                        type="text" 
+                        maxLength={6}
+                        placeholder="000000"
+                        className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl text-center text-2xl font-black tracking-[0.5em] outline-none focus:ring-2 focus:ring-blue-500"
+                        value={setupCode}
+                        onChange={(e) => setSetupCode(e.target.value.replace(/\D/g, ''))}
+                       />
+                       <div className="flex gap-4 pt-4">
+                         <button onClick={() => setIsSettingUp2FA(false)} className="flex-1 py-4 font-bold text-slate-400">Cancel</button>
+                         <button 
+                           onClick={confirm2FASetup}
+                           disabled={setupCode.length !== 6}
+                           className="flex-1 bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-xl disabled:opacity-50"
+                         >
+                           Enable 2FA
+                         </button>
+                       </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-8 bg-blue-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <Sparkles size={18} className="text-blue-300" />
+                  Security Tips
+                </h3>
+                <ul className="text-xs space-y-4 text-blue-100 font-medium">
+                  <li className="flex gap-2">
+                    <span className="text-blue-400 font-black">•</span>
+                    Always download your 2FA app recovery codes.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-400 font-black">•</span>
+                    If you lose access, clear your browser's local storage to reset everything.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-blue-400 font-black">•</span>
+                    Use a different password than your social accounts.
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
