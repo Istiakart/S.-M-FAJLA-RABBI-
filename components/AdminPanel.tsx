@@ -21,7 +21,10 @@ import {
   EyeOff,
   CheckCircle2,
   Image as ImageIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Copy,
+  KeyRound,
+  RefreshCw
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 
@@ -35,6 +38,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [useSyncToken, setUseSyncToken] = useState(false);
+  const [syncTokenInput, setSyncTokenInput] = useState('');
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [visits, setVisits] = useState<Visit[]>([]);
@@ -47,6 +52,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   const [newPassword, setNewPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [syncToken, setSyncToken] = useState('');
 
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -73,15 +79,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
 
     const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
     setNewUsername(creds.username || 'admin');
+    
+    // Generate current sync token
+    const token = btoa(JSON.stringify(creds));
+    setSyncToken(token);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (useSyncToken) {
+      try {
+        const decoded = JSON.parse(atob(syncTokenInput));
+        if (decoded.username && decoded.password) {
+          localStorage.setItem('admin_credentials', JSON.stringify(decoded));
+          setIsAuthenticated(true);
+          return;
+        }
+      } catch (err) {
+        alert('Invalid Sync Token!');
+        return;
+      }
+    }
+
     const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
     if (loginUsername === creds.username && loginPassword === creds.password) {
       setIsAuthenticated(true);
     } else {
-      alert('Invalid Username or Password!');
+      alert('Invalid Username or Password! Note: Credentials are local to this device/browser.');
     }
   };
 
@@ -91,10 +116,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       alert("Please enter both a new username and password.");
       return;
     }
-    localStorage.setItem('admin_credentials', JSON.stringify({ username: newUsername, password: newPassword }));
+    const newCreds = { username: newUsername, password: newPassword };
+    localStorage.setItem('admin_credentials', JSON.stringify(newCreds));
+    setSyncToken(btoa(JSON.stringify(newCreds)));
     setUpdateSuccess(true);
     setNewPassword('');
     setTimeout(() => setUpdateSuccess(false), 5000);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
   };
 
   const blobToBase64 = (file: File): Promise<string> => {
@@ -223,49 +255,86 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
-        <form onSubmit={handleLogin} className="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md animate-fade-in-up">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg ring-4 ring-blue-50">
-              <ShieldCheck className="text-white w-8 h-8" />
+        <div className="w-full max-w-md">
+          <form onSubmit={handleLogin} className="bg-white p-8 rounded-[2rem] shadow-2xl w-full animate-fade-in-up">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg ring-4 ring-blue-50">
+                <ShieldCheck className="text-white w-8 h-8" />
+              </div>
+              <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Admin Portal</h1>
+              <p className="text-slate-500 text-sm font-medium">
+                {useSyncToken ? 'Paste token from another device' : 'Enter your credentials'}
+              </p>
             </div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Admin Portal</h1>
-            <p className="text-slate-500 text-sm font-medium">Please enter your credentials</p>
-          </div>
-          <div className="space-y-4 mb-6">
-            <div className="relative">
-              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input 
-                type="text" 
-                placeholder="Username" 
-                className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
-                value={loginUsername}
-                onChange={(e) => setLoginUsername(e.target.value)}
-                autoFocus
-              />
+
+            <div className="space-y-4 mb-6">
+              {!useSyncToken ? (
+                <>
+                  <div className="relative">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input 
+                      type="text" 
+                      placeholder="Username" 
+                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
+                      value={loginUsername}
+                      onChange={(e) => setLoginUsername(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input 
+                      type={showLoginPassword ? "text" : "password"} 
+                      placeholder="Password" 
+                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                    >
+                      {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="relative">
+                  <KeyRound className="absolute left-4 top-4 text-slate-400 w-5 h-5" />
+                  <textarea 
+                    placeholder="Paste Sync Token here..." 
+                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all h-32 resize-none text-xs"
+                    value={syncTokenInput}
+                    onChange={(e) => setSyncTokenInput(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input 
-                type={showLoginPassword ? "text" : "password"} 
-                placeholder="Password" 
-                className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold transition-all"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-              />
-              <button 
-                type="button" 
-                onClick={() => setShowLoginPassword(!showLoginPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
-              >
-                {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+
+            <button 
+              type="button" 
+              onClick={() => { setUseSyncToken(!useSyncToken); setSyncTokenInput(''); }}
+              className="w-full text-center text-xs font-bold text-blue-600 uppercase tracking-widest mb-6 hover:underline"
+            >
+              {useSyncToken ? 'Back to standard login' : 'Login with Sync Token'}
+            </button>
+
+            <div className="flex gap-4">
+              <button type="button" onClick={onClose} className="flex-1 py-4 font-bold text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
+              <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">
+                {useSyncToken ? 'Sync & Login' : 'Login'}
               </button>
             </div>
+          </form>
+          
+          <div className="mt-6 p-4 bg-slate-800/50 rounded-2xl border border-slate-700 text-center">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+              SECURITY NOTE: Credentials are stored locally in your browser. <br/>
+              Changes on one device won't sync to others automatically.
+            </p>
           </div>
-          <div className="flex gap-4">
-            <button type="button" onClick={onClose} className="flex-1 py-4 font-bold text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
-            <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">Login</button>
-          </div>
-        </form>
+        </div>
       </div>
     );
   }
@@ -527,8 +596,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
 
         {activeTab === 'settings' && (
           <div className="animate-fade-in max-w-2xl">
-            <h2 className="text-3xl font-black text-slate-900 mb-8">Security Settings</h2>
-            <p className="text-slate-500 mb-10 font-medium">Update your administrative credentials to keep your dashboard secure.</p>
+            <h2 className="text-3xl font-black text-slate-900 mb-4">Security Settings</h2>
+            
+            <div className="mb-10 bg-blue-50 border border-blue-100 p-6 rounded-3xl">
+              <div className="flex items-start gap-3">
+                <RefreshCw className="text-blue-600 w-5 h-5 mt-1 shrink-0" />
+                <p className="text-slate-600 text-sm font-medium leading-relaxed">
+                  <strong>Device-Specific Storage:</strong> Your login credentials and portfolio changes are stored in this browser's local memory. 
+                  If you want to use another device (like your phone), use the <strong>Sync Token</strong> below to copy your access.
+                </p>
+              </div>
+            </div>
             
             {updateSuccess && (
               <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl flex items-center gap-3 animate-fade-in">
@@ -537,46 +615,76 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
               </div>
             )}
 
-            <form onSubmit={handleUpdateCredentials} className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl space-y-6">
-              <div>
-                <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Admin Username</label>
-                <div className="relative">
-                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
-                  <input 
-                    type="text" 
-                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                    value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                  />
+            <div className="space-y-8">
+              <form onSubmit={handleUpdateCredentials} className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl space-y-6">
+                <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                  <Edit3 size={18} className="text-blue-600" />
+                  Update Credentials
+                </h3>
+                <div>
+                  <label className="text-xs font-black text-slate-400 uppercase mb-2 block">Admin Username</label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
+                    <input 
+                      type="text" 
+                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="text-xs font-black text-slate-400 uppercase mb-2 block">New Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
-                  <input 
-                    type={showNewPassword ? "text" : "password"} 
-                    placeholder="Enter new strong password"
-                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
+                <div>
+                  <label className="text-xs font-black text-slate-400 uppercase mb-2 block">New Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5" />
+                    <input 
+                      type={showNewPassword ? "text" : "password"} 
+                      placeholder="Enter new strong password"
+                      className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+                <button 
+                  type="submit" 
+                  className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
+                >
+                  <ShieldCheck size={18} /> Update Security
+                </button>
+              </form>
+
+              <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl space-y-6">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  <Smartphone size={18} className="text-blue-400" />
+                  Sync to Another Device
+                </h3>
+                <p className="text-slate-400 text-xs">
+                  Copy this token and use it on your phone or other laptop's login screen to instantly sync your admin credentials.
+                </p>
+                <div className="bg-slate-800 p-4 rounded-xl break-all font-mono text-[10px] text-blue-300 border border-slate-700 relative">
+                  {syncToken}
                   <button 
-                    type="button" 
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                    onClick={() => copyToClipboard(syncToken)}
+                    className="absolute top-2 right-2 p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-all text-white"
+                    title="Copy Token"
                   >
-                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    <Copy size={14} />
                   </button>
                 </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
+                  <CheckCircle2 size={14} />
+                  Token is updated automatically whenever you change credentials.
+                </div>
               </div>
-              <button 
-                type="submit" 
-                className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
-              >
-                <ShieldCheck size={18} /> Update Security
-              </button>
-            </form>
+            </div>
           </div>
         )}
       </main>
