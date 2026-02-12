@@ -158,6 +158,46 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     }
   };
 
+  const initiate2FASetup = () => {
+    const secret = new OTPAuth.Secret().base32;
+    setTempSecret(secret);
+    setIsSettingUp2FA(true);
+  };
+
+  const confirm2FASetup = () => {
+    const totp = new OTPAuth.TOTP({
+      issuer: "Rabbi Portfolio",
+      label: newUsername,
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: tempSecret,
+    });
+    const delta = totp.validate({ token: setupCode, window: 1 });
+    if (delta !== null) {
+      const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+      const updatedCreds = { ...creds, twoFactorSecret: tempSecret };
+      localStorage.setItem('admin_credentials', JSON.stringify(updatedCreds));
+      setSyncToken(btoa(JSON.stringify(updatedCreds)));
+      setIsSettingUp2FA(false);
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
+    } else {
+      alert("Invalid code. Please try again.");
+    }
+  };
+
+  const disable2FA = () => {
+    if (confirm("Are you sure you want to disable Google Authenticator?")) {
+      const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+      const updatedCreds = { ...creds, twoFactorSecret: null };
+      localStorage.setItem('admin_credentials', JSON.stringify(updatedCreds));
+      setSyncToken(btoa(JSON.stringify(updatedCreds)));
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
+    }
+  };
+
   const handleTabChange = (tab: any) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
@@ -189,13 +229,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
 
   const saveBrandingIdentity = () => {
     try {
-      // Direct save to localStorage
       localStorage.setItem('rabbi_site_identity', JSON.stringify(identity));
-      
-      // Notify parent to refresh its state
       onProjectsUpdate();
-      
-      // UI Feedback
       setBrandingSuccess(true);
       setTimeout(() => setBrandingSuccess(false), 3000);
     } catch (err) {
@@ -348,7 +383,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     return (
       <div className="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <form onSubmit={handleLogin} className="bg-white p-8 rounded-[2rem] shadow-2xl w-full animate-fade-in-up">
+          <form onSubmit={handleLogin} className="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full animate-fade-in-up">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg ring-4 ring-blue-50">
                 <ShieldCheck className="text-white w-8 h-8" />
@@ -360,20 +395,50 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
               {loginStep === 'creds' ? (
                 !useSyncToken ? (
                   <>
-                    <input type="text" placeholder="Username" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
-                    <input type={showLoginPassword ? "text" : "password"} placeholder="Password" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><UserIcon size={18}/></div>
+                      <input type="text" placeholder="Username" className="w-full bg-slate-50 border border-slate-200 pl-12 pr-4 py-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Lock size={18}/></div>
+                      <input 
+                        type={showLoginPassword ? "text" : "password"} 
+                        placeholder="Password" 
+                        className="w-full bg-slate-50 border border-slate-200 pl-12 pr-12 py-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20" 
+                        value={loginPassword} 
+                        onChange={(e) => setLoginPassword(e.target.value)} 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors"
+                      >
+                        {showLoginPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
+                      </button>
+                    </div>
                   </>
                 ) : (
-                  <textarea placeholder="Paste Sync Token..." className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl h-32 text-xs" value={syncTokenInput} onChange={(e) => setSyncTokenInput(e.target.value)} />
+                  <textarea placeholder="Paste Sync Token..." className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl h-32 text-xs outline-none focus:ring-2 focus:ring-blue-500/20" value={syncTokenInput} onChange={(e) => setSyncTokenInput(e.target.value)} />
                 )
               ) : (
-                <input type="text" maxLength={6} placeholder="6-digit code" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl text-center text-2xl font-bold" value={twoFactorCode} onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))} />
+                <div className="space-y-4 text-center">
+                   <div className="text-xs font-black text-blue-600 uppercase tracking-[0.2em]">Enter 2FA Code</div>
+                   <input type="text" maxLength={6} placeholder="000000" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl text-center text-3xl font-black tracking-[0.5em] outline-none focus:ring-2 focus:ring-blue-500/20" value={twoFactorCode} onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))} autoFocus />
+                </div>
               )}
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-400 font-bold">Cancel</button>
-              <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold">Next</button>
+              <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-400 font-bold hover:bg-slate-50 rounded-xl transition-colors">Cancel</button>
+              <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">Next</button>
             </div>
+            
+            <button 
+              type="button" 
+              onClick={() => setUseSyncToken(!useSyncToken)}
+              className="w-full mt-6 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-blue-400 transition-colors"
+            >
+              {useSyncToken ? 'Back to standard login' : 'Use Sync Token Access'}
+            </button>
           </form>
         </div>
       </div>
@@ -590,20 +655,123 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
           )}
 
           {activeTab === 'settings' && (
-            <div className="animate-fade-in max-w-2xl mx-auto space-y-12">
-              <h2 className="text-3xl font-black">Security Protocols</h2>
-              <form onSubmit={handleUpdateCredentials} className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-xl space-y-6">
-                <input type="text" className="w-full bg-slate-50 border p-4 rounded-2xl" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
-                <input type="password" placeholder="New Password" className="w-full bg-slate-50 border p-4 rounded-2xl" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold">Update Access</button>
-              </form>
-              <div className="bg-slate-900 text-white p-10 rounded-[3.5rem] space-y-6">
-                <h3 className="font-bold">Sync Token</h3>
-                <div className="bg-slate-800 p-4 rounded-xl text-[10px] break-all font-mono text-blue-300 relative">
+            <div className="animate-fade-in max-w-2xl mx-auto space-y-12 pb-20">
+              <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Security Protocols</h2>
+              
+              {/* Access Credentials */}
+              <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-xl space-y-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-900"><UserIcon size={24} /></div>
+                  <h3 className="text-xl font-bold">Access Credentials</h3>
+                </div>
+                <form onSubmit={handleUpdateCredentials} className="space-y-4">
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><UserIcon size={18}/></div>
+                    <input type="text" className="w-full bg-slate-50 border p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
+                  </div>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Lock size={18}/></div>
+                    <input 
+                      type={showNewPassword ? "text" : "password"} 
+                      placeholder="New Password" 
+                      className="w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" 
+                      value={newPassword} 
+                      onChange={(e) => setNewPassword(e.target.value)} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    >
+                      {showNewPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
+                    </button>
+                  </div>
+                  <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold hover:bg-black transition-colors">Update Access</button>
+                  {updateSuccess && <div className="text-center text-emerald-600 text-xs font-bold animate-pulse">Credentials updated successfully!</div>}
+                </form>
+              </div>
+
+              {/* Google Authenticator (2FA) */}
+              <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-xl space-y-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600"><SmartphoneNfc size={24} /></div>
+                  <h3 className="text-xl font-bold">Two-Factor Authentication</h3>
+                </div>
+                
+                {JSON.parse(localStorage.getItem('admin_credentials') || '{}').twoFactorSecret ? (
+                  <div className="space-y-6">
+                    <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-4 text-emerald-700">
+                      <CheckCircle2 size={32} />
+                      <div>
+                        <div className="font-bold">2FA is Enabled</div>
+                        <div className="text-xs">Your account is protected with Google Authenticator.</div>
+                      </div>
+                    </div>
+                    <button onClick={disable2FA} className="w-full py-4 text-red-500 font-bold hover:bg-red-50 rounded-xl transition-colors">Disable Authenticator</button>
+                  </div>
+                ) : !isSettingUp2FA ? (
+                  <div className="space-y-6">
+                    <p className="text-sm text-slate-500 leading-relaxed">Secure your admin panel with Google Authenticator. You will need to enter a 6-digit code every time you login.</p>
+                    <button onClick={initiate2FASetup} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-blue-100">
+                      <KeyRound size={20}/>
+                      Enable Google Authenticator
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-8 animate-fade-in-up">
+                    <div className="text-center space-y-4">
+                      <div className="inline-block p-4 bg-white border-8 border-slate-50 rounded-[2rem] shadow-sm">
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+                            new OTPAuth.TOTP({
+                              issuer: "Rabbi Portfolio",
+                              label: newUsername,
+                              algorithm: "SHA1",
+                              digits: 6,
+                              period: 30,
+                              secret: tempSecret,
+                            }).toString()
+                          )}&size=200x200`} 
+                          alt="2FA QR Code" 
+                          className="w-48 h-48"
+                        />
+                      </div>
+                      <p className="text-xs font-bold text-slate-400">Scan this code with Google Authenticator app</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="text-xs font-black text-slate-400 uppercase tracking-widest text-center">Verification Code</div>
+                      <input 
+                        type="text" 
+                        maxLength={6} 
+                        className="w-full bg-slate-50 border p-4 rounded-2xl text-center text-3xl font-black tracking-[0.4em] outline-none focus:ring-2 focus:ring-blue-600/20" 
+                        placeholder="000000"
+                        value={setupCode}
+                        onChange={(e) => setSetupCode(e.target.value.replace(/\D/g, ''))}
+                      />
+                      <div className="flex gap-4">
+                        <button onClick={() => setIsSettingUp2FA(false)} className="flex-1 py-4 text-slate-400 font-bold">Cancel</button>
+                        <button onClick={confirm2FASetup} className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold">Confirm</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sync Token Container */}
+              <div className="bg-slate-900 text-white p-10 rounded-[3rem] space-y-6 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-[80px]"></div>
+                <div className="flex items-center gap-4 mb-4 relative z-10">
+                   <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-blue-400"><RefreshCw size={24} /></div>
+                   <h3 className="text-xl font-bold">Sync Token</h3>
+                </div>
+                <p className="text-slate-400 text-sm relative z-10">Use this token to quickly sync your admin session across different devices without entering credentials.</p>
+                <div className="bg-slate-800 p-6 rounded-2xl text-[10px] break-all font-mono text-blue-300 relative group z-10 border border-slate-700">
                   {syncToken}
-                  <button onClick={() => copyToClipboard(syncToken)} className="absolute top-2 right-2 p-2 bg-slate-700 rounded-lg"><Copy size={14}/></button>
+                  <button onClick={() => copyToClipboard(syncToken)} className="absolute top-2 right-2 p-3 bg-slate-700 hover:bg-blue-600 rounded-xl transition-all shadow-lg active:scale-90"><Copy size={16}/></button>
                 </div>
               </div>
+
             </div>
           )}
         </div>
