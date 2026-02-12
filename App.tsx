@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -23,7 +23,7 @@ const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
 
-  const loadSiteData = () => {
+  const loadSiteData = useCallback(() => {
     // Load Projects
     const storedProjectsRaw = localStorage.getItem('rabbi_portfolio_projects');
     let currentProjects: Project[] = [];
@@ -42,12 +42,19 @@ const App: React.FC = () => {
     }
     setProjects(currentProjects);
 
-    // Load Identity
+    // Load Identity with extra verification
     const storedIdentity = localStorage.getItem('rabbi_site_identity');
     if (storedIdentity) {
-      setIdentity(JSON.parse(storedIdentity));
+      try {
+        const parsedIdentity = JSON.parse(storedIdentity);
+        if (parsedIdentity.logoUrl || parsedIdentity.profileImageUrl) {
+          setIdentity(parsedIdentity);
+        }
+      } catch (e) {
+        console.error("Failed to parse identity", e);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadSiteData();
@@ -68,7 +75,7 @@ const App: React.FC = () => {
     logVisit();
     window.addEventListener('hashchange', logVisit);
     return () => window.removeEventListener('hashchange', logVisit);
-  }, []);
+  }, [loadSiteData]);
 
   if (isAdminMode) {
     return (

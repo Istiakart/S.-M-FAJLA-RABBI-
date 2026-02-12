@@ -69,10 +69,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   const [tempSecret, setTempSecret] = useState('');
   const [setupCode, setSetupCode] = useState('');
 
-  // Branding Identity State
-  const [identity, setIdentity] = useState<SiteIdentity>({
-    logoUrl: "",
-    profileImageUrl: ""
+  // Initialize identity from localStorage immediately to prevent state reset issues
+  const [identity, setIdentity] = useState<SiteIdentity>(() => {
+    const saved = localStorage.getItem('rabbi_site_identity');
+    if (saved) return JSON.parse(saved);
+    return {
+      logoUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
+      profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA"
+    };
   });
 
   const formRef = useRef<HTMLDivElement>(null);
@@ -100,16 +104,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     const storedVisits = JSON.parse(localStorage.getItem('rabbi_portfolio_visits') || '[]');
     setProjects(storedProjects);
     setVisits(storedVisits);
-
-    const storedIdentity = localStorage.getItem('rabbi_site_identity');
-    if (storedIdentity) {
-      setIdentity(JSON.parse(storedIdentity));
-    } else {
-      setIdentity({
-        logoUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
-        profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA"
-      });
-    }
 
     const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
     setNewUsername(creds.username || 'admin');
@@ -169,73 +163,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     setIsSidebarOpen(false);
   };
 
-  const initiate2FASetup = () => {
-    const secret = new OTPAuth.Secret().base32;
-    setTempSecret(secret);
-    setIsSettingUp2FA(true);
-  };
-
-  const confirm2FASetup = () => {
-    const totp = new OTPAuth.TOTP({
-      issuer: "Rabbi Portfolio",
-      label: newUsername,
-      algorithm: "SHA1",
-      digits: 6,
-      period: 30,
-      secret: tempSecret,
-    });
-    const delta = totp.validate({ token: setupCode, window: 1 });
-    if (delta !== null) {
-      const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
-      const updatedCreds = { ...creds, twoFactorSecret: tempSecret };
-      localStorage.setItem('admin_credentials', JSON.stringify(updatedCreds));
-      setSyncToken(btoa(JSON.stringify(updatedCreds)));
-      setIsSettingUp2FA(false);
-      setUpdateSuccess(true);
-      setTimeout(() => setUpdateSuccess(false), 3000);
-    } else {
-      alert("Invalid code. Please try again.");
-    }
-  };
-
-  const disable2FA = () => {
-    if (confirm("Are you sure you want to disable Google Authenticator?")) {
-      const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
-      const updatedCreds = { ...creds, twoFactorSecret: null };
-      localStorage.setItem('admin_credentials', JSON.stringify(updatedCreds));
-      setSyncToken(btoa(JSON.stringify(updatedCreds)));
-      setUpdateSuccess(true);
-      setTimeout(() => setUpdateSuccess(false), 3000);
-    }
-  };
-
-  const handleUpdateCredentials = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUsername || !newPassword) {
-      alert("Please enter both a new username and password.");
-      return;
-    }
-    const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
-    const newCreds = { ...creds, username: newUsername, password: newPassword };
-    localStorage.setItem('admin_credentials', JSON.stringify(newCreds));
-    setSyncToken(btoa(JSON.stringify(newCreds)));
-    setUpdateSuccess(true);
-    setNewPassword('');
-    setTimeout(() => setUpdateSuccess(false), 5000);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('Copied to clipboard!');
-  };
-
   const blobToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => {
-        resolve(reader.result as string);
-      };
+      reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
   };
@@ -243,15 +175,33 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   const handleIdentityImageSelect = async (type: 'logo' | 'profile', e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const base64 = await blobToBase64(file);
-    setIdentity(prev => ({ ...prev, [type === 'logo' ? 'logoUrl' : 'profileImageUrl']: base64 }));
+    try {
+      const base64 = await blobToBase64(file);
+      setIdentity(prev => ({ 
+        ...prev, 
+        [type === 'logo' ? 'logoUrl' : 'profileImageUrl']: base64 
+      }));
+    } catch (err) {
+      console.error("Image upload failed", err);
+      alert("Failed to process image.");
+    }
   };
 
   const saveBrandingIdentity = () => {
-    localStorage.setItem('rabbi_site_identity', JSON.stringify(identity));
-    setBrandingSuccess(true);
-    onProjectsUpdate(); // Trigger refresh in App component
-    setTimeout(() => setBrandingSuccess(false), 3000);
+    try {
+      // Direct save to localStorage
+      localStorage.setItem('rabbi_site_identity', JSON.stringify(identity));
+      
+      // Notify parent to refresh its state
+      onProjectsUpdate();
+      
+      // UI Feedback
+      setBrandingSuccess(true);
+      setTimeout(() => setBrandingSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to save branding", err);
+      alert("Storage limit reached or failed to save. Try using smaller images.");
+    }
   };
 
   const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,14 +228,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     setNewProject({ ...newProject, imageUrls: updatedImages });
   };
 
-  // Fixed handleAiUpload to address TypeScript error on line 269 by ensuring type safety.
   const handleAiUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0];
     setIsAiScanning(true);
     try {
-      // Cast explicitly to File to prevent 'unknown' inference errors in strict environments
       const base64 = await blobToBase64(file as File);
       const pureBase64 = base64.split(',')[1] || "";
       const data = await analyzeMarketingImage(pureBase64, (file as File).type);
@@ -374,6 +322,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       onProjectsUpdate();
       if (editingProjectId === id) resetForm();
     }
+  };
+
+  const handleUpdateCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername || !newPassword) {
+      alert("Please enter both a new username and password.");
+      return;
+    }
+    const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
+    const newCreds = { ...creds, username: newUsername, password: newPassword };
+    localStorage.setItem('admin_credentials', JSON.stringify(newCreds));
+    setSyncToken(btoa(JSON.stringify(newCreds)));
+    setUpdateSuccess(true);
+    setNewPassword('');
+    setTimeout(() => setUpdateSuccess(false), 5000);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
   };
 
   if (!isAuthenticated) {
@@ -467,7 +435,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                   </div>
                   <div className="flex flex-col items-center gap-6">
                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-100 bg-slate-50 flex items-center justify-center relative group">
-                      <img src={identity.logoUrl} className="w-full h-full object-contain" />
+                      {identity.logoUrl ? (
+                        <img src={identity.logoUrl} className="w-full h-full object-contain" alt="Logo Preview" />
+                      ) : (
+                        <div className="text-slate-300"><ImageIcon size={40} /></div>
+                      )}
                       <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                         <Camera className="text-white" />
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleIdentityImageSelect('logo', e)} />
@@ -475,7 +447,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                     </div>
                     <div className="text-center">
                       <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Header & Footer Logo</p>
-                      <p className="text-[10px] text-slate-400">Click circle to upload new image</p>
+                      <p className="text-[10px] text-slate-400">Click circle to change</p>
                     </div>
                   </div>
                 </div>
@@ -488,7 +460,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                   </div>
                   <div className="flex flex-col items-center gap-6">
                     <div className="w-32 h-32 rounded-[2rem] overflow-hidden border-4 border-slate-100 bg-slate-50 relative group">
-                      <img src={identity.profileImageUrl} className="w-full h-full object-cover object-top" />
+                      {identity.profileImageUrl ? (
+                        <img src={identity.profileImageUrl} className="w-full h-full object-cover object-top" alt="Profile Preview" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300"><UserIcon size={40} /></div>
+                      )}
                       <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                         <Camera className="text-white" />
                         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleIdentityImageSelect('profile', e)} />
@@ -516,7 +492,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                 <Sparkles size={40} className="shrink-0" />
                 <div>
                   <h4 className="font-bold text-lg">Branding Sync Active</h4>
-                  <p className="text-blue-100 text-sm">Any image you upload here will automatically propagate across Header, Hero, About, and Footer components after clicking "Save".</p>
+                  <p className="text-blue-100 text-sm">After uploading images, click "Save Branding Settings" to apply changes globally across the site.</p>
                 </div>
               </div>
             </div>
