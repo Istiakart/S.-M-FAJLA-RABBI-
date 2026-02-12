@@ -81,7 +81,7 @@ export const PROJECTS: Project[] = [
     results: "Live Platform",
     efficiency: "98% PageSpeed",
     description: "Developed a high-performance business platform engineered specifically for Meta Ads compatibility. Features lightning-fast load times and deep GTM/Meta Pixel integration to ensure zero data loss during scaling.",
-    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop",
+    imageUrls: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop"],
     link: "https://example.com",
     metrics: [
       { label: "Load Time", value: "< 1.2s", description: "LCP Optimization" },
@@ -102,6 +102,7 @@ export const PROJECTS: Project[] = [
     results: "142 Messages",
     efficiency: "BDT 8.20/Conv",
     description: "Achieved high-volume customer inquiries for a premium clothing brand. By implementing a messaging-first funnel, we reduced the cost per conversion by 65% compared to standard website traffic ads.",
+    imageUrls: ["https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2070&auto=format&fit=crop"],
     metrics: [
       { label: "Sales Conv.", value: "142", description: "Direct leads generated" },
       { label: "Cost/Message", value: "BDT 8.20", description: "Target achieved" },
@@ -123,6 +124,7 @@ export const PROJECTS: Project[] = [
     results: "6.5K+ Engagements",
     efficiency: "$0.0003/Res",
     description: "Strategic engagement campaign that maximized social proof for a niche lifestyle shop. The campaign utilized viral creative hooks and precise interest-stacking to achieve record-low interaction costs.",
+    imageUrls: ["https://images.unsplash.com/photo-1590059367464-918967b5398d?q=80&w=2070&auto=format&fit=crop"],
     metrics: [
       { label: "Total Eng.", value: "6,587", description: "Likes, Shares, Comments" },
       { label: "Cost/Result", value: "$0.0003", description: "Highly optimized spend" },
@@ -144,6 +146,7 @@ export const PROJECTS: Project[] = [
     results: "85 High-Ticket Leads",
     efficiency: "BDT 45/Lead",
     description: "Generated qualified leads for luxury retail. Focusing on high-net-worth individual interest profiles, we filtered for quality over quantity, resulting in an 8.4x return on ad spend.",
+    imageUrls: ["https://images.unsplash.com/photo-1547996160-81dfa63595aa?q=80&w=1974&auto=format&fit=crop"],
     metrics: [
       { label: "Verified Leads", value: "85", description: "Phone-verified inquiries" },
       { label: "ROAS", value: "8.4x", description: "Return on Ad Spend" },
@@ -158,7 +161,7 @@ export const PROJECTS: Project[] = [
   }
 ];
 
-const AI_STUDIO_LOGO = "data:image/png;base64,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";
+const AI_STUDIO_LOGO = "https://www.gstatic.com/lamda/images/gemini_sparkle_v2.svg";
 
 export const TOOLS: Tool[] = [
   { 

@@ -8,7 +8,7 @@ export interface Project {
   results: string;
   efficiency: string;
   description: string;
-  imageUrl?: string;
+  imageUrls?: string[]; // Changed from imageUrl to support multiple images
   link?: string;
   metrics?: {
     label: string;

@@ -77,7 +77,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     results: '',
     efficiency: '',
     description: '',
-    imageUrl: '',
+    imageUrls: [],
     link: ''
   });
 
@@ -228,10 +228,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   };
 
   const handleProjectImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const base64 = await blobToBase64(file);
-    setNewProject({ ...newProject, imageUrl: `data:${file.type};base64,${base64}` });
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const currentImages = newProject.imageUrls || [];
+    const remainingSlots = 10 - currentImages.length;
+    if (remainingSlots <= 0) {
+      alert("You can only upload up to 10 images.");
+      return;
+    }
+
+    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    const newImageUrls: string[] = [];
+
+    for (const file of filesToProcess) {
+      const base64 = await blobToBase64(file);
+      newImageUrls.push(`data:${file.type};base64,${base64}`);
+    }
+
+    setNewProject({ 
+      ...newProject, 
+      imageUrls: [...currentImages, ...newImageUrls] 
+    });
+  };
+
+  const removeImage = (index: number) => {
+    const currentImages = newProject.imageUrls || [];
+    const updatedImages = currentImages.filter((_, i) => i !== index);
+    setNewProject({ ...newProject, imageUrls: updatedImages });
   };
 
   const handleAiUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,6 +267,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       const base64 = await blobToBase64(file);
       const data = await analyzeMarketingImage(base64, file.type);
       
+      const currentImages = newProject.imageUrls || [];
+      const aiImage = `data:${file.type};base64,${base64}`;
+
       setNewProject({
         ...newProject,
         title: data.title || '',
@@ -250,6 +277,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         results: data.results || '',
         efficiency: data.efficiency || '',
         description: data.description || '',
+        // Populate first slot with the scanned image if empty
+        imageUrls: currentImages.length === 0 ? [aiImage] : currentImages
       });
       
     } catch (err) {
@@ -267,7 +296,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       results: '', 
       efficiency: '', 
       description: '', 
-      imageUrl: '', 
+      imageUrls: [], 
       link: '' 
     });
     setEditingProjectId(null);
@@ -322,7 +351,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       results: project.results,
       efficiency: project.efficiency,
       description: project.description,
-      imageUrl: project.imageUrl || '',
+      imageUrls: project.imageUrls || [],
       link: project.link || ''
     });
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -465,7 +494,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
           </div>
         </div>
         
-        {/* Desktop Quick Nav Hint */}
         <div className="hidden lg:flex items-center gap-6">
            <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -474,7 +502,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         </div>
       </div>
 
-      {/* Unified Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/60 z-[140] backdrop-blur-md transition-opacity duration-300"
@@ -482,7 +509,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         />
       )}
 
-      {/* Global Sidebar Drawer */}
       <aside className={`
         fixed inset-y-0 left-0 z-[150] w-80 bg-slate-900 p-8 flex flex-col shrink-0
         transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)
@@ -550,7 +576,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         </div>
       </aside>
 
-      {/* Full-Width Main Content Area */}
       <main className="flex-1 overflow-y-auto p-6 md:p-12 lg:p-20 text-slate-900 bg-slate-50 relative">
         <div className="max-w-7xl mx-auto">
           {activeTab === 'analytics' && (
@@ -661,21 +686,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                       </select>
                     </div>
                     <div>
-                       <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block tracking-[0.2em]">Creative Asset</label>
-                       <div className="flex gap-6 items-center">
-                         {newProject.imageUrl ? (
-                           <div className="relative w-24 h-24 rounded-[2rem] overflow-hidden border border-slate-200 shadow-lg">
-                             <img src={newProject.imageUrl} className="w-full h-full object-cover" />
-                             <button onClick={() => setNewProject({...newProject, imageUrl: ''})} className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl-xl hover:bg-red-600 transition-colors"><X size={16} /></button>
+                       <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block tracking-[0.2em]">Creative Assets (Up to 10)</label>
+                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                         {(newProject.imageUrls || []).map((url, idx) => (
+                           <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
+                             <img src={url} className="w-full h-full object-cover" />
+                             <button 
+                               onClick={() => removeImage(idx)} 
+                               className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                             >
+                               <X size={12} />
+                             </button>
                            </div>
-                         ) : (
-                           <label className="w-full flex items-center justify-center gap-3 bg-slate-50 border border-slate-200 border-dashed p-5 rounded-[2rem] cursor-pointer hover:bg-slate-100 transition-all text-slate-400 group">
-                             <ImageIcon size={24} className="group-hover:text-blue-500 transition-colors" />
-                             <span className="text-xs font-black uppercase tracking-widest group-hover:text-slate-900 transition-colors">Select Visual</span>
-                             <input type="file" accept="image/*" className="hidden" onChange={handleProjectImageUpload} />
+                         ))}
+                         {(newProject.imageUrls || []).length < 10 && (
+                           <label className="aspect-square flex flex-col items-center justify-center gap-1 bg-slate-50 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer hover:bg-slate-100 transition-all text-slate-400 group">
+                             <Plus size={20} className="group-hover:text-blue-500 transition-colors" />
+                             <span className="text-[8px] font-black uppercase tracking-widest">Add Image</span>
+                             <input 
+                               type="file" 
+                               multiple 
+                               accept="image/*" 
+                               className="hidden" 
+                               onChange={handleProjectImageUpload} 
+                             />
                            </label>
                          )}
                        </div>
+                       <p className="mt-3 text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                         {newProject.imageUrls?.length || 0} / 10 images uploaded
+                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
@@ -708,7 +748,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                     <div key={p.id} className={`bg-white p-8 rounded-[3rem] border transition-all duration-500 group flex flex-col justify-between ${editingProjectId === p.id ? 'border-blue-500 bg-blue-50/20 ring-4 ring-blue-50' : 'border-slate-200 hover:border-blue-200 hover:shadow-2xl hover:-translate-y-1'}`}>
                       <div className="flex gap-6 items-start">
                         <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center font-black text-2xl shrink-0 overflow-hidden shadow-inner ${editingProjectId === p.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-600'}`}>
-                          {p.imageUrl ? <img src={p.imageUrl} className="w-full h-full object-cover" /> : p.category.charAt(0)}
+                          {p.imageUrls && p.imageUrls.length > 0 ? (
+                            <div className="relative w-full h-full">
+                              <img src={p.imageUrls[0]} className="w-full h-full object-cover" />
+                              {p.imageUrls.length > 1 && (
+                                <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                  +{p.imageUrls.length - 1}
+                                </div>
+                              )}
+                            </div>
+                          ) : p.category.charAt(0)}
                         </div>
                         <div className="flex-1">
                           <div className="font-black text-slate-900 text-xl leading-tight mb-2">{p.title}</div>

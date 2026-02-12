@@ -3,13 +3,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Project } from '../types';
 import { generateCaseStudySummary } from '../services/geminiService';
-import { Sparkles, BrainCircuit, ExternalLink } from 'lucide-react';
+import { Sparkles, BrainCircuit, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -18,10 +19,10 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Reset internal state if project ID changes
   useEffect(() => {
     setAiSummary(null);
     setIsExpanded(false);
+    setActiveImageIdx(0);
   }, [project.id]);
 
   const handleGenerateAISummary = async () => {
@@ -45,16 +46,43 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
 
   const { value, unit } = splitResults(project.results);
 
+  const images = project.imageUrls || [];
+
   return (
     <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
-      {project.imageUrl && (
+      {images.length > 0 && (
         <div className="w-full aspect-[16/9] overflow-hidden bg-slate-100 relative group">
           <img 
-            src={project.imageUrl} 
+            src={images[activeImageIdx]} 
             alt={project.title} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+          
+          {/* Gallery Controls */}
+          {images.length > 1 && (
+            <>
+              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1))}
+                  className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0))}
+                  className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
+                {images.map((_, i) => (
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIdx ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
       
@@ -205,7 +233,6 @@ const Portfolio: React.FC<PortfolioProps> = ({ projects }) => {
   const [limit, setLimit] = useState(4);
 
   const filteredProjects = useMemo(() => {
-    // Show newest first
     const sorted = [...projects].sort((a, b) => parseInt(b.id) - parseInt(a.id));
     return sorted.filter(p => activeFilter === 'All' || p.category === activeFilter);
   }, [projects, activeFilter]);
