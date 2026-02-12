@@ -1,7 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  logoUrl: string;
+}
+
+const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -35,7 +39,7 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-600 shadow-md ring-2 ring-blue-50 shrink-0">
             <img 
-              src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" 
+              src={logoUrl} 
               alt="S M Fajla Rabbi Logo" 
               className="w-full h-full object-cover object-top"
               onError={(e) => {

@@ -11,23 +11,27 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import { PROJECTS as INITIAL_PROJECTS } from './constants';
-import { Project, Visit } from './types';
+import { Project, Visit, SiteIdentity } from './types';
+
+const DEFAULT_IDENTITY: SiteIdentity = {
+  logoUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
+  profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA"
+};
 
 const App: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
 
-  const loadProjects = () => {
+  const loadSiteData = () => {
+    // Load Projects
     const storedProjectsRaw = localStorage.getItem('rabbi_portfolio_projects');
     let currentProjects: Project[] = [];
     
     if (storedProjectsRaw) {
       currentProjects = JSON.parse(storedProjectsRaw);
-      
-      // Sync Logic: Add any hardcoded initial projects that are missing in localStorage
       const currentIds = new Set(currentProjects.map(p => p.id));
       const missingProjects = INITIAL_PROJECTS.filter(p => !currentIds.has(p.id));
-      
       if (missingProjects.length > 0) {
         currentProjects = [...currentProjects, ...missingProjects];
         localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(currentProjects));
@@ -36,14 +40,18 @@ const App: React.FC = () => {
       currentProjects = INITIAL_PROJECTS;
       localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(INITIAL_PROJECTS));
     }
-    
     setProjects(currentProjects);
+
+    // Load Identity
+    const storedIdentity = localStorage.getItem('rabbi_site_identity');
+    if (storedIdentity) {
+      setIdentity(JSON.parse(storedIdentity));
+    }
   };
 
   useEffect(() => {
-    loadProjects();
+    loadSiteData();
 
-    // Visitor Tracking Logic
     const logVisit = () => {
       const visits: Visit[] = JSON.parse(localStorage.getItem('rabbi_portfolio_visits') || '[]');
       const newVisit: Visit = {
@@ -53,7 +61,6 @@ const App: React.FC = () => {
         platform: (navigator as any).platform || 'Unknown',
         page: window.location.hash || 'Home'
       };
-      
       const updatedVisits = [newVisit, ...visits].slice(0, 500);
       localStorage.setItem('rabbi_portfolio_visits', JSON.stringify(updatedVisits));
     };
@@ -67,24 +74,24 @@ const App: React.FC = () => {
     return (
       <AdminPanel 
         onClose={() => setIsAdminMode(false)} 
-        onProjectsUpdate={loadProjects}
+        onProjectsUpdate={loadSiteData}
       />
     );
   }
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <Header logoUrl={identity.logoUrl} />
       <main>
-        <Hero />
-        <About />
+        <Hero profileImageUrl={identity.profileImageUrl} />
+        <About profileImageUrl={identity.profileImageUrl} />
         <Services />
         <Portfolio projects={projects} />
         <Tools />
         <ZoomBooking />
-        <Contact />
+        <Contact profileImageUrl={identity.profileImageUrl} />
       </main>
-      <Footer onAdminLogin={() => setIsAdminMode(true)} />
+      <Footer logoUrl={identity.logoUrl} onAdminLogin={() => setIsAdminMode(true)} />
     </div>
   );
 };

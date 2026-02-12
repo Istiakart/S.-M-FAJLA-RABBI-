@@ -1,7 +1,11 @@
 
 import React from 'react';
 
-const About: React.FC = () => {
+interface AboutProps {
+  profileImageUrl: string;
+}
+
+const About: React.FC<AboutProps> = ({ profileImageUrl }) => {
   return (
     <section id="about" className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -9,7 +13,7 @@ const About: React.FC = () => {
           <div className="relative">
             <div className="aspect-[1/1] rounded-[2.5rem] overflow-hidden bg-slate-900 shadow-2xl relative group">
               <img 
-                src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" 
+                src={profileImageUrl} 
                 alt="S M Fajla Rabbi" 
                 className="w-full h-full object-cover object-top transition-all duration-700"
                 onError={(e) => {

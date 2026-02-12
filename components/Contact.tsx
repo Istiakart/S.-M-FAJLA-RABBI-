@@ -1,7 +1,11 @@
 
 import React from 'react';
 
-const Contact: React.FC = () => {
+interface ContactProps {
+  profileImageUrl: string;
+}
+
+const Contact: React.FC<ContactProps> = ({ profileImageUrl }) => {
   return (
     <section id="contact" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +50,7 @@ const Contact: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full overflow-hidden border border-blue-600 shadow-sm">
-                <img src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" className="w-full h-full object-cover object-top" />
+                <img src={profileImageUrl} className="w-full h-full object-cover object-top" />
               </div>
               <span className="font-bold text-slate-900 tracking-tight uppercase">S M FAJLA RABBI</span>
             </div>

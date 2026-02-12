@@ -30,17 +30,20 @@ export const analyzeMarketingImage = async (base64Data: string, mimeType: string
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: [
-        {
-          inlineData: {
-            data: base64Data,
-            mimeType: mimeType,
+      // Fix: Ensure contents follows the correct multi-part structure using a 'parts' array.
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType: mimeType,
+            },
           },
-        },
-        {
-          text: "Extract marketing data from this screenshot. Focus on Campaign Name, Total Results (e.g., messages, leads, reach), and Efficiency (e.g., cost per result). Return the data in a clear structured way.",
-        },
-      ],
+          {
+            text: "Extract marketing data from this screenshot. Focus on Campaign Name, Total Results (e.g., messages, leads, reach), and Efficiency (e.g., cost per result). Return the data in a clear structured way.",
+          },
+        ],
+      },
       config: {
         responseMimeType: "application/json",
         responseSchema: {

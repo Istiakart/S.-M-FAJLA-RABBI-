@@ -1,7 +1,11 @@
 
 import React from 'react';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  profileImageUrl: string;
+}
+
+const Hero: React.FC<HeroProps> = ({ profileImageUrl }) => {
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-slate-50">
       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-100 rounded-full blur-3xl opacity-30 pointer-events-none"></div>
@@ -47,7 +51,7 @@ const Hero: React.FC = () => {
             <div className="relative z-10 w-full max-w-[320px] md:max-w-[480px] mx-auto">
               <div className="aspect-[1/1] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl border-[8px] md:border-[12px] border-white bg-slate-900 group">
                 <img 
-                  src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" 
+                  src={profileImageUrl} 
                   alt="S M Fajla Rabbi Professional Portrait" 
                   className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {

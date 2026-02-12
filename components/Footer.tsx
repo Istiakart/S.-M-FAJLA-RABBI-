@@ -3,9 +3,10 @@ import React from 'react';
 
 interface FooterProps {
   onAdminLogin?: () => void;
+  logoUrl?: string;
 }
 
-const Footer: React.FC<FooterProps> = ({ onAdminLogin }) => {
+const Footer: React.FC<FooterProps> = ({ onAdminLogin, logoUrl }) => {
   const currentYear = new Date().getFullYear();
   const EMAIL_ADDRESS = "istiakrobbi25@gmail.com";
 
@@ -16,7 +17,7 @@ const Footer: React.FC<FooterProps> = ({ onAdminLogin }) => {
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-600 shadow-lg cursor-pointer" onClick={onAdminLogin}>
-                <img src="https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA" className="w-full h-full object-cover object-top" />
+                <img src={logoUrl} className="w-full h-full object-cover object-top" />
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-extrabold tracking-tight leading-none">

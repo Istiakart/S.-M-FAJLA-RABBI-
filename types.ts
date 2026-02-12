@@ -8,7 +8,7 @@ export interface Project {
   results: string;
   efficiency: string;
   description: string;
-  imageUrls?: string[]; // Changed from imageUrl to support multiple images
+  imageUrls?: string[];
   link?: string;
   metrics?: {
     label: string;
@@ -40,4 +40,9 @@ export interface Service {
 export interface Tool {
   name: string;
   icon: string;
+}
+
+export interface SiteIdentity {
+  logoUrl: string;
+  profileImageUrl: string;
 }
