@@ -689,8 +689,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                        <label className="text-[10px] font-black text-slate-400 uppercase mb-3 block tracking-[0.2em]">Creative Assets (Up to 10)</label>
                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
                          {(newProject.imageUrls || []).map((url, idx) => (
-                           <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
-                             <img src={url} className="w-full h-full object-cover" />
+                           <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm group bg-slate-50">
+                             {/* Changed object-cover to object-contain */}
+                             <img src={url} className="w-full h-full object-contain" />
                              <button 
                                onClick={() => removeImage(idx)} 
                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
@@ -749,8 +750,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                       <div className="flex gap-6 items-start">
                         <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center font-black text-2xl shrink-0 overflow-hidden shadow-inner ${editingProjectId === p.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-600'}`}>
                           {p.imageUrls && p.imageUrls.length > 0 ? (
-                            <div className="relative w-full h-full">
-                              <img src={p.imageUrls[0]} className="w-full h-full object-cover" />
+                            <div className="relative w-full h-full bg-slate-50">
+                              {/* Changed object-cover to object-contain */}
+                              <img src={p.imageUrls[0]} className="w-full h-full object-contain" />
                               {p.imageUrls.length > 1 && (
                                 <div className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded-full backdrop-blur-sm">
                                   +{p.imageUrls.length - 1}

@@ -51,13 +51,14 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   return (
     <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
       {images.length > 0 && (
-        <div className="w-full aspect-[16/9] overflow-hidden bg-slate-100 relative group">
+        <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group">
+          {/* Changed object-cover to object-contain to prevent cropping */}
           <img 
             src={images[activeImageIdx]} 
             alt={project.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-contain transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
           
           {/* Gallery Controls */}
           {images.length > 1 && (
@@ -111,8 +112,10 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
                 onClick={handleGenerateAISummary}
                 className="group flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
               >
-                <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                Generate AI ROI Insight
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                  Generate AI ROI Insight
+                </span>
               </button>
             ) : (
               <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-fade-in relative overflow-hidden">
