@@ -38,8 +38,10 @@ export interface Service {
 }
 
 export interface Tool {
+  id: string;
   name: string;
   icon: string;
+  subtitle?: string;
 }
 
 export interface SiteIdentity {

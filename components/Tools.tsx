@@ -1,58 +1,12 @@
 
 import React from 'react';
+import { Tool } from '../types';
 
-interface Tool {
-  name: string;
-  subtitle: string;
-  icon: string;
+interface ToolsProps {
+  tools: Tool[];
 }
 
-const AI_STUDIO_LOGO = "https://www.gstatic.com/lamda/images/gemini_sparkle_v2.svg";
-
-const TOOLS: Tool[] = [
-  { 
-    name: "WordPress", 
-    subtitle: "CMS & Development", 
-    icon: "https://www.vectorlogo.zone/logos/wordpress/wordpress-icon.svg" 
-  },
-  { 
-    name: "Shopify", 
-    subtitle: "E-commerce Builds", 
-    icon: "https://www.vectorlogo.zone/logos/shopify/shopify-icon.svg" 
-  },
-  { 
-    name: "Meta Ads Manager", 
-    subtitle: "Scaling & Tracking", 
-    icon: "https://www.vectorlogo.zone/logos/facebook/facebook-official.svg" 
-  },
-  { 
-    name: "Google Analytics 4", 
-    subtitle: "Conversion Data", 
-    icon: "https://www.vectorlogo.zone/logos/google_analytics/google_analytics-icon.svg" 
-  },
-  { 
-    name: "Meta Pixel", 
-    subtitle: "Advanced Retargeting", 
-    icon: "https://www.vectorlogo.zone/logos/facebook/facebook-icon.svg" 
-  },
-  { 
-    name: "Google Tag Manager", 
-    subtitle: "Server-side Tracking", 
-    icon: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Google_Tag_Manager_Logo.svg" 
-  },
-  { 
-    name: "AI Studio & GPT", 
-    subtitle: "Copy & Strategy", 
-    icon: AI_STUDIO_LOGO 
-  },
-  { 
-    name: "PageSpeed", 
-    subtitle: "Speed Optimization", 
-    icon: "https://www.vectorlogo.zone/logos/google/google-icon.svg" 
-  }
-];
-
-const Tools: React.FC = () => {
+const Tools: React.FC<ToolsProps> = ({ tools }) => {
   return (
     <section className="py-24 bg-slate-50 border-y border-slate-200 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,9 +32,9 @@ const Tools: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {TOOLS.map((tool, i) => (
+          {tools.map((tool) => (
             <div 
-              key={i} 
+              key={tool.id} 
               className="group bg-white p-8 rounded-[2rem] border border-slate-100 flex flex-col items-center gap-4 transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-2"
             >
               <div className="relative">
@@ -91,6 +45,9 @@ const Tools: React.FC = () => {
                     alt={`${tool.name} logo`} 
                     className="max-h-full max-w-full object-contain transition-all duration-500 ease-out group-hover:scale-110"
                     loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://img.icons8.com/fluency/96/wrench.png";
+                    }}
                   />
                 </div>
               </div>
@@ -100,7 +57,7 @@ const Tools: React.FC = () => {
                   {tool.name}
                 </span>
                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-                  {tool.subtitle}
+                  {tool.subtitle || 'Tooling Solution'}
                 </span>
               </div>
             </div>
@@ -109,7 +66,7 @@ const Tools: React.FC = () => {
         
         <div className="mt-16 text-center">
           <p className="text-slate-400 text-sm font-medium italic">
-            "We don't just use tools; we master them to drive BDT 8.20 cost-per-conversations."
+            "Strategic mastery of industry-leading tools drives our performance benchmarks."
           </p>
         </div>
       </div>

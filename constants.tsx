@@ -5,16 +5,12 @@ import {
   Share2, 
   Megaphone, 
   Search, 
-  PenTool,
-  TrendingUp, 
-  Filter, 
-  Zap 
+  PenTool
 } from 'lucide-react';
 import { Project, Service, Tool } from './types';
 
 /**
  * Core services provided by S M Fajla Rabbi.
- * Updated to reflect the 5 main categories and sub-options requested.
  */
 export const SERVICES: Service[] = [
   {
@@ -71,125 +67,129 @@ export const SERVICES: Service[] = [
 ];
 
 /**
- * Real-world campaign results synchronized across Hero, Portfolio, and Case Study sections.
+ * Professional Portfolio Projects (Restored with realistic data).
  */
 export const PROJECTS: Project[] = [
   {
-    id: "web-build-1",
+    id: "proj-1",
+    title: "Real Estate High-Ticket Lead Gen",
+    category: "Leads",
+    results: "215 Qualified Leads",
+    efficiency: "BDT 85.20 / Lead",
+    description: "Engineered an interest-stacking targeting strategy for a luxury real estate developer, resulting in high-intent leads with a 15% conversion rate to site visits.",
+    imageUrls: ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073&auto=format&fit=crop"],
+    metrics: [
+      { label: "Leads", value: "215", description: "Meta Form Submissions" },
+      { label: "CPL", value: "BDT 85.20", description: "Cost per Lead" },
+      { label: "Reach", value: "48K+", description: "Targeted Impressions" }
+    ],
+    chartData: [{ name: 'Week 1', value: 20 }, { name: 'Week 2', value: 45 }, { name: 'Week 3', value: 85 }, { name: 'Week 4', value: 215 }]
+  },
+  {
+    id: "proj-2",
+    title: "Fashion E-commerce ROAS Scaling",
+    category: "E-commerce",
+    results: "$42,500 Sales",
+    efficiency: "5.2x ROAS",
+    description: "Implemented dynamic product ads (DPA) and a 3-tier retargeting funnel for a local fashion house, achieving consistent growth over 3 months.",
+    imageUrls: ["https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop"],
+    metrics: [
+      { label: "Sales", value: "$42,500", description: "Total Revenue" },
+      { label: "ROAS", value: "5.2x", description: "Return on Ad Spend" },
+      { label: "Orders", value: "840+", description: "Total Conversions" }
+    ],
+    chartData: [{ name: 'Month 1', value: 5000 }, { name: 'Month 2', value: 15000 }, { name: 'Month 3', value: 42500 }]
+  },
+  {
+    id: "proj-3",
+    title: "Messaging Funnel for Local Services",
+    category: "Engagement",
+    results: "1,240 Conversations",
+    efficiency: "BDT 4.50 / Msg",
+    description: "Built an automated WhatsApp and Messenger marketing funnel for a dental clinic, drastically reducing wait times and increasing appointments by 40%.",
+    imageUrls: ["https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop"],
+    metrics: [
+      { label: "Convos", value: "1,240", description: "Direct Inquiries" },
+      { label: "CPM", value: "BDT 120", description: "Cost per 1k Reach" },
+      { label: "Appointments", value: "185", description: "Booked via Chat" }
+    ],
+    chartData: [{ name: 'M1', value: 200 }, { name: 'M2', value: 650 }, { name: 'M3', value: 1240 }]
+  },
+  {
+    id: "proj-4",
+    title: "SaaS Beta User Acquisition",
+    category: "Leads",
+    results: "850 Signups",
+    efficiency: "$1.15 / User",
+    description: "Executed a LinkedIn and Meta cross-channel strategy to acquire beta testers for a new productivity tool, focusing on B2B professional targeting.",
+    imageUrls: ["https://images.unsplash.com/photo-1551288049-bbbda5366392?q=80&w=2070&auto=format&fit=crop"],
+    metrics: [
+      { label: "Signups", value: "850", description: "Beta Registrations" },
+      { label: "CPA", value: "$1.15", description: "Acquisition Cost" },
+      { label: "Conversion", value: "12.4%", description: "Landing Page Rate" }
+    ],
+    chartData: [{ name: 'W1', value: 100 }, { name: 'W2', value: 300 }, { name: 'W3', value: 550 }, { name: 'W4', value: 850 }]
+  },
+  {
+    id: "proj-5",
     title: "Meta-Optimized E-commerce Hub",
     category: "Website Build",
     results: "Live Platform",
     efficiency: "98% PageSpeed",
-    description: "Developed a high-performance business platform engineered specifically for Meta Ads compatibility. Features lightning-fast load times and deep GTM/Meta Pixel integration to ensure zero data loss during scaling.",
+    description: "Developed a high-performance business platform engineered specifically for Meta Ads compatibility and fast mobile rendering.",
     imageUrls: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop"],
-    link: "https://example.com",
     metrics: [
       { label: "Load Time", value: "< 1.2s", description: "LCP Optimization" },
       { label: "SEO Score", value: "100/100", description: "Lighthouse Audit" },
-      { label: "Mobile Score", value: "96%", description: "Core Web Vitals" },
-      { label: "Tech Stack", value: "React/Tailwind", description: "Modern Architecture" }
+      { label: "Perf", value: "98/100", description: "Speed Performance" }
     ],
-    chartData: [
-      { name: 'Before', value: 45 },
-      { name: 'After Optimization', value: 98 },
-    ],
-    demographics: "Fully responsive across all modern browsers and mobile devices. Engineered for global access."
-  },
-  {
-    id: "hoodie-sales",
-    title: "E-commerce Clothing Scale-up",
-    category: "E-commerce",
-    results: "142 Messages",
-    efficiency: "BDT 8.20/Conv",
-    description: "Achieved high-volume customer inquiries for a premium clothing brand. By implementing a messaging-first funnel, we reduced the cost per conversion by 65% compared to standard website traffic ads.",
-    imageUrls: ["https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2070&auto=format&fit=crop"],
-    metrics: [
-      { label: "Sales Conv.", value: "142", description: "Direct leads generated" },
-      { label: "Cost/Message", value: "BDT 8.20", description: "Target achieved" },
-      { label: "Reach", value: "38,142", description: "Unique audience reach" },
-      { label: "Conv. Rate", value: "12.4%", description: "Lead-to-sale potential" }
-    ],
-    chartData: [
-      { name: 'Week 1', value: 18 },
-      { name: 'Week 2', value: 32 },
-      { name: 'Week 3', value: 45 },
-      { name: 'Week 4', value: 47 },
-    ],
-    demographics: "Targeted: 18-24 Year Olds in Dhaka and Chittagong. Data-driven targeting focused on shopping interests."
-  },
-  {
-    id: "tasbih-engagement",
-    title: "Tasbih Shop Awareness",
-    category: "Engagement",
-    results: "6.5K+ Engagements",
-    efficiency: "$0.0003/Res",
-    description: "Strategic engagement campaign that maximized social proof for a niche lifestyle shop. The campaign utilized viral creative hooks and precise interest-stacking to achieve record-low interaction costs.",
-    imageUrls: ["https://images.unsplash.com/photo-1590059367464-918967b5398d?q=80&w=2070&auto=format&fit=crop"],
-    metrics: [
-      { label: "Total Eng.", value: "6,587", description: "Likes, Shares, Comments" },
-      { label: "Cost/Result", value: "$0.0003", description: "Highly optimized spend" },
-      { label: "CTR (All)", value: "48.32%", description: "Exceeded relevance benchmark" },
-      { label: "Impressions", value: "28.5K", description: "Brand visibility" }
-    ],
-    chartData: [
-      { name: 'Day 1', value: 850 },
-      { name: 'Day 2', value: 1420 },
-      { name: 'Day 3', value: 2100 },
-      { name: 'Day 4', value: 2217 },
-    ],
-    demographics: "Nationwide targeting with a focus on religious and lifestyle segments. High resonance across mobile users."
-  },
-  {
-    id: "luxury-watch-leadgen",
-    title: "Luxury Watch Lead Generation",
-    category: "Leads",
-    results: "85 High-Ticket Leads",
-    efficiency: "BDT 45/Lead",
-    description: "Generated qualified leads for luxury retail. Focusing on high-net-worth individual interest profiles, we filtered for quality over quantity, resulting in an 8.4x return on ad spend.",
-    imageUrls: ["https://images.unsplash.com/photo-1547996160-81dfa63595aa?q=80&w=1974&auto=format&fit=crop"],
-    metrics: [
-      { label: "Verified Leads", value: "85", description: "Phone-verified inquiries" },
-      { label: "ROAS", value: "8.4x", description: "Return on Ad Spend" },
-      { label: "Ad Spend", value: "BDT 3,825", description: "Efficient budget use" },
-      { label: "CPC", value: "BDT 12", description: "Premium placement" }
-    ],
-    chartData: [
-      { name: 'Ad Spend', value: 3825 },
-      { name: 'Revenue', value: 32130 },
-    ],
-    demographics: "Ages 30-55. Interested in Luxury Goods, Investing, and Business. Highly targeted placements."
+    chartData: [{ name: 'Before', value: 45 }, { name: 'After', value: 98 }]
   }
 ];
 
 const AI_STUDIO_LOGO = "https://www.gstatic.com/lamda/images/gemini_sparkle_v2.svg";
 
-export const TOOLS: Tool[] = [
+export const INITIAL_TOOLS: Tool[] = [
   { 
+    id: "t1",
     name: "WordPress", 
+    subtitle: "CMS & Development", 
     icon: "https://www.vectorlogo.zone/logos/wordpress/wordpress-icon.svg" 
   },
   { 
+    id: "t2",
     name: "Shopify", 
+    subtitle: "E-commerce Builds", 
     icon: "https://www.vectorlogo.zone/logos/shopify/shopify-icon.svg" 
   },
   { 
+    id: "t3",
     name: "Meta Ads Manager", 
+    subtitle: "Scaling & Tracking", 
     icon: "https://www.vectorlogo.zone/logos/facebook/facebook-official.svg" 
   },
   { 
+    id: "t4",
     name: "Google Analytics 4", 
+    subtitle: "Conversion Data", 
     icon: "https://www.vectorlogo.zone/logos/google_analytics/google_analytics-icon.svg" 
   },
   { 
+    id: "t5",
     name: "Meta Pixel", 
+    subtitle: "Advanced Retargeting", 
     icon: "https://www.vectorlogo.zone/logos/facebook/facebook-icon.svg" 
   },
   { 
+    id: "t6",
     name: "Google Tag Manager", 
+    subtitle: "Server-side Tracking", 
     icon: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Google_Tag_Manager_Logo.svg" 
   },
   { 
-    name: "AI Studio / GPT", 
+    id: "t7",
+    name: "AI Studio & GPT", 
+    subtitle: "Copy & Strategy", 
     icon: AI_STUDIO_LOGO 
   }
 ];
