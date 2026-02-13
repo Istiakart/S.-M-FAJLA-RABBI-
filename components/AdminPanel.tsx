@@ -112,7 +112,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     }
     setProjects(JSON.parse(localStorage.getItem('rabbi_portfolio_projects') || '[]'));
     setTools(JSON.parse(localStorage.getItem('rabbi_portfolio_tools') || '[]'));
-    // Fixed syntax error: Added missing closing single quote to the localStorage key name.
     setVisits(JSON.parse(localStorage.getItem('rabbi_portfolio_visits') || '[]'));
     const creds = JSON.parse(localStorage.getItem('admin_credentials') || '{}');
     setNewUsername(creds.username || 'admin');
@@ -338,7 +337,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
           <button onClick={() => setIsSidebarOpen(true)} className="text-white p-2 hover:bg-slate-800 rounded-xl transition-all"><Menu size={28} /></button>
           <div className="text-white flex flex-col">
             <div className="text-sm font-black uppercase tracking-tighter">S M FAJLA <span className="text-blue-400">RABBI</span></div>
-            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Control Center</div>
+            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Console | Web Designer</div>
           </div>
         </div>
         <div className="flex items-center gap-4">
