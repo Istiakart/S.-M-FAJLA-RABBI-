@@ -1,11 +1,13 @@
 
 import React from 'react';
+import { FileDown } from 'lucide-react';
 
 interface HeroProps {
   profileImageUrl: string;
+  onDownloadCv?: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ profileImageUrl }) => {
+const Hero: React.FC<HeroProps> = ({ profileImageUrl, onDownloadCv }) => {
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-slate-50">
       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-100 rounded-full blur-3xl opacity-30 pointer-events-none"></div>
@@ -38,12 +40,21 @@ const Hero: React.FC<HeroProps> = ({ profileImageUrl }) => {
               >
                 Get a Quote
               </a>
-              <a 
-                href="#portfolio" 
-                className="w-full sm:w-auto bg-white border-2 border-slate-200 text-slate-700 px-10 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 transition-all text-center"
-              >
-                View Performance
-              </a>
+              <div className="flex gap-4 w-full sm:w-auto">
+                <a 
+                  href="#portfolio" 
+                  className="flex-1 sm:w-auto bg-white border-2 border-slate-200 text-slate-700 px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 transition-all text-center"
+                >
+                  Portfolio
+                </a>
+                <button 
+                  onClick={onDownloadCv}
+                  className="flex-1 sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-black transition-all text-center flex items-center justify-center gap-2 shadow-xl shadow-slate-200 active:scale-95"
+                >
+                  <FileDown size={20} />
+                  Download CV
+                </button>
+              </div>
             </div>
           </div>
 

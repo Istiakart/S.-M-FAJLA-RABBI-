@@ -68,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
             rel="noopener noreferrer"
             className="bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-md shadow-blue-100"
           >
-            Book Session
+            Hire me
           </a>
         </nav>
 
@@ -113,7 +113,7 @@ const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
             onClick={() => setIsMobileMenuOpen(false)}
             className="mt-2 bg-blue-600 text-white px-6 py-4 rounded-xl text-center font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
           >
-            Book Session
+            Hire me
           </a>
         </nav>
       </div>

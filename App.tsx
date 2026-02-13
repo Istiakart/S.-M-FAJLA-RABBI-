@@ -10,16 +10,19 @@ import ZoomBooking from './components/ZoomBooking';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
+import CVModal from './components/CVModal';
 import { PROJECTS as INITIAL_PROJECTS, INITIAL_TOOLS } from './constants';
 import { Project, Visit, SiteIdentity, Tool } from './types';
 
 const DEFAULT_IDENTITY: SiteIdentity = {
   logoUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
-  profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA"
+  profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
+  cvUrl: ""
 };
 
 const App: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isCvModalOpen, setIsCvModalOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
@@ -29,7 +32,6 @@ const App: React.FC = () => {
     const storedProjectsRaw = localStorage.getItem('rabbi_portfolio_projects');
     if (storedProjectsRaw) {
       const stored = JSON.parse(storedProjectsRaw);
-      // If user has fewer projects than our initial defaults, merge them to restore "lost" ones
       if (stored.length < 3) {
         const merged = [...INITIAL_PROJECTS];
         stored.forEach((p: Project) => {
@@ -59,9 +61,7 @@ const App: React.FC = () => {
     if (storedIdentity) {
       try {
         const parsedIdentity = JSON.parse(storedIdentity);
-        if (parsedIdentity.logoUrl || parsedIdentity.profileImageUrl) {
-          setIdentity(parsedIdentity);
-        }
+        setIdentity(prev => ({ ...prev, ...parsedIdentity }));
       } catch (e) {
         console.error("Failed to parse identity", e);
       }
@@ -102,15 +102,27 @@ const App: React.FC = () => {
     <div className="min-h-screen">
       <Header logoUrl={identity.logoUrl} />
       <main>
-        <Hero profileImageUrl={identity.profileImageUrl} />
+        <Hero 
+          profileImageUrl={identity.profileImageUrl} 
+          onDownloadCv={() => setIsCvModalOpen(true)} 
+        />
         <About profileImageUrl={identity.profileImageUrl} />
         <Services />
         <Portfolio projects={projects} />
         <Tools tools={tools} />
         <ZoomBooking />
-        <Contact profileImageUrl={identity.profileImageUrl} />
+        <Contact 
+          profileImageUrl={identity.profileImageUrl} 
+          onDownloadCv={() => setIsCvModalOpen(true)}
+        />
       </main>
       <Footer logoUrl={identity.logoUrl} onAdminLogin={() => setIsAdminMode(true)} />
+      
+      <CVModal 
+        isOpen={isCvModalOpen} 
+        onClose={() => setIsCvModalOpen(false)} 
+        cvUrl={identity.cvUrl} 
+      />
     </div>
   );
 };

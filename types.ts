@@ -47,4 +47,5 @@ export interface Tool {
 export interface SiteIdentity {
   logoUrl: string;
   profileImageUrl: string;
+  cvUrl?: string;
 }

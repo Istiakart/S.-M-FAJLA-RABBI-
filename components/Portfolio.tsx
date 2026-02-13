@@ -45,36 +45,34 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   };
 
   const { value, unit } = splitResults(project.results);
-
   const images = project.imageUrls || [];
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
       {images.length > 0 && (
-        <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group">
-          {/* Changed object-cover to object-contain to prevent cropping */}
+        <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group min-h-[200px] flex items-center justify-center">
           <img 
             src={images[activeImageIdx]} 
             alt={project.title} 
-            className="w-full h-full object-contain transition-transform duration-700"
+            className="w-full h-full object-contain transition-opacity duration-300"
+            loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
           
-          {/* Gallery Controls */}
           {images.length > 1 && (
             <>
-              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1))}
-                  className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
+                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={24} />
                 </button>
                 <button 
                   onClick={() => setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0))}
-                  className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
+                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={24} />
                 </button>
               </div>
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
@@ -95,7 +93,7 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
             </span>
             <h4 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">{project.title}</h4>
           </div>
-          <div className="text-right shrink-0">
+          <div className="text-right shrink-0 ml-4">
             <div className="text-xl md:text-2xl font-black text-blue-600">{value}</div>
             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter leading-none">{unit}</div>
           </div>

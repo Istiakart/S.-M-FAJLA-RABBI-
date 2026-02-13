@@ -1,11 +1,13 @@
 
 import React from 'react';
+import { FileDown } from 'lucide-react';
 
 interface ContactProps {
   profileImageUrl: string;
+  onDownloadCv?: () => void;
 }
 
-const Contact: React.FC<ContactProps> = ({ profileImageUrl }) => {
+const Contact: React.FC<ContactProps> = ({ profileImageUrl, onDownloadCv }) => {
   return (
     <section id="contact" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,6 +35,13 @@ const Contact: React.FC<ContactProps> = ({ profileImageUrl }) => {
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-3.313l.369.218c1.12.665 2.408 1.015 3.731 1.016 5.142 0 9.324-4.181 9.326-9.323.001-2.491-.972-4.833-2.733-6.595s-4.102-2.733-6.596-2.733c-5.142 0-9.324 4.183-9.327 9.325-.001 1.485.352 2.933 1.025 4.205l.237.447-.937 3.422 3.502-.922zm9.646-5.835c-.267-.134-1.579-.779-1.824-.868-.246-.088-.425-.133-.604.134-.179.267-.691.868-.848 1.046-.156.178-.313.199-.579.066-.267-.133-1.125-.415-2.144-1.325-.792-.707-1.328-1.58-1.483-1.847-.156-.267-.016-.411.117-.544.121-.119.267-.312.4-.467.133-.156.178-.267.267-.445.088-.178.044-.334-.022-.467-.067-.134-.604-1.458-.828-2.002-.218-.528-.439-.456-.604-.464-.156-.008-.335-.01-.514-.01s-.469.067-.714.334c-.246.267-.938.913-.938 2.226 0 1.313.959 2.581 1.092 2.759.134.178 1.888 2.883 4.574 4.041.64.276 1.139.44 1.526.563.642.204 1.226.175 1.688.107.514-.077 1.579-.645 1.803-1.268.223-.623.223-1.157.156-1.268-.067-.111-.246-.178-.513-.312z"/></svg>
                 WhatsApp Me
               </a>
+              <button 
+                onClick={onDownloadCv}
+                className="bg-slate-900 text-white border border-slate-700 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl active:scale-95 w-full"
+              >
+                <FileDown size={20} />
+                Download My CV
+              </button>
               <a 
                 href="https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/" 
                 target="_blank" 
