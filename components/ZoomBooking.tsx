@@ -3,6 +3,8 @@ import React from 'react';
 import { Video, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 
 const ZoomBooking: React.FC = () => {
+  const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeBhaQwxVKtQn3ibvqPZ7-FGnUkml9EO6P5EYBZIvWCnCoJeg/viewform?usp=publish-editor";
+
   return (
     <section id="zoom-booking" className="py-24 bg-blue-900 relative overflow-hidden">
       {/* Dynamic Background Elements */}
@@ -66,7 +68,7 @@ const ZoomBooking: React.FC = () => {
                 </p>
 
                 <a 
-                  href="https://docs.google.com/forms/d/e/1FAIpQLScbNBhZ3cCFP0AAPtpZoRxuXhIgLk646BdSm_RCjnAZpjrneA/viewform?usp=publish-editor"
+                  href={GOOGLE_FORM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95 mb-6"
