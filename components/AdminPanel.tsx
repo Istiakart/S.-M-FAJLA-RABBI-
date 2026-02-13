@@ -29,9 +29,10 @@ import {
   Wrench,
   ChevronRight,
   TrendingUp,
-  SmartphoneNfc,
   FileSpreadsheet,
-  ExternalLink
+  ExternalLink,
+  // Added SmartphoneNfc to fix "Cannot find name 'SmartphoneNfc'" error
+  SmartphoneNfc
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 
@@ -41,8 +42,8 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) => {
-  // Update this URL with your actual Google Sheet URL
-  const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1X5XbY7tV8b9y7tV8b9y7tV8b9y7tV8b9y7tV8b9y7tV8/edit";
+  // Updated with the user provided Google Sheet URL
+  const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1JDHDIp3c3GSwhemS4VvtWSowoNLHFxAIvTf91j1zQ2g/edit?resourcekey=&gid=1373341915#gid=1373341915";
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginStep, setLoginStep] = useState<'creds' | '2fa'>('creds');
