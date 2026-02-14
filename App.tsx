@@ -40,8 +40,26 @@ const App: React.FC = () => {
 
   const [adminCreds, setAdminCreds] = useState(() => {
     const saved = localStorage.getItem('portfolio_admin_creds');
-    return saved ? JSON.parse(saved) : { username: 'admin', password: 'admin123', twoFactorSecret: '', twoFactorEnabled: false };
+    return saved ? JSON.parse(saved) : { 
+      username: 'admin', 
+      password: 'admin123', 
+      twoFactorSecret: 'JBSWY3DPEHPK3PXP', 
+      twoFactorEnabled: false 
+    };
   });
+
+  // Real-time Visitor Tracking Logic
+  useEffect(() => {
+    const trackVisit = () => {
+      const currentVisits = parseInt(localStorage.getItem('portfolio_total_visits') || '0', 10);
+      localStorage.setItem('portfolio_total_visits', (currentVisits + 1).toString());
+    };
+    
+    // Only track if not in admin mode to avoid counting self-admin actions as unique visits
+    if (!isAdminMode) {
+      trackVisit();
+    }
+  }, [isAdminMode]);
 
   useEffect(() => {
     localStorage.setItem('portfolio_projects', JSON.stringify(projects));

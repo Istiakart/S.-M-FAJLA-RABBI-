@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Project } from '../types';
@@ -26,7 +25,6 @@ const ImageLightbox: React.FC<LightboxProps> = ({ images, currentIndex, onClose,
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center bg-slate-900/98 backdrop-blur-xl animate-fade-in" onClick={onClose}>
-      {/* Top Controls */}
       <div className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-[520] pointer-events-none">
         <div className="px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-widest border border-white/5">
           Asset {currentIndex + 1} / {images.length}
@@ -39,7 +37,6 @@ const ImageLightbox: React.FC<LightboxProps> = ({ images, currentIndex, onClose,
         </button>
       </div>
 
-      {/* Navigation Buttons */}
       {images.length > 1 && (
         <>
           <button 
@@ -57,7 +54,6 @@ const ImageLightbox: React.FC<LightboxProps> = ({ images, currentIndex, onClose,
         </>
       )}
 
-      {/* Image Container */}
       <div className="relative max-w-6xl w-full h-[70vh] md:h-[85vh] flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
         <img 
           key={images[currentIndex]}
@@ -67,7 +63,6 @@ const ImageLightbox: React.FC<LightboxProps> = ({ images, currentIndex, onClose,
         />
       </div>
 
-      {/* Progress Dots */}
       {images.length > 1 && (
         <div className="absolute bottom-6 md:bottom-8 flex gap-2">
           {images.map((_, i) => (
@@ -137,16 +132,19 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
     <>
       <div className="bg-white rounded-2xl md:rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
         {images.length > 0 && (
-          <div className="w-full aspect-video overflow-hidden bg-slate-900 relative group min-h-[180px] md:min-h-[200px] flex items-center justify-center cursor-zoom-in">
+          <div className="w-full aspect-video overflow-hidden bg-slate-900/5 backdrop-blur-sm relative group min-h-[220px] md:min-h-[280px] flex items-center justify-center cursor-zoom-in border-b border-slate-50">
+            {/* The background of the container is a slightly lighter slate to make the object-contain look professional */}
+            <div className="absolute inset-0 bg-slate-100/50"></div>
+            
             <img 
               src={images[activeImageIdx]} 
               alt={project.title} 
-              className="w-full h-full object-contain transition-opacity duration-300"
+              className="relative z-10 max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-[1.02]"
               loading="lazy"
               onClick={() => setIsLightboxOpen(true)}
             />
             
-            <div className="absolute inset-0 flex items-center justify-between px-3 md:px-4 pointer-events-none">
+            <div className="absolute inset-0 z-20 flex items-center justify-between px-3 md:px-4 pointer-events-none">
               {images.length > 1 && (
                 <>
                   <button 
@@ -165,14 +163,14 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
               )}
             </div>
 
-            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-              <div className="p-2 md:p-3 bg-white/20 backdrop-blur-md rounded-full text-white">
-                <Maximize2 size={20} className="md:w-6 md:h-6" />
+            <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+              <div className="p-2 md:p-3 bg-slate-900/40 backdrop-blur-md rounded-xl text-white">
+                <Maximize2 size={16} className="md:w-5 md:h-5" />
               </div>
             </div>
 
             {images.length > 1 && (
-              <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-1 px-2.5 py-1 bg-black/30 backdrop-blur-md rounded-full pointer-events-none">
+              <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1 px-2.5 py-1 bg-slate-900/20 backdrop-blur-md rounded-full pointer-events-none">
                 {images.map((_, i) => (
                   <div key={i} className={`w-1 md:w-1.5 h-1 md:h-1.5 rounded-full transition-all ${i === activeImageIdx ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
                 ))}
