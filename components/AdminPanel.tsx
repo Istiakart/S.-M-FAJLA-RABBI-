@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Project, SiteIdentity, Tool } from '../types';
 import { 
@@ -6,7 +5,7 @@ import {
   Settings as SettingsIcon, ShieldCheck, User as UserIcon, Lock, Eye, 
   EyeOff, Camera, Palette, Wrench, TrendingUp, FileText, Upload, Globe, 
   Table, Check, Smartphone, Key, ExternalLink, Image as ImageIcon,
-  ChevronRight, ChevronLeft, Edit3, Menu
+  ChevronRight, ChevronLeft, Edit3, Menu, ArrowLeft
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -77,7 +76,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setLoginError('');
     
     if (loginUsername.trim().toLowerCase() !== adminCreds.username.toLowerCase() || loginPassword !== adminCreds.password) {
-      setLoginError('Invalid Username or Password');
+      setLoginError('Invalid Credentials');
       return;
     }
 
@@ -134,7 +133,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     showNotification("Project Saved!");
   };
 
-  // Fix: Added handleDeleteProject to resolve the missing function error on line 374
   const handleDeleteProject = (id: string) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       onProjectsUpdate(currentProjects.filter(p => p.id !== id));
@@ -177,78 +175,92 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     alert(`2FA Enabled! Secret: ${secret}`);
   };
 
-  // Close sidebar on mobile when tab changes
   const switchTab = (tab: any) => {
     setActiveTab(tab);
     if(window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
   if (!isAuthenticated) return (
-    <div className="fixed inset-0 bg-slate-900 z-[200] flex items-center justify-center p-4">
-      <form onSubmit={handleLogin} className="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl w-full max-md">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xl shadow-blue-200">
-            <ShieldCheck className="text-white" size={32} />
-          </div>
-          <h1 className="text-2xl font-black uppercase text-slate-900 tracking-tight">Admin Access</h1>
-        </div>
+    <div className="fixed inset-0 bg-slate-950 z-[200] flex flex-col items-center justify-center p-4">
+      {/* Background elements */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-blue-600 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] bg-cyan-600 rounded-full blur-[100px] animate-pulse delay-700"></div>
+      </div>
 
-        {loginError && (
-          <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold text-center">
-            {loginError}
-          </div>
-        )}
-
-        <div className="space-y-4 mb-8">
-          <div className="relative">
-            <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Username" 
-              className="w-full bg-slate-50 border p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-medium" 
-              value={loginUsername} 
-              onChange={e => setLoginUsername(e.target.value)} 
-              required 
-            />
-          </div>
-          <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type={showLoginPassword ? "text" : "password"} 
-              placeholder="Password" 
-              className="w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-medium" 
-              value={loginPassword} 
-              onChange={e => setLoginPassword(e.target.value)} 
-              required 
-            />
-            <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-              {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+      <div className="w-full max-w-[420px] animate-fade-in-up relative z-10">
+        <div className="bg-white/10 backdrop-blur-2xl p-8 md:p-10 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/20">
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl mx-auto flex items-center justify-center mb-5 shadow-lg shadow-blue-900/40">
+              <ShieldCheck className="text-white" size={28} />
+            </div>
+            <h1 className="text-xl font-black uppercase text-white tracking-[0.2em]">Vault Access</h1>
+            <p className="text-white/40 text-[10px] font-bold uppercase mt-1 tracking-widest">S M FAJLA RABBI</p>
           </div>
 
-          {adminCreds.twoFactorEnabled && (
-            <div className="relative">
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+          {loginError && (
+            <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-xs font-bold text-center animate-fade-in">
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="relative group">
+              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-blue-400 transition-colors" size={18} />
               <input 
                 type="text" 
-                placeholder="6-Digit 2FA Code" 
-                className="w-full bg-blue-50 border-blue-100 border p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-black tracking-[0.5em] text-center" 
-                value={otpCode} 
-                onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                placeholder="Username" 
+                className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/10 transition-all text-white placeholder:text-white/20 font-medium text-sm" 
+                value={loginUsername} 
+                onChange={e => setLoginUsername(e.target.value)} 
                 required 
               />
             </div>
-          )}
+            
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-blue-400 transition-colors" size={18} />
+              <input 
+                type={showLoginPassword ? "text" : "password"} 
+                placeholder="Password" 
+                className="w-full bg-white/5 border border-white/10 p-4 pl-12 pr-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/10 transition-all text-white placeholder:text-white/20 font-medium text-sm" 
+                value={loginPassword} 
+                onChange={e => setLoginPassword(e.target.value)} 
+                required 
+              />
+              <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white">
+                {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            {adminCreds.twoFactorEnabled && (
+              <div className="relative group pt-2">
+                <div className="absolute -top-1 left-4 px-2 bg-blue-600 rounded-full text-[8px] font-black text-white uppercase tracking-widest z-20">Secure OTP</div>
+                <Key className="absolute left-4 top-[calc(50%+4px)] -translate-y-1/2 text-blue-400" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="000000" 
+                  className="w-full bg-blue-500/10 border border-blue-500/30 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-blue-400 placeholder:text-blue-400/30 font-black tracking-[1em] text-center" 
+                  value={otpCode} 
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                  required 
+                />
+              </div>
+            )}
+
+            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs mt-4">
+              Authorize
+            </button>
+          </form>
         </div>
-
-        <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-blue-700 uppercase tracking-widest text-sm">
-          Login
+        
+        <button 
+          type="button" 
+          onClick={onClose} 
+          className="w-full mt-8 py-2 text-white/30 font-bold text-[10px] uppercase tracking-[0.3em] hover:text-white flex items-center justify-center gap-2 transition-colors"
+        >
+          <ArrowLeft size={12} /> Return to Website
         </button>
-
-        <button type="button" onClick={onClose} className="w-full mt-4 py-2 text-slate-400 font-bold text-xs uppercase hover:text-slate-900">
-          Back to Site
-        </button>
-      </form>
+      </div>
     </div>
   );
 
@@ -266,17 +278,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <div className="text-white">
-            <div className="text-xs md:text-sm font-black uppercase">RABBI <span className="text-blue-400">CONTROL</span></div>
+            <div className="text-xs md:text-sm font-black uppercase tracking-widest">RABBI <span className="text-blue-400">CONTROL</span></div>
           </div>
         </div>
-        <button onClick={onClose} className="bg-red-500 text-white p-2 rounded-xl hover:bg-red-600 flex items-center gap-2 px-3 md:px-4">
+        <button onClick={onClose} className="bg-red-500 text-white p-2 rounded-xl hover:bg-red-600 flex items-center gap-2 px-3 md:px-4 active:scale-95 transition-all">
           <LogOut size={16} />
-          <span className="hidden md:inline text-xs font-bold uppercase">Logout</span>
+          <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">Logout</span>
         </button>
       </header>
 
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Sidebar with overlay for mobile */}
         {isSidebarOpen && window.innerWidth < 1024 && (
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-[110]" onClick={() => setIsSidebarOpen(false)} />
         )}
@@ -309,7 +320,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              {/* Traffic Chart with responsive behavior */}
               <div className="bg-white p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                   <div>
@@ -435,7 +445,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           )}
 
-          {/* Other tabs remain fully functional and responsive by using similar grid/flex patterns */}
           {activeTab === 'branding' && (
             <div className="animate-fade-in space-y-6">
               <h2 className="text-2xl font-black">Site Identity</h2>

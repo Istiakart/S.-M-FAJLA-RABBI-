@@ -37,7 +37,7 @@ const Hero: React.FC<HeroProps> = ({ profileImageUrl, onDownloadCv }) => {
                 href="#contact" 
                 className="w-full sm:w-auto bg-blue-600 text-white px-8 md:px-10 py-4 rounded-xl text-base md:text-lg font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 text-center"
               >
-                Hire Rabbi
+                Get a Quote
               </a>
               <button 
                 onClick={onDownloadCv}
