@@ -10,13 +10,6 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import CVModal from './components/CVModal';
-import { db } from './services/firebase';
-import { 
-  onSnapshot, 
-  doc, 
-  collection, 
-  addDoc 
-} from 'firebase/firestore';
 import { Project, SiteIdentity, Tool } from './types';
 import { PROJECTS as INITIAL_PROJECTS, INITIAL_TOOLS } from './constants';
 
@@ -29,81 +22,58 @@ const DEFAULT_IDENTITY: SiteIdentity = {
 const App: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isCvModalOpen, setIsCvModalOpen] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const saved = localStorage.getItem('portfolio_projects');
+    return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
+  });
+
+  const [identity, setIdentity] = useState<SiteIdentity>(() => {
+    const saved = localStorage.getItem('portfolio_identity');
+    return saved ? JSON.parse(saved) : DEFAULT_IDENTITY;
+  });
+
+  const [tools, setTools] = useState<Tool[]>(() => {
+    const saved = localStorage.getItem('portfolio_tools');
+    return saved ? JSON.parse(saved) : INITIAL_TOOLS;
+  });
+
+  const [adminCreds, setAdminCreds] = useState(() => {
+    const saved = localStorage.getItem('portfolio_admin_creds');
+    return saved ? JSON.parse(saved) : { username: 'admin', password: 'admin123', twoFactorSecret: '', twoFactorEnabled: false };
+  });
 
   useEffect(() => {
-    // 1. Sync Site Identity
-    const unsubIdentity = onSnapshot(doc(db, "site_config", "identity"), (docSnap) => {
-      if (docSnap.exists()) {
-        setIdentity(docSnap.data() as SiteIdentity);
-      }
-      setIsDataLoaded(true);
-    }, (error) => {
-      console.error("Identity sync failed", error);
-      setIsDataLoaded(true); // Proceed anyway to show static content
-    });
+    localStorage.setItem('portfolio_projects', JSON.stringify(projects));
+  }, [projects]);
 
-    // 2. Sync Projects
-    const unsubProjects = onSnapshot(collection(db, "projects"), (querySnap) => {
-      const projs: Project[] = [];
-      querySnap.forEach((doc) => {
-        projs.push({ id: doc.id, ...doc.data() } as Project);
-      });
-      if (projs.length > 0) {
-        setProjects(projs.sort((a, b) => (b as any).createdAt?.seconds - (a as any).createdAt?.seconds));
-      } else {
-        setProjects(INITIAL_PROJECTS);
-      }
-    });
+  useEffect(() => {
+    localStorage.setItem('portfolio_identity', JSON.stringify(identity));
+  }, [identity]);
 
-    // 3. Sync Tools
-    const unsubTools = onSnapshot(collection(db, "tools"), (querySnap) => {
-      const tl: Tool[] = [];
-      querySnap.forEach((doc) => {
-        tl.push({ id: doc.id, ...doc.data() } as Tool);
-      });
-      if (tl.length > 0) {
-        setTools(tl);
-      } else {
-        setTools(INITIAL_TOOLS);
-      }
-    });
+  useEffect(() => {
+    localStorage.setItem('portfolio_tools', JSON.stringify(tools));
+  }, [tools]);
 
-    // 4. Log Visit to Firestore
-    const logVisit = async () => {
-      try {
-        await addDoc(collection(db, "visits"), {
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          platform: (navigator as any).platform || 'Unknown',
-          page: window.location.hash || 'Home'
-        });
-      } catch (e) {
-        console.error("Visit log failed", e);
-      }
-    };
-    logVisit();
+  useEffect(() => {
+    localStorage.setItem('portfolio_admin_creds', JSON.stringify(adminCreds));
+  }, [adminCreds]);
 
-    return () => {
-      unsubIdentity();
-      unsubProjects();
-      unsubTools();
-    };
-  }, []);
-
-  if (isAdminMode) return <AdminPanel onClose={() => setIsAdminMode(false)} onProjectsUpdate={() => {}} />;
-
-  if (!isDataLoaded) return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-6">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <div className="text-[10px] font-black uppercase text-blue-400 tracking-[0.4em] animate-pulse">Initializing Ecosystem...</div>
-      </div>
-    </div>
-  );
+  if (isAdminMode) {
+    return (
+      <AdminPanel 
+        onClose={() => setIsAdminMode(false)} 
+        onProjectsUpdate={setProjects} 
+        currentProjects={projects}
+        currentIdentity={identity}
+        onIdentityUpdate={setIdentity}
+        currentTools={tools}
+        onToolsUpdate={setTools}
+        adminCreds={adminCreds}
+        onAdminCredsUpdate={setAdminCreds}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen animate-fade-in bg-slate-50">

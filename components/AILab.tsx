@@ -23,7 +23,8 @@ const AILab: React.FC = () => {
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
   // --- Helpers ---
-  const blobToBase64 = (blob: window.Blob): Promise<string> => {
+  // Fix: Use globalThis.Blob to refer to native browser Blob when shadowed by imported @google/genai Blob
+  const blobToBase64 = (blob: globalThis.Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
