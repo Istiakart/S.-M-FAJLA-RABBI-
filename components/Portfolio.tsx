@@ -1,26 +1,84 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Project } from '../types';
 import { generateCaseStudySummary } from '../services/geminiService';
 import { Sparkles, BrainCircuit, ExternalLink, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 
-const ImageLightbox: React.FC<{ imageUrl: string; onClose: () => void }> = ({ imageUrl, onClose }) => {
+interface LightboxProps {
+  images: string[];
+  currentIndex: number;
+  onClose: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+}
+
+const ImageLightbox: React.FC<LightboxProps> = ({ images, currentIndex, onClose, onNext, onPrev }) => {
+  // Add keyboard listeners for better UX
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') onNext();
+      if (e.key === 'ArrowLeft') onPrev();
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onNext, onPrev, onClose]);
+
   return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-10 bg-slate-900/95 backdrop-blur-md animate-fade-in" onClick={onClose}>
-      <button 
-        onClick={onClose}
-        className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all z-[510]"
-      >
-        <X size={24} />
-      </button>
-      <div className="relative max-w-5xl w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[500] flex items-center justify-center bg-slate-900/98 backdrop-blur-xl animate-fade-in" onClick={onClose}>
+      {/* Top Controls */}
+      <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-[520] pointer-events-none">
+        <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/80 text-xs font-bold uppercase tracking-widest border border-white/5">
+          Asset {currentIndex + 1} / {images.length}
+        </div>
+        <button 
+          onClick={onClose}
+          className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all pointer-events-auto border border-white/5 active:scale-90"
+        >
+          <X size={24} />
+        </button>
+      </div>
+
+      {/* Navigation Buttons */}
+      {images.length > 1 && (
+        <>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onPrev(); }}
+            className="absolute left-6 w-14 h-14 rounded-full bg-white/10 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all z-[510] border border-white/5 active:scale-90 shadow-2xl"
+          >
+            <ChevronLeft size={32} />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onNext(); }}
+            className="absolute right-6 w-14 h-14 rounded-full bg-white/10 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all z-[510] border border-white/5 active:scale-90 shadow-2xl"
+          >
+            <ChevronRight size={32} />
+          </button>
+        </>
+      )}
+
+      {/* Image Container */}
+      <div className="relative max-w-6xl w-full h-[85vh] flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
         <img 
-          src={imageUrl} 
-          className="max-h-full max-w-full object-contain rounded-lg shadow-2xl animate-fade-in-up select-none" 
-          alt="Full Preview"
+          key={images[currentIndex]} // Force re-render for animation on change
+          src={images[currentIndex]} 
+          className="max-h-full max-w-full object-contain rounded-xl shadow-[0_0_100px_rgba(37,99,235,0.2)] animate-fade-in-up select-none" 
+          alt={`Full Preview ${currentIndex + 1}`}
         />
       </div>
+
+      {/* Progress Dots */}
+      {images.length > 1 && (
+        <div className="absolute bottom-8 flex gap-2">
+          {images.map((_, i) => (
+            <div 
+              key={i} 
+              className={`h-1.5 transition-all rounded-full ${i === currentIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/20'}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -68,6 +126,14 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const { value, unit } = splitResults(project.results);
   const images = project.imageUrls || [];
 
+  const handleNextImage = useCallback(() => {
+    setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0));
+  }, [images.length]);
+
+  const handlePrevImage = useCallback(() => {
+    setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1));
+  }, [images.length]);
+
   return (
     <>
       <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
@@ -81,18 +147,18 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
               onClick={() => setIsLightboxOpen(true)}
             />
             
-            {/* Nav controls overlay - must be pointer-events-none on container so click reaches img */}
+            {/* Nav controls overlay */}
             <div className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
               {images.length > 1 && (
                 <>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1)); }}
+                    onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
                     className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100"
                   >
                     <ChevronLeft size={24} />
                   </button>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0)); }}
+                    onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                     className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100"
                   >
                     <ChevronRight size={24} />
@@ -256,11 +322,14 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Enhanced Lightbox Modal */}
       {isLightboxOpen && (
         <ImageLightbox 
-          imageUrl={images[activeImageIdx]} 
+          images={images}
+          currentIndex={activeImageIdx}
           onClose={() => setIsLightboxOpen(false)} 
+          onNext={handleNextImage}
+          onPrev={handlePrevImage}
         />
       )}
     </>
