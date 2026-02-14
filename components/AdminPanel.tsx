@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Project, SiteIdentity, Tool } from '../types';
 import { 
   Plus, LogOut, Trash2, Sparkles, Loader2, X, 
-  Settings as SettingsIcon, ShieldCheck, User as UserIcon, Lock, Eye, 
-  EyeOff, Camera, Palette, Wrench, TrendingUp, FileText, Upload, Globe, 
-  Table, Check, Smartphone, Key, ExternalLink, Image as ImageIcon,
-  ChevronRight, ChevronLeft, Edit3, Menu, ArrowLeft, QrCode, Copy, Info,
-  Users, UploadCloud, XCircle
+  ShieldCheck, User as UserIcon, Lock, Eye, 
+  EyeOff, Smartphone, Key, ExternalLink, Image as ImageIcon,
+  Edit3, Menu, ArrowLeft, QrCode, Copy, Info,
+  Users, XCircle, RefreshCcw, Check, TrendingUp, Wrench, Palette, FileText
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import * as OTPAuth from 'otpauth';
 
 interface AdminPanelProps {
-  onClose: () => void;
+  onClose: void;
   onProjectsUpdate: (projects: Project[]) => void;
   currentProjects: Project[];
   currentIdentity: SiteIdentity;
@@ -52,6 +51,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   // 2FA Setup State
   const [show2FAGuide, setShow2FAGuide] = useState(false);
   const [currentQRUrl, setCurrentQRUrl] = useState('');
+  const [pendingSecret, setPendingSecret] = useState('');
 
   useEffect(() => {
     const visits = parseInt(localStorage.getItem('portfolio_total_visits') || '0', 10);
@@ -68,31 +68,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     { name: 'Sun', count: totalVisitors },
   ];
 
-  // Project Editor State
-  const [editingProject, setEditingProject] = useState<Partial<Project> | null>(null);
-  const [newProject, setNewProject] = useState<Partial<Project>>({ 
-    title: '', category: 'E-commerce', results: '', efficiency: '', description: '', imageUrls: [] 
-  });
-
-  // Tools Editor State
-  const [editingTool, setEditingTool] = useState<Tool | null>(null);
-  const [newTool, setNewTool] = useState<Partial<Tool>>({ name: '', subtitle: '', icon: '' });
-
-  // Security State
-  const [tempUsername, setTempUsername] = useState(adminCreds.username);
-  const [tempPassword, setTempPassword] = useState(adminCreds.password);
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     
-    // Check credentials first
     if (loginUsername.trim().toLowerCase() !== adminCreds.username.toLowerCase() || loginPassword !== adminCreds.password) {
       setLoginError('Invalid Credentials');
       return;
     }
 
-    // Check 2FA if enabled
     if (adminCreds.twoFactorEnabled) {
       if (!otpCode) {
         setLoginError('2FA Code Required');
@@ -118,16 +102,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setIsAuthenticated(true);
   };
 
+  const emergencyReset2FA = () => {
+    if (window.confirm("This will disable 2FA for this browser so you can log in. Use only if locked out.")) {
+      onAdminCredsUpdate({ ...adminCreds, twoFactorEnabled: false, twoFactorSecret: '' });
+      setLoginError('2FA Reset. Try logging in now.');
+      setOtpCode('');
+    }
+  };
+
   const showNotification = (msg: string) => {
     setSaveStatus(msg);
     setTimeout(() => setSaveStatus(null), 3000);
   };
 
   const generate2FA = () => {
-    // Generate a new secret
     const secret = new OTPAuth.Secret().base32;
-    
-    // Create TOTP instance to generate URI
     const totp = new OTPAuth.TOTP({
       issuer: 'RabbiPortfolio',
       label: adminCreds.username,
@@ -141,15 +130,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(uri)}`;
     
     setCurrentQRUrl(qrApiUrl);
+    setPendingSecret(secret);
     setShow2FAGuide(true);
-    
-    // Update credentials with the secret but wait for user confirmation to "enable" it?
-    // For simplicity, we enable it here, but typically you'd verify a code first.
+  };
+
+  const confirm2FASync = () => {
     onAdminCredsUpdate({ 
       ...adminCreds, 
-      twoFactorSecret: secret, 
+      twoFactorSecret: pendingSecret, 
       twoFactorEnabled: true 
     });
+    setShow2FAGuide(false);
+    showNotification("2FA Protection Enabled!");
   };
 
   const disable2FA = () => {
@@ -252,6 +244,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     if(window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
+  // Project Editor State
+  const [editingProject, setEditingProject] = useState<Partial<Project> | null>(null);
+  const [newProject, setNewProject] = useState<Partial<Project>>({ 
+    title: '', category: 'E-commerce', results: '', efficiency: '', description: '', imageUrls: [] 
+  });
+
+  // Tools Editor State
+  const [editingTool, setEditingTool] = useState<Tool | null>(null);
+  const [newTool, setNewTool] = useState<Partial<Tool>>({ name: '', subtitle: '', icon: '' });
+
+  // Security State
+  const [tempUsername, setTempUsername] = useState(adminCreds.username);
+  const [tempPassword, setTempPassword] = useState(adminCreds.password);
+
   const currentEditorImages = (editingProject ? editingProject.imageUrls : newProject.imageUrls) || [];
 
   if (!isAuthenticated) return (
@@ -300,6 +306,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs mt-4">Authorize</button>
           </form>
+
+          {adminCreds.twoFactorEnabled && (
+            <button onClick={emergencyReset2FA} className="w-full mt-6 py-2 text-[8px] font-black uppercase text-slate-500 tracking-widest hover:text-red-400 flex items-center justify-center gap-2">
+              <RefreshCcw size={10} /> Trouble with 2FA? Reset Security
+            </button>
+          )}
         </div>
         <button type="button" onClick={onClose} className="w-full mt-8 py-2 text-white/30 font-bold text-[10px] uppercase tracking-[0.3em] hover:text-white flex items-center justify-center gap-2">
           <ArrowLeft size={12} /> Return to Website
@@ -312,6 +324,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     <div className="fixed inset-0 bg-slate-50 z-[100] flex flex-col overflow-hidden">
       {saveStatus && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[210] bg-emerald-600 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 animate-fade-in-up">
+          {/* Fix: Use Check icon which is now imported */}
           <Check size={18} /> {saveStatus}
         </div>
       )}
@@ -337,10 +350,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         )}
         
         <aside className={`absolute lg:relative z-[120] h-full w-72 bg-slate-900 p-6 flex flex-col gap-2 transition-all duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:hidden'}`}>
+          {/* Fix: Use TrendingUp icon which is now imported */}
           <button onClick={() => switchTab('analytics')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'analytics' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><TrendingUp size={18} /> Overview</button>
           <button onClick={() => switchTab('projects')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><ImageIcon size={18} /> Projects</button>
+          {/* Fix: Use Wrench icon which is now imported */}
           <button onClick={() => switchTab('tools')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'tools' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><Wrench size={18} /> Tool Stack</button>
+          {/* Fix: Use Palette icon which is now imported */}
           <button onClick={() => switchTab('branding')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'branding' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><Palette size={18} /> Branding & CV</button>
+          {/* Fix: Use FileText icon which is now imported */}
           <button onClick={() => switchTab('inquiries')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'inquiries' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><FileText size={18} /> Inquiries</button>
           <button onClick={() => switchTab('security')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'security' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><Key size={18} /> Security</button>
         </aside>
@@ -536,6 +553,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
                 <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm text-center">
                   <div className="text-[10px] font-black uppercase mb-6 text-slate-400 tracking-widest">Resume PDF</div>
+                  {/* Fix: Use FileText icon which is now imported */}
                   <div className="h-24 flex items-center justify-center mb-6"><FileText className="text-emerald-500" size={56} /></div>
                   <label className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer inline-block hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">Update CV<input type="file" accept=".pdf" className="hidden" onChange={e => {
                     const f = e.target.files?.[0]; if(f){ const r = new FileReader(); r.onload = () => onIdentityUpdate({...currentIdentity, cvUrl: r.result as string}); r.readAsDataURL(f); }
@@ -601,16 +619,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     
                     <div className="bg-slate-50 p-6 rounded-3xl mb-8 flex flex-col items-center justify-center border shadow-inner">
                       <img src={currentQRUrl} className="w-44 h-44 rounded-xl border-4 border-white shadow-lg mb-4" alt="2FA QR Code" />
-                      <div className="text-[10px] font-black text-slate-300 bg-white px-4 py-1.5 rounded-full border">Secret: {adminCreds.twoFactorSecret}</div>
+                      <div className="text-[10px] font-black text-slate-300 bg-white px-4 py-1.5 rounded-full border">Secret: {pendingSecret}</div>
                     </div>
 
                     <div className="space-y-4 mb-8">
                       <div className="flex gap-4 items-start"><div className="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">1</div><p className="text-xs text-slate-600 font-medium">Open Google Authenticator app.</p></div>
                       <div className="flex gap-4 items-start"><div className="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">2</div><p className="text-xs text-slate-600 font-medium">Scan this QR Code using the camera.</p></div>
-                      <div className="flex gap-4 items-start"><div className="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">3</div><p className="text-xs text-slate-600 font-medium">The account "RabbiPortfolio" will appear.</p></div>
                     </div>
                     
-                    <button onClick={() => setShow2FAGuide(false)} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-all">I've Synced Authenticator</button>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShow2FAGuide(false)} className="flex-1 bg-slate-100 py-4 rounded-2xl font-bold uppercase text-[10px] text-slate-500">Cancel</button>
+                      <button onClick={confirm2FASync} className="flex-[2] bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-all">I've Synced Authenticator</button>
+                    </div>
                   </div>
                 </div>
               )}
