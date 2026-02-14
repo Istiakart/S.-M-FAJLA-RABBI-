@@ -3,7 +3,27 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Project } from '../types';
 import { generateCaseStudySummary } from '../services/geminiService';
-import { Sparkles, BrainCircuit, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, BrainCircuit, ExternalLink, ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
+
+const ImageLightbox: React.FC<{ imageUrl: string; onClose: () => void }> = ({ imageUrl, onClose }) => {
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-10 bg-slate-900/95 backdrop-blur-md animate-fade-in" onClick={onClose}>
+      <button 
+        onClick={onClose}
+        className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all z-[210]"
+      >
+        <X size={24} />
+      </button>
+      <div className="relative max-w-5xl w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+        <img 
+          src={imageUrl} 
+          className="max-h-full max-w-full object-contain rounded-lg shadow-2xl animate-fade-in-up" 
+          alt="Full Preview"
+        />
+      </div>
+    </div>
+  );
+};
 
 const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -11,6 +31,7 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -48,180 +69,201 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
   const images = project.imageUrls || [];
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
-      {images.length > 0 && (
-        <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group min-h-[200px] flex items-center justify-center">
-          <img 
-            src={images[activeImageIdx]} 
-            alt={project.title} 
-            className="w-full h-full object-contain transition-opacity duration-300"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
-          
-          {images.length > 1 && (
-            <>
-              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={() => setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1))}
-                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
-                >
-                  <ChevronLeft size={24} />
-                </button>
-                <button 
-                  onClick={() => setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0))}
-                  className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all"
-                >
-                  <ChevronRight size={24} />
-                </button>
+    <>
+      <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
+        {images.length > 0 && (
+          <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group min-h-[200px] flex items-center justify-center">
+            <img 
+              src={images[activeImageIdx]} 
+              alt={project.title} 
+              className="w-full h-full object-contain transition-opacity duration-300 cursor-zoom-in"
+              loading="lazy"
+              onClick={() => setIsLightboxOpen(true)}
+            />
+            
+            {/* Zoom Icon Overlay */}
+            <div 
+              className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
+            >
+              <div className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white">
+                <Maximize2 size={24} />
               </div>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
-                {images.map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIdx ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      
-      <div className="p-6 md:p-8 flex-1 flex flex-col">
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex-1">
-            <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2">
-              {project.category}
-            </span>
-            <h4 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">{project.title}</h4>
-          </div>
-          <div className="text-right shrink-0 ml-4">
-            <div className="text-xl md:text-2xl font-black text-blue-600">{value}</div>
-            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter leading-none">{unit}</div>
-          </div>
-        </div>
-
-        <p className="text-slate-600 mb-6 leading-relaxed text-sm md:text-base font-medium">
-          {project.description}
-        </p>
-
-        {project.category !== 'Website Build' && (
-          <div className="mb-8">
-            {!aiSummary && !isGenerating ? (
-              <button 
-                onClick={handleGenerateAISummary}
-                className="group flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                  Generate AI ROI Insight
-                </span>
-              </button>
-            ) : (
-              <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-fade-in relative overflow-hidden">
-                <div className="flex items-start gap-3">
-                  <BrainCircuit className={`w-4 h-4 mt-0.5 ${isGenerating ? 'text-blue-300 animate-pulse' : 'text-blue-600'}`} />
-                  <div>
-                    <div className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">ClickNova AI Summary</div>
-                    <p className="text-xs text-slate-700 leading-relaxed font-semibold italic">
-                      {isGenerating ? "Analyzing performance data via Gemini..." : aiSummary}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
-          {project.metrics?.slice(0, 4).map((m, i) => (
-            <div key={i} className="bg-slate-50 p-4 rounded-2xl border border-slate-100/50">
-              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">{m.label}</div>
-              <div className="text-lg font-bold text-slate-900">{m.value}</div>
-              <div className="text-[9px] text-slate-400 font-medium leading-tight">{m.description}</div>
             </div>
-          ))}
-        </div>
 
-        <div className={`overflow-hidden transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="pt-4 pb-8">
-            {project.category !== 'Website Build' && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+            
+            {images.length > 1 && (
               <>
-                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Performance Timeline</h5>
-                <div className="h-64 w-full mb-8">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart 
-                      data={project.chartData} 
-                      margin={{ top: 10, right: 10, left: isMobile ? -40 : -20, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fill: '#94a3b8', fontSize: 10 }}
-                      />
-                      <Tooltip 
-                        cursor={{ fill: '#f8fafc' }}
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '12px' }}
-                      />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={32}>
-                        {project.chartData?.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === (project.chartData?.length || 0) - 1 ? '#2563eb' : '#e2e8f0'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1)); }}
+                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0)); }}
+                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </div>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
+                  {images.map((_, i) => (
+                    <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIdx ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
+                  ))}
                 </div>
               </>
             )}
-            
-            <div className="bg-blue-900 text-white p-6 rounded-2xl shadow-inner">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                </div>
-                <h5 className="font-bold text-blue-200 uppercase text-[10px] tracking-widest">Strategy Highlight</h5>
-              </div>
-              <div className="text-xl font-bold mb-3">ClickNova Methodology</div>
-              <p className="text-blue-100 text-sm leading-relaxed font-medium">
-                Implementing <strong>conversion-focused systems</strong> optimized at <strong>ClickNova IT Agency</strong>. We leverage precise technical execution to ensure maximum ROI: <span className="text-white font-bold">{project.efficiency}</span>.
-              </p>
+          </div>
+        )}
+        
+        <div className="p-6 md:p-8 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex-1">
+              <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2">
+                {project.category}
+              </span>
+              <h4 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">{project.title}</h4>
+            </div>
+            <div className="text-right shrink-0 ml-4">
+              <div className="text-xl md:text-2xl font-black text-blue-600">{value}</div>
+              <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter leading-none">{unit}</div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-auto flex gap-3">
-          <button 
-            onClick={() => setIsExpanded(!isExpanded)}
-            className={`flex-1 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border-2 ${
-              isExpanded 
-                ? 'bg-slate-50 border-slate-200 text-slate-500' 
-                : 'bg-white border-slate-100 text-slate-700 hover:border-blue-100 hover:text-blue-600 shadow-sm'
-            }`}
-          >
-            {isExpanded ? 'Hide Details' : 'View Breakdown'}
-            <svg className={`w-4 h-4 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {project.link && (
-            <a 
-              href={project.link} 
-              target="_blank" 
-              rel="noreferrer"
-              className="bg-blue-600 text-white p-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center"
-              title="Visit Project"
-            >
-              <ExternalLink size={20} />
-            </a>
+          <p className="text-slate-600 mb-6 leading-relaxed text-sm md:text-base font-medium">
+            {project.description}
+          </p>
+
+          {project.category !== 'Website Build' && (
+            <div className="mb-8">
+              {!aiSummary && !isGenerating ? (
+                <button 
+                  onClick={handleGenerateAISummary}
+                  className="group flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                    Generate AI ROI Insight
+                  </span>
+                </button>
+              ) : (
+                <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-fade-in relative overflow-hidden">
+                  <div className="flex items-start gap-3">
+                    <BrainCircuit className={`w-4 h-4 mt-0.5 ${isGenerating ? 'text-blue-300 animate-pulse' : 'text-blue-600'}`} />
+                    <div>
+                      <div className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">ClickNova AI Summary</div>
+                      <p className="text-xs text-slate-700 leading-relaxed font-semibold italic">
+                        {isGenerating ? "Analyzing performance data via Gemini..." : aiSummary}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
+
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
+            {project.metrics?.slice(0, 4).map((m, i) => (
+              <div key={i} className="bg-slate-50 p-4 rounded-2xl border border-slate-100/50">
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">{m.label}</div>
+                <div className="text-lg font-bold text-slate-900">{m.value}</div>
+                <div className="text-[9px] text-slate-400 font-medium leading-tight">{m.description}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className={`overflow-hidden transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className="pt-4 pb-8">
+              {project.category !== 'Website Build' && (
+                <>
+                  <h5 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Performance Timeline</h5>
+                  <div className="h-64 w-full mb-8">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart 
+                        data={project.chartData} 
+                        margin={{ top: 10, right: 10, left: isMobile ? -40 : -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis 
+                          dataKey="name" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                        />
+                        <YAxis 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#94a3b8', fontSize: 10 }}
+                        />
+                        <Tooltip 
+                          cursor={{ fill: '#f8fafc' }}
+                          contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '12px' }}
+                        />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={32}>
+                          {project.chartData?.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={index === (project.chartData?.length || 0) - 1 ? '#2563eb' : '#e2e8f0'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
+              
+              <div className="bg-blue-900 text-white p-6 rounded-2xl shadow-inner">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  </div>
+                  <h5 className="font-bold text-blue-200 uppercase text-[10px] tracking-widest">Strategy Highlight</h5>
+                </div>
+                <div className="text-xl font-bold mb-3">ClickNova Methodology</div>
+                <p className="text-blue-100 text-sm leading-relaxed font-medium">
+                  Implementing <strong>conversion-focused systems</strong> optimized at <strong>ClickNova IT Agency</strong>. We leverage precise technical execution to ensure maximum ROI: <span className="text-white font-bold">{project.efficiency}</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-auto flex gap-3">
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`flex-1 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border-2 ${
+                isExpanded 
+                  ? 'bg-slate-50 border-slate-200 text-slate-500' 
+                  : 'bg-white border-slate-100 text-slate-700 hover:border-blue-100 hover:text-blue-600 shadow-sm'
+              }`}
+            >
+              {isExpanded ? 'Hide Details' : 'View Breakdown'}
+              <svg className={`w-4 h-4 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {project.link && (
+              <a 
+                href={project.link} 
+                target="_blank" 
+                rel="noreferrer"
+                className="bg-blue-600 text-white p-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center justify-center"
+                title="Visit Project"
+              >
+                <ExternalLink size={20} />
+              </a>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Lightbox Modal */}
+      {isLightboxOpen && (
+        <ImageLightbox 
+          imageUrl={images[activeImageIdx]} 
+          onClose={() => setIsLightboxOpen(false)} 
+        />
+      )}
+    </>
   );
 };
 
