@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Project, Visit, SiteIdentity, Tool } from '../types';
 import * as OTPAuth from 'otpauth';
@@ -284,45 +283,45 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-4">
-        <form onSubmit={handleLogin} className="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md animate-fade-in-up">
-          <div className="text-center mb-10">
-            <div className="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-xl ring-4 ring-blue-50">
-              <ShieldCheck className="text-white w-10 h-10" />
+        <form onSubmit={handleLogin} className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl w-full max-w-md animate-fade-in-up">
+          <div className="text-center mb-6 md:mb-10">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 rounded-2xl md:rounded-3xl mx-auto flex items-center justify-center mb-4 md:mb-6 shadow-xl ring-4 ring-blue-50">
+              <ShieldCheck className="text-white w-8 h-8 md:w-10 md:h-10" />
             </div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter text-slate-900">Admin Login</h1>
-            <p className="text-slate-500 text-sm mt-2 font-medium">Verify credentials to continue</p>
+            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-900">Admin Login</h1>
+            <p className="text-slate-500 text-xs md:text-sm mt-2 font-medium">Verify credentials to continue</p>
           </div>
-          <div className="space-y-4 mb-8">
+          <div className="space-y-4 mb-6 md:mb-8">
             {loginStep === 'creds' ? (
               !useSyncToken ? (
                 <>
                   <div className="relative">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                    <input type="text" placeholder="Username" className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input type="text" placeholder="Username" className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                    <input type={showLoginPassword ? "text" : "password"} placeholder="Password" className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input type={showLoginPassword ? "text" : "password"} placeholder="Password" className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 pr-12 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
                     <button type="button" onClick={() => setShowLoginPassword(!showLoginPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                      {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </>
               ) : (
-                <textarea placeholder="Paste Sync Token..." className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl h-32 text-xs font-mono outline-none" value={syncTokenInput} onChange={e => setSyncTokenInput(e.target.value)} />
+                <textarea placeholder="Paste Sync Token..." className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl md:rounded-2xl h-32 text-[10px] font-mono outline-none" value={syncTokenInput} onChange={e => setSyncTokenInput(e.target.value)} />
               )
             ) : (
               <div className="text-center">
-                <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">Enter 6-Digit 2FA Code</p>
-                <input type="text" maxLength={6} placeholder="000000" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center text-4xl font-black tracking-[0.5em] outline-none" value={twoFactorCode} onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, ''))} autoFocus />
+                <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">Enter 6-Digit 2FA Code</p>
+                <input type="text" maxLength={6} placeholder="000000" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl md:rounded-2xl text-center text-3xl md:text-4xl font-black tracking-[0.4em] md:tracking-[0.5em] outline-none" value={twoFactorCode} onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, ''))} autoFocus />
               </div>
             )}
           </div>
-          <div className="flex gap-4">
-            <button type="button" onClick={onClose} className="flex-1 py-4 text-slate-400 font-bold hover:bg-slate-50 rounded-2xl transition-all">Cancel</button>
-            <button type="submit" className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all">Next</button>
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose} className="flex-1 py-3.5 text-slate-400 font-bold hover:bg-slate-50 rounded-xl md:rounded-2xl transition-all text-sm">Cancel</button>
+            <button type="submit" className="flex-1 bg-blue-600 text-white py-3.5 rounded-xl md:rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all text-sm">Next</button>
           </div>
-          <button type="button" onClick={() => setUseSyncToken(!useSyncToken)} className="w-full mt-8 text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-blue-500 transition-colors">
+          <button type="button" onClick={() => setUseSyncToken(!useSyncToken)} className="w-full mt-6 text-[9px] font-black text-slate-300 uppercase tracking-widest hover:text-blue-500 transition-colors">
             {useSyncToken ? 'Standard Credentials' : 'Use Sync Token Access'}
           </button>
         </form>
@@ -332,72 +331,75 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
 
   return (
     <div className="fixed inset-0 bg-slate-50 z-[100] flex flex-col overflow-hidden font-sans">
-      <header className="w-full bg-slate-900 px-6 py-4 flex items-center justify-between shrink-0 shadow-2xl z-[130]">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsSidebarOpen(true)} className="text-white p-2 hover:bg-slate-800 rounded-xl transition-all"><Menu size={28} /></button>
+      <header className="w-full bg-slate-900 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shrink-0 shadow-2xl z-[130]">
+        <div className="flex items-center gap-3 md:gap-4">
+          <button onClick={() => setIsSidebarOpen(true)} className="text-white p-1.5 hover:bg-slate-800 rounded-lg md:rounded-xl transition-all"><Menu size={24} /></button>
           <div className="text-white flex flex-col">
-            <div className="text-sm font-black uppercase tracking-tighter">S M FAJLA <span className="text-blue-400">RABBI</span></div>
-            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Console | Web Designer</div>
+            <div className="text-xs md:text-sm font-black uppercase tracking-tighter">S M FAJLA <span className="text-blue-400">RABBI</span></div>
+            <div className="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Console</div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-           <div className="hidden md:flex flex-col items-end mr-4">
-             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">System Status</div>
-             <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-black uppercase"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Active Sync</div>
+        <div className="flex items-center gap-2 md:gap-4">
+           <div className="hidden sm:flex flex-col items-end mr-2 md:mr-4">
+             <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] text-emerald-400 font-black uppercase"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Active</div>
            </div>
-           <button onClick={onClose} className="bg-red-500/10 text-red-400 p-2.5 rounded-xl hover:bg-red-500/20 transition-all"><LogOut size={20} /></button>
+           <button onClick={onClose} className="bg-red-500/10 text-red-400 p-2 rounded-lg md:rounded-xl hover:bg-red-500/20 transition-all"><LogOut size={18} /></button>
         </div>
       </header>
+
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 z-[140] backdrop-blur-md" onClick={() => setIsSidebarOpen(false)} />}
-      <aside className={`fixed inset-y-0 left-0 z-[150] w-80 bg-slate-900 p-8 flex flex-col transition-transform duration-500 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl border-r border-slate-800`}>
-        <div className="flex items-center justify-between mb-16 text-white">
-           <div className="text-sm font-black uppercase tracking-widest text-slate-400">Main Console</div>
-           <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white"><X size={24} /></button>
+      
+      <aside className={`fixed inset-y-0 left-0 z-[150] w-72 md:w-80 bg-slate-900 p-6 md:p-8 flex flex-col transition-transform duration-500 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl border-r border-slate-800`}>
+        <div className="flex items-center justify-between mb-12 text-white">
+           <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Main Console</div>
+           <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 hover:text-white"><X size={20} /></button>
         </div>
-        <nav className="flex-1 space-y-3">
-          <button onClick={() => handleTabChange('analytics')} className={`w-full flex items-center gap-4 p-5 rounded-2xl font-bold text-sm transition-all ${activeTab === 'analytics' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Users size={22} /> Traffic Logs</button>
-          <button onClick={() => handleTabChange('projects')} className={`w-full flex items-center gap-4 p-5 rounded-2xl font-bold text-sm transition-all ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Plus size={22} /> Portfolio Lab</button>
-          <button onClick={() => handleTabChange('tools')} className={`w-full flex items-center gap-4 p-5 rounded-2xl font-bold text-sm transition-all ${activeTab === 'tools' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Wrench size={22} /> Tech Stack</button>
-          <div className="my-6 border-t border-slate-800 pt-6">
-            <div className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-4 ml-2">Leads Management</div>
-            <a href={GOOGLE_SHEET_URL} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-4 p-5 rounded-2xl font-bold text-sm text-emerald-400 hover:bg-emerald-500/10 transition-all group">
-              <FileSpreadsheet size={22} /> 
-              <span>Response Sheet</span>
-              <ExternalLink size={14} className="ml-auto opacity-40 group-hover:opacity-100" />
+        <nav className="flex-1 space-y-2 md:space-y-3">
+          <button onClick={() => handleTabChange('analytics')} className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all ${activeTab === 'analytics' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Users size={20} /> Traffic Logs</button>
+          <button onClick={() => handleTabChange('projects')} className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Plus size={20} /> Portfolio Lab</button>
+          <button onClick={() => handleTabChange('tools')} className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all ${activeTab === 'tools' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Wrench size={20} /> Tech Stack</button>
+          <div className="my-6 md:my-8 border-t border-slate-800 pt-6">
+            <div className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] mb-4 ml-2">Leads Sync</div>
+            <a href={GOOGLE_SHEET_URL} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm text-emerald-400 hover:bg-emerald-500/10 transition-all group">
+              <FileSpreadsheet size={20} /> 
+              <span>Sheet Data</span>
+              <ExternalLink size={12} className="ml-auto opacity-40 group-hover:opacity-100" />
             </a>
           </div>
-          <button onClick={() => handleTabChange('branding')} className={`w-full flex items-center gap-4 p-5 rounded-2xl font-bold text-sm transition-all ${activeTab === 'branding' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Palette size={22} /> Branding Suite</button>
-          <button onClick={() => handleTabChange('settings')} className={`w-full flex items-center gap-4 p-5 rounded-2xl font-bold text-sm transition-all ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><SettingsIcon size={22} /> Security Matrix</button>
+          <button onClick={() => handleTabChange('branding')} className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all ${activeTab === 'branding' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><Palette size={20} /> Branding Suite</button>
+          <button onClick={() => handleTabChange('settings')} className={`w-full flex items-center gap-4 p-4 md:p-5 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800'}`}><SettingsIcon size={20} /> Security</button>
         </nav>
       </aside>
-      <main className="flex-1 overflow-y-auto p-6 md:p-12 lg:p-20 text-slate-900 bg-slate-50">
+
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-12 text-slate-900 bg-slate-50">
         <div className="max-w-7xl mx-auto">
           {activeTab === 'analytics' && (
-            <div className="animate-fade-in space-y-12">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="animate-fade-in space-y-8 md:space-y-12">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">Traffic Insight</h2>
-                  <p className="text-slate-500 font-medium mt-2">Monitoring real-time interactions across your portfolio.</p>
+                  <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter">Traffic Insight</h2>
+                  <p className="text-slate-500 text-xs md:text-base font-medium mt-1 md:mt-2">Monitoring real-time interactions across your portfolio.</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><TrendingUp size={24} /></div>
+                <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm flex items-center gap-4 w-fit">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 text-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0"><TrendingUp size={20} className="md:w-6 md:h-6" /></div>
                   <div>
-                    <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total Impressions</div>
-                    <div className="text-2xl font-black">{visits.length}</div>
+                    <div className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">Total Impressions</div>
+                    <div className="text-xl md:text-2xl font-black mt-1">{visits.length}</div>
                   </div>
                 </div>
               </div>
-              <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden">
-                <div className="flex items-center justify-between mb-10">
+              
+              <div className="bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-10 gap-4">
                    <div>
-                      <h3 className="text-xl font-bold flex items-center gap-3 text-slate-900"><TrendingUp size={24} className="text-blue-600" /> Interaction Timeline</h3>
-                      <p className="text-xs text-slate-400 font-medium uppercase tracking-widest mt-1">Daily Traffic Volume (Last 7 Days)</p>
+                      <h3 className="text-base md:text-xl font-bold flex items-center gap-2 text-slate-900"><TrendingUp size={18} className="text-blue-600" /> Timeline</h3>
+                      <p className="text-[9px] md:text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Daily Volume Log</p>
                    </div>
-                   <div className="bg-slate-50 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-100">Live Metric</div>
+                   <div className="bg-slate-50 px-3 py-1.5 rounded-lg text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-100 w-fit">Live Metric</div>
                 </div>
-                <div className="h-80 w-full">
+                <div className="h-48 md:h-80 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={trafficChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart data={trafficChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
@@ -405,42 +407,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} dy={10} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }} />
-                      <Tooltip contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: 'bold', color: '#1e293b' }} />
-                      <Area type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" animationDuration={1500} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 8, fontWeight: 700 }} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 8, fontWeight: 700 }} />
+                      <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 15px 30px -10px rgba(0,0,0,0.1)', fontSize: '10px', fontWeight: 'bold' }} />
+                      <Area type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" animationDuration={1000} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="bg-white rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden">
-                <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="font-bold flex items-center gap-3"><Users size={20} className="text-blue-600" /> Recent Activity</h3>
-                  <button onClick={() => { localStorage.setItem('rabbi_portfolio_visits', '[]'); setVisits([]); }} className="text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600">Clear History</button>
+
+              <div className="bg-white rounded-[2rem] md:rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden">
+                <div className="p-5 md:p-8 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="font-bold flex items-center gap-2 text-sm md:text-base"><Users size={18} className="text-blue-600" /> Recent Activity</h3>
+                  <button onClick={() => { if(confirm("Clear logs?")){ localStorage.setItem('rabbi_portfolio_visits', '[]'); setVisits([]); } }} className="text-[9px] md:text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600 transition-colors">Clear History</button>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest border-b border-slate-100">
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full text-left min-w-[600px]">
+                    <thead className="bg-slate-50 text-[8px] md:text-[10px] uppercase font-black text-slate-400 tracking-widest border-b border-slate-100">
                       <tr>
-                        <th className="px-8 py-5">Timestamp</th>
-                        <th className="px-8 py-5">Source / Platform</th>
-                        <th className="px-8 py-5">Node / Page</th>
-                        <th className="px-8 py-5 text-right">Identifier</th>
+                        <th className="px-5 md:px-8 py-4 md:py-5">Timestamp</th>
+                        <th className="px-5 md:px-8 py-4 md:py-5">Platform</th>
+                        <th className="px-5 md:px-8 py-4 md:py-5">Page</th>
+                        <th className="px-5 md:px-8 py-4 md:py-5 text-right">ID</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {visits.length === 0 ? (
-                        <tr><td colSpan={4} className="px-8 py-20 text-center text-slate-400 font-medium italic">No traffic data recorded yet.</td></tr>
+                        <tr><td colSpan={4} className="px-8 py-16 text-center text-slate-400 font-medium italic text-xs">No traffic data yet.</td></tr>
                       ) : (
-                        visits.slice(0, 50).map((v) => (
+                        visits.slice(0, 30).map((v) => (
                           <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-8 py-6 text-xs font-bold text-slate-600">{new Date(v.timestamp).toLocaleString()}</td>
-                            <td className="px-8 py-6">
-                               <div className="text-xs font-bold text-slate-900">{v.platform}</div>
-                               <div className="text-[10px] text-slate-400 font-medium truncate max-w-[200px]">{v.userAgent}</div>
+                            <td className="px-5 md:px-8 py-4 md:py-6 text-[10px] md:text-xs font-bold text-slate-600">{new Date(v.timestamp).toLocaleString()}</td>
+                            <td className="px-5 md:px-8 py-4 md:py-6">
+                               <div className="text-[10px] md:text-xs font-black text-slate-900 leading-none">{v.platform}</div>
+                               <div className="text-[8px] md:text-[9px] text-slate-400 font-medium truncate max-w-[150px] mt-1">{v.userAgent}</div>
                             </td>
-                            <td className="px-8 py-6"><span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase">{v.page}</span></td>
-                            <td className="px-8 py-6 text-right font-mono text-[9px] text-slate-400">{v.id}</td>
+                            <td className="px-5 md:px-8 py-4 md:py-6"><span className="px-2.5 py-0.5 bg-blue-50 text-blue-600 rounded-lg text-[8px] md:text-[9px] font-black uppercase">{v.page}</span></td>
+                            <td className="px-5 md:px-8 py-4 md:py-6 text-right font-mono text-[8px] text-slate-400">{v.id}</td>
                           </tr>
                         ))
                       )}
@@ -450,93 +453,101 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
               </div>
             </div>
           )}
+
           {activeTab === 'projects' && (
-            <div className="animate-fade-in grid xl:grid-cols-5 gap-16" ref={formRef}>
-              <div className="xl:col-span-2 space-y-10">
+            <div className="animate-fade-in grid xl:grid-cols-5 gap-8 md:gap-16" ref={formRef}>
+              <div className="xl:col-span-2 space-y-6 md:space-y-10">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tighter">{editingProjectId ? 'Sync Update' : 'Publish Asset'}</h2>
-                  {editingProjectId && <button onClick={() => {setEditingProjectId(null); setNewProject({title:'', category:'E-commerce', results:'', efficiency:'', description:'', imageUrls:[]});}} className="text-red-500 font-bold text-xs">Cancel</button>}
+                  <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tighter">{editingProjectId ? 'Update Asset' : 'Publish Asset'}</h2>
+                  {editingProjectId && <button onClick={() => {setEditingProjectId(null); setNewProject({title:'', category:'E-commerce', results:'', efficiency:'', description:'', imageUrls:[]});}} className="text-red-500 font-bold text-[10px] uppercase">Cancel</button>}
                 </div>
-                <div className={`p-10 rounded-[3rem] border-2 border-dashed transition-all ${isAiScanning ? 'bg-blue-50 border-blue-500' : 'bg-slate-50 border-slate-200 hover:border-blue-400'}`}>
+                
+                <div className={`p-6 md:p-10 rounded-2xl md:rounded-[3rem] border-2 border-dashed transition-all ${isAiScanning ? 'bg-blue-50 border-blue-500' : 'bg-slate-50 border-slate-200'}`}>
                    {isAiScanning ? (
-                     <div className="text-center py-6">
-                       <Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={40} />
-                       <div className="text-blue-600 font-black text-xs uppercase tracking-widest">AI Vision Scanning...</div>
+                     <div className="text-center py-4">
+                       <Loader2 className="animate-spin mx-auto text-blue-600 mb-3" size={32} />
+                       <div className="text-blue-600 font-black text-[9px] uppercase tracking-widest">Scanning Meta Data...</div>
                      </div>
                    ) : (
                      <label className="flex flex-col items-center justify-center cursor-pointer group">
-                       <div className="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center mb-4 shadow-xl shadow-blue-200 group-hover:scale-110 transition-transform"><Sparkles size={28} /></div>
+                       <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-600 text-white rounded-xl md:rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-blue-100 group-hover:scale-105 transition-transform"><Sparkles size={24} /></div>
                        <div className="text-center">
-                         <div className="font-bold text-slate-900">AI Magic Upload</div>
-                         <div className="text-xs text-slate-400 mt-1">Upload result screenshot to auto-fill</div>
+                         <div className="font-bold text-slate-900 text-sm">AI Magic Scan</div>
+                         <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-tighter">Upload ad screenshot</div>
                        </div>
                        <input type="file" className="hidden" accept="image/*" onChange={handleAiUpload} />
                      </label>
                    )}
                 </div>
-                <div className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-2xl space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4">Project Title</label>
-                    <input type="text" placeholder="e.g. Meta Ads Scaling for XYZ" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none" value={newProject.title} onChange={e => setNewProject({...newProject, title: e.target.value})} />
+
+                <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3.5rem] border border-slate-200 shadow-xl space-y-5 md:space-y-6">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-3">Title</label>
+                    <input type="text" placeholder="Project Name" className="w-full bg-slate-50 border border-slate-200 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none text-sm" value={newProject.title} onChange={e => setNewProject({...newProject, title: e.target.value})} />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4">Asset Gallery (Max 10)</label>
-                    <div className="grid grid-cols-4 gap-3">
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-3">Assets (Max 10)</label>
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2.5">
                       {newProject.imageUrls?.map((url, i) => (
-                        <div key={i} className="aspect-square rounded-xl border border-slate-100 overflow-hidden relative group bg-slate-50">
+                        <div key={i} className="aspect-square rounded-lg md:rounded-xl border border-slate-100 overflow-hidden relative group bg-slate-50">
                           <img src={url} className="w-full h-full object-contain" />
-                          <button onClick={() => setNewProject({...newProject, imageUrls: newProject.imageUrls?.filter((_, idx)=>idx!==i)})} className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"><Trash2 size={16} /></button>
+                          <button onClick={() => setNewProject({...newProject, imageUrls: newProject.imageUrls?.filter((_, idx)=>idx!==i)})} className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"><Trash2 size={14} /></button>
                         </div>
                       ))}
                       {(newProject.imageUrls?.length || 0) < 10 && (
-                        <label className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors">
-                          <Plus className="text-slate-300" />
+                        <label className="aspect-square rounded-lg md:rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors">
+                          <Plus className="text-slate-300" size={16} />
                           <input type="file" multiple className="hidden" accept="image/*" onChange={handleProjectImageUpload} />
                         </label>
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4">Results</label>
-                      <input type="text" placeholder="142 Leads" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none" value={newProject.results} onChange={e => setNewProject({...newProject, results: e.target.value})} />
+
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-3">Results</label>
+                      <input type="text" placeholder="e.g. 50 Sales" className="w-full bg-slate-50 border border-slate-200 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none text-sm" value={newProject.results} onChange={e => setNewProject({...newProject, results: e.target.value})} />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4">Efficiency</label>
-                      <input type="text" placeholder="BDT 8.20/Conv" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none" value={newProject.efficiency} onChange={e => setNewProject({...newProject, efficiency: e.target.value})} />
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-3">Efficiency</label>
+                      <input type="text" placeholder="e.g. 15 ROAS" className="w-full bg-slate-50 border border-slate-200 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none text-sm" value={newProject.efficiency} onChange={e => setNewProject({...newProject, efficiency: e.target.value})} />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4">Strategic Summary</label>
-                    <textarea placeholder="The technical approach used..." className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl h-32 outline-none resize-none" value={newProject.description} onChange={e => setNewProject({...newProject, description: e.target.value})} />
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-3">Description</label>
+                    <textarea placeholder="Strategy details..." className="w-full bg-slate-50 border border-slate-200 p-3.5 md:p-4 rounded-xl md:rounded-2xl h-24 md:h-32 outline-none resize-none text-sm" value={newProject.description} onChange={e => setNewProject({...newProject, description: e.target.value})} />
                   </div>
-                  <button onClick={handleAddOrUpdateProject} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
-                    {editingProjectId ? 'Sync Portfolio Asset' : 'Publish New Asset'}
+
+                  <button onClick={handleAddOrUpdateProject} className="w-full bg-blue-600 text-white py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all">
+                    {editingProjectId ? 'Sync' : 'Publish'} Portfolio Asset
                   </button>
                 </div>
               </div>
-              <div className="xl:col-span-3 space-y-10">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Live Portfolio ({projects.length})</h2>
-                <div className="grid md:grid-cols-2 gap-8">
+
+              <div className="xl:col-span-3 space-y-6 md:space-y-10">
+                <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tighter">Live Portfolio ({projects.length})</h2>
+                <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
                   {projects.map(p => (
-                    <div key={p.id} className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl group hover:shadow-2xl transition-all">
-                      <div className="flex gap-6 mb-8">
-                        <div className="w-20 h-20 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                    <div key={p.id} className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-slate-200 shadow-lg group hover:shadow-xl transition-all">
+                      <div className="flex gap-4 md:gap-6 mb-6 md:mb-8">
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-xl md:rounded-2xl border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
                           {p.imageUrls?.[0] ? <img src={p.imageUrls[0]} className="w-full h-full object-contain" /> : <ImageIcon className="text-slate-300" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest px-2 py-0.5 bg-blue-50 rounded-lg">{p.category}</span>
-                          <h4 className="font-bold text-lg mt-1 truncate">{p.title}</h4>
-                          <div className="flex items-center gap-4 mt-2">
-                            <div className="text-xs font-bold text-slate-400 uppercase tracking-tighter">{p.results}</div>
+                          <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest px-2 py-0.5 bg-blue-50 rounded-lg">{p.category}</span>
+                          <h4 className="font-bold text-base md:text-lg mt-1 truncate">{p.title}</h4>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 md:mt-2">
+                            <div className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-tighter">{p.results}</div>
                             <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                            <div className="text-xs font-bold text-emerald-600 uppercase tracking-tighter">{p.efficiency}</div>
+                            <div className="text-[9px] md:text-xs font-bold text-emerald-600 uppercase tracking-tighter">{p.efficiency}</div>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-3">
-                        <button onClick={() => { setEditingProjectId(p.id); setNewProject({ ...p, results: p.results, efficiency: p.efficiency }); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex-1 py-4 bg-blue-50 text-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-100 transition-colors">Edit Asset</button>
-                        <button onClick={() => {if(confirm("Delete asset?")){ const updated=projects.filter(pr=>pr.id!==p.id); setProjects(updated); localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(updated)); onProjectsUpdate(); }}} className="p-4 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all"><Trash2 size={20} /></button>
+                      <div className="flex gap-2.5">
+                        <button onClick={() => { setEditingProjectId(p.id); setNewProject({ ...p, results: p.results, efficiency: p.efficiency }); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex-1 py-3 bg-blue-50 text-blue-600 rounded-xl md:rounded-2xl font-black text-[9px] md:text-xs uppercase tracking-widest hover:bg-blue-100 transition-colors">Edit</button>
+                        <button onClick={() => {if(confirm("Delete asset?")){ const updated=projects.filter(pr=>pr.id!==p.id); setProjects(updated); localStorage.setItem('rabbi_portfolio_projects', JSON.stringify(updated)); onProjectsUpdate(); }}} className="p-3 bg-red-50 text-red-500 rounded-xl md:rounded-2xl hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18} /></button>
                       </div>
                     </div>
                   ))}
@@ -544,37 +555,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
               </div>
             </div>
           )}
+
           {activeTab === 'tools' && (
-            <div className="animate-fade-in grid xl:grid-cols-5 gap-16">
-              <div className="xl:col-span-2 space-y-10">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">{editingToolId ? 'Update Skill' : 'Add Tech Tool'}</h2>
-                <div className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-2xl space-y-6">
+            <div className="animate-fade-in grid xl:grid-cols-5 gap-8 md:gap-16">
+              <div className="xl:col-span-2 space-y-6 md:space-y-10">
+                <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tighter">{editingToolId ? 'Update Skill' : 'Add Tech Tool'}</h2>
+                <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3.5rem] border border-slate-200 shadow-xl space-y-5 md:space-y-6">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden relative group">
-                      {newTool.icon ? <img src={newTool.icon} className="w-full h-full object-contain p-2" /> : <ImageIcon className="text-slate-300" size={32} />}
-                      <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer text-white text-[10px] font-black">CHANGE <input type="file" className="hidden" accept="image/*" onChange={async e => { const f=e.target.files?.[0]; if(f) setNewTool({...newTool, icon: await compressImage(f, 400, 400)}) }} /></label>
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden relative group">
+                      {newTool.icon ? <img src={newTool.icon} className="w-full h-full object-contain p-2 md:p-4" /> : <ImageIcon className="text-slate-300" size={28} />}
+                      <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer text-[9px] font-black text-white uppercase transition-opacity">Change <input type="file" className="hidden" accept="image/*" onChange={async e => { const f=e.target.files?.[0]; if(f) setNewTool({...newTool, icon: await compressImage(f, 400, 400)}) }} /></label>
                     </div>
                   </div>
-                  <input type="text" placeholder="Tool Name" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none" value={newTool.name} onChange={e => setNewTool({...newTool, name: e.target.value})} />
-                  <input type="text" placeholder="Subtitle / Role" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none" value={newTool.subtitle} onChange={e => setNewTool({...newTool, subtitle: e.target.value})} />
-                  <button onClick={handleAddOrUpdateTool} className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Save Tooling</button>
+                  <input type="text" placeholder="Tool Name" className="w-full bg-slate-50 border border-slate-200 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none text-sm" value={newTool.name} onChange={e => setNewTool({...newTool, name: e.target.value})} />
+                  <input type="text" placeholder="Subtitle" className="w-full bg-slate-50 border border-slate-200 p-3.5 md:p-4 rounded-xl md:rounded-2xl outline-none text-sm" value={newTool.subtitle} onChange={e => setNewTool({...newTool, subtitle: e.target.value})} />
+                  <button onClick={handleAddOrUpdateTool} className="w-full bg-blue-600 text-white py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">Save Tooling</button>
                 </div>
               </div>
-              <div className="xl:col-span-3 space-y-10">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Current Stack ({tools.length})</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+              <div className="xl:col-span-3 space-y-6 md:space-y-10">
+                <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tighter">Current Stack ({tools.length})</h2>
+                <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
                   {tools.map(t => (
-                    <div key={t.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-200 flex items-center justify-between group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center p-2"><img src={t.icon} className="max-h-full max-w-full object-contain" /></div>
+                    <div key={t.id} className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] border border-slate-200 flex items-center justify-between group">
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-lg md:rounded-xl flex items-center justify-center p-2"><img src={t.icon} className="max-h-full max-w-full object-contain" /></div>
                         <div>
-                          <div className="font-black text-slate-900 text-sm">{t.name}</div>
-                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.subtitle}</div>
+                          <div className="font-black text-slate-900 text-xs md:text-sm">{t.name}</div>
+                          <div className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.subtitle}</div>
                         </div>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button onClick={() => { setEditingToolId(t.id); setNewTool(t); window.scrollTo({top:0, behavior:'smooth'}); }} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><Edit3 size={18} /></button>
-                         <button onClick={() => { if(confirm("Delete tool?")){ const updated=tools.filter(tr=>tr.id!==t.id); setTools(updated); localStorage.setItem('rabbi_portfolio_tools', JSON.stringify(updated)); onProjectsUpdate(); } }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
+                      <div className="flex gap-1 md:gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                         <button onClick={() => { setEditingToolId(t.id); setNewTool(t); window.scrollTo({top:0, behavior:'smooth'}); }} className="p-1.5 md:p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><Edit3 size={16} /></button>
+                         <button onClick={() => { if(confirm("Delete tool?")){ const updated=tools.filter(tr=>tr.id!==t.id); setTools(updated); localStorage.setItem('rabbi_portfolio_tools', JSON.stringify(updated)); onProjectsUpdate(); } }} className="p-1.5 md:p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                       </div>
                     </div>
                   ))}
@@ -582,123 +594,131 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
               </div>
             </div>
           )}
+
           {activeTab === 'branding' && (
-            <div className="animate-fade-in space-y-12">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="animate-fade-in space-y-8 md:space-y-12 pb-12">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">Site Identity</h2>
-                  <p className="text-slate-500 font-medium mt-2">Manage logos, profile avatars, and CV documents.</p>
+                  <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter">Site Identity</h2>
+                  <p className="text-slate-500 text-xs md:text-base font-medium mt-1 md:mt-2">Manage logos, avatars, and CV documents.</p>
                 </div>
                 {brandingSuccess && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full animate-fade-in">
-                    <CheckCircle2 size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Branding Updated Successfully</span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full animate-fade-in w-fit">
+                    <CheckCircle2 size={14} />
+                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest">Updated</span>
                   </div>
                 )}
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl space-y-6 flex flex-col items-center">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Header/Footer Logo</h3>
-                  <div className="w-32 h-32 rounded-full border-4 border-slate-100 bg-slate-50 relative group flex items-center justify-center overflow-hidden">
-                    <img src={identity.logoUrl} className="w-full h-full object-contain p-4" alt="Logo" />
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-slate-200 shadow-xl space-y-4 md:space-y-6 flex flex-col items-center text-center">
+                  <h3 className="text-[9px] md:text-sm font-black uppercase tracking-widest text-slate-400">Website Logo</h3>
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-slate-50 bg-slate-50 relative group flex items-center justify-center overflow-hidden">
+                    <img src={identity.logoUrl} className="w-full h-full object-contain p-4 md:p-6" />
                     <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                      <Camera className="text-white" /><input type="file" className="hidden" accept="image/*" onChange={e => handleBrandingSelect('logo', e)} />
+                      <Camera className="text-white" size={24} /><input type="file" className="hidden" accept="image/*" onChange={e => handleBrandingSelect('logo', e)} />
                     </label>
                   </div>
                 </div>
-                <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl space-y-6 flex flex-col items-center">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Profile / Hero Image</h3>
-                  <div className="w-32 h-32 rounded-[2rem] border-4 border-slate-100 bg-slate-50 relative group overflow-hidden">
-                    <img src={identity.profileImageUrl} className="w-full h-full object-cover object-top" alt="Profile" />
+                <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-slate-200 shadow-xl space-y-4 md:space-y-6 flex flex-col items-center text-center">
+                  <h3 className="text-[9px] md:text-sm font-black uppercase tracking-widest text-slate-400">Profile Image</h3>
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[2rem] border-4 border-slate-50 bg-slate-50 relative group overflow-hidden">
+                    <img src={identity.profileImageUrl} className="w-full h-full object-cover object-top" />
                     <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                      <Camera className="text-white" /><input type="file" className="hidden" accept="image/*" onChange={e => handleBrandingSelect('profile', e)} />
+                      <Camera className="text-white" size={24} /><input type="file" className="hidden" accept="image/*" onChange={e => handleBrandingSelect('profile', e)} />
                     </label>
                   </div>
                 </div>
-                {/* PDF CV Upload Section */}
-                <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl space-y-6 flex flex-col items-center">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">CV / PDF Document</h3>
-                  <div className="w-32 h-32 rounded-[2rem] border-4 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center relative group overflow-hidden">
+                <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-slate-200 shadow-xl space-y-4 md:space-y-6 flex flex-col items-center text-center">
+                  <h3 className="text-[9px] md:text-sm font-black uppercase tracking-widest text-slate-400">PDF CV Doc</h3>
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[2rem] border-4 border-dashed border-slate-100 bg-slate-50 flex items-center justify-center relative group overflow-hidden">
                     {identity.cvUrl ? (
                       <div className="flex flex-col items-center text-blue-600">
-                        <FileText size={40} />
-                        <span className="text-[8px] font-black uppercase mt-1">CV LOADED</span>
+                        <FileText size={32} />
+                        <span className="text-[7px] md:text-[8px] font-black uppercase mt-1">CV File</span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center text-slate-300">
-                        <Upload size={40} />
-                        <span className="text-[8px] font-black uppercase mt-1">NO FILE</span>
+                        <Upload size={32} />
+                        <span className="text-[7px] md:text-[8px] font-black uppercase mt-1">No File</span>
                       </div>
                     )}
                     <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                      <Upload className="text-white" /><input type="file" className="hidden" accept="application/pdf" onChange={handleCvUpload} />
+                      <Upload className="text-white" size={24} /><input type="file" className="hidden" accept="application/pdf" onChange={handleCvUpload} />
                     </label>
                   </div>
                 </div>
               </div>
               <div className="flex justify-center">
-                 <button onClick={saveBranding} className="px-12 py-5 bg-blue-600 text-white rounded-[1.5rem] font-black text-lg flex items-center gap-4 shadow-2xl shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
-                   <Save size={20} /> Sync Branding & CV
+                 <button onClick={saveBranding} className="px-10 md:px-12 py-4 md:py-5 bg-blue-600 text-white rounded-xl md:rounded-[1.5rem] font-black text-sm md:text-lg flex items-center gap-3 shadow-xl md:shadow-2xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all">
+                   {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                   <Save size={18} className="md:w-5 md:h-5" /> Sync Identity
                  </button>
               </div>
             </div>
           )}
+
           {activeTab === 'settings' && (
-            <div className="animate-fade-in max-w-2xl mx-auto space-y-12 pb-32">
+            <div className="animate-fade-in max-w-2xl mx-auto space-y-8 md:space-y-12 pb-24 md:pb-32">
               <div className="text-center">
-                <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">Security Matrix</h2>
-                <p className="text-slate-500 font-medium mt-2">Manage credentials and advanced 2FA protocols.</p>
+                <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter">Security Matrix</h2>
+                <p className="text-slate-500 text-xs md:text-base font-medium mt-1 md:mt-2">Update credentials and 2FA protocols.</p>
               </div>
-              <div className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-xl space-y-8">
-                <div className="flex items-center gap-4">
-                   <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-900"><UserIcon size={24} /></div>
-                   <h3 className="text-xl font-bold">Access Control</h3>
+              
+              <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3.5rem] border border-slate-200 shadow-xl space-y-6 md:space-y-8">
+                <div className="flex items-center gap-3 md:gap-4">
+                   {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                   <div className="w-10 h-10 md:w-14 md:h-14 bg-slate-100 rounded-xl md:rounded-2xl flex items-center justify-center text-slate-900 shrink-0"><UserIcon size={20} className="md:w-6 md:h-6" /></div>
+                   <h3 className="text-base md:text-xl font-bold">Access Protocol</h3>
                 </div>
                 <form onSubmit={handleUpdateCredentials} className="space-y-4">
                    <div className="relative">
-                     <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                     <input type="text" className="w-full bg-slate-50 border p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
+                     <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                     <input type="text" className="w-full bg-slate-50 border p-3.5 md:p-4 pl-12 rounded-xl md:rounded-2xl outline-none text-sm" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
                    </div>
                    <div className="relative">
-                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                     <input type={showNewPassword ? "text" : "password"} placeholder="Set New Password" className="w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                     <input type={showNewPassword ? "text" : "password"} placeholder="New Password" className="w-full bg-slate-50 border p-3.5 md:p-4 pl-12 pr-12 rounded-xl md:rounded-2xl outline-none text-sm" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
                      <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                       {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                       {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                      </button>
                    </div>
-                   <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:bg-black transition-all">Apply Protocol Update</button>
-                   {updateSuccess && <div className="text-center text-emerald-600 font-bold text-xs animate-pulse">Security protocol updated!</div>}
+                   <button type="submit" className="w-full bg-slate-900 text-white py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-black transition-all">Update Access</button>
+                   {updateSuccess && <div className="text-center text-emerald-600 font-bold text-[10px] uppercase animate-pulse">Sync complete!</div>}
                 </form>
               </div>
-              <div className="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-xl space-y-8">
-                <div className="flex items-center gap-4">
-                   <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600"><SmartphoneNfc size={24} /></div>
-                   <h3 className="text-xl font-bold">Two-Factor Authentication</h3>
+
+              <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3.5rem] border border-slate-200 shadow-xl space-y-6 md:space-y-8">
+                <div className="flex items-center gap-3 md:gap-4">
+                   {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                   <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-100 rounded-xl md:rounded-2xl flex items-center justify-center text-blue-600 shrink-0"><SmartphoneNfc size={20} className="md:w-6 md:h-6" /></div>
+                   <h3 className="text-base md:text-xl font-bold">Multi-Factor Sync</h3>
                 </div>
                 {JSON.parse(localStorage.getItem('admin_credentials') || '{}').twoFactorSecret ? (
-                  <div className="bg-emerald-50 p-8 rounded-[2rem] border border-emerald-100 flex flex-col items-center gap-6">
-                    <CheckCircle2 size={48} className="text-emerald-500" />
+                  <div className="bg-emerald-50 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-emerald-100 flex flex-col items-center gap-4 md:gap-6">
+                    {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                    <CheckCircle2 size={40} className="w-10 h-10 md:w-12 md:h-12 text-emerald-500" />
                     <div className="text-center">
-                       <div className="font-black text-emerald-700 text-lg uppercase tracking-tight">2FA IS ACTIVE</div>
-                       <div className="text-xs text-emerald-600/80 font-bold mt-1 uppercase tracking-widest">Account Protected by Google Authenticator</div>
+                       <div className="font-black text-emerald-700 text-base md:text-lg uppercase tracking-tight">2FA ENABLED</div>
+                       <div className="text-[9px] md:text-[10px] text-emerald-600/80 font-bold mt-1 uppercase tracking-widest">Secured via Google Authenticator</div>
                     </div>
-                    <button onClick={() => {if(confirm("Disable 2FA?")){ const c=JSON.parse(localStorage.getItem('admin_credentials')||'{}'); c.twoFactorSecret=null; localStorage.setItem('admin_credentials', JSON.stringify(c)); setSyncToken(btoa(JSON.stringify(c))); window.location.reload(); }}} className="px-6 py-2 text-red-500 font-black text-[10px] uppercase tracking-widest bg-white border border-red-100 rounded-xl hover:bg-red-50">Disable Security</button>
+                    <button onClick={() => {if(confirm("Disable 2FA?")){ const c=JSON.parse(localStorage.getItem('admin_credentials')||'{}'); c.twoFactorSecret=null; localStorage.setItem('admin_credentials', JSON.stringify(c)); setSyncToken(btoa(JSON.stringify(c))); window.location.reload(); }}} className="px-5 py-2 text-red-500 font-black text-[9px] uppercase tracking-widest bg-white border border-red-100 rounded-lg hover:bg-red-50">Disable</button>
                   </div>
                 ) : !isSettingUp2FA ? (
-                  <div className="space-y-6">
-                    <p className="text-slate-500 text-sm font-medium leading-relaxed">Add an extra layer of protection to your admin portal. Requires a 6-digit dynamic code from Google Authenticator.</p>
-                    <button onClick={() => { const secret = new OTPAuth.Secret().base32; setTempSecret(secret); setIsSettingUp2FA(true); }} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-4 shadow-xl shadow-blue-100"><KeyRound size={20} /> Enable 2FA Protection</button>
+                  <div className="space-y-5 md:space-y-6">
+                    <p className="text-slate-500 text-xs md:text-sm font-medium leading-relaxed">Protect your admin logs with 6-digit dynamic codes. Essential for agency-grade security.</p>
+                    {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                    <button onClick={() => { const secret = new OTPAuth.Secret().base32; setTempSecret(secret); setIsSettingUp2FA(true); }} className="w-full py-4 md:py-5 bg-blue-600 text-white rounded-xl md:rounded-2xl font-black text-sm md:text-lg flex items-center justify-center gap-3 md:gap-4 shadow-xl shadow-blue-100"><KeyRound size={18} className="md:w-5 md:h-5" /> Setup 2FA Sync</button>
                   </div>
                 ) : (
-                  <div className="space-y-8 animate-fade-in-up text-center">
-                    <div className="inline-block p-4 bg-white border-8 border-slate-50 rounded-[2.5rem] shadow-sm">
-                       <img src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(`otpauth://totp/RabbiPortfolio:${newUsername}?secret=${tempSecret}&issuer=RabbiPortfolio`)}&size=200x200`} alt="QR" className="w-48 h-48" />
+                  <div className="space-y-6 md:space-y-8 animate-fade-in-up text-center">
+                    <div className="inline-block p-4 bg-white border-4 border-slate-50 rounded-[2rem] shadow-sm">
+                       <img src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(`otpauth://totp/RabbiPortfolio:${newUsername}?secret=${tempSecret}&issuer=RabbiPortfolio`)}&size=200x200`} alt="QR" className="w-40 h-40 md:w-48 md:h-48" />
                     </div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Scan with Google Authenticator</p>
+                    <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Scan with Authenticator App</p>
                     <div className="space-y-4">
-                      <input type="text" maxLength={6} placeholder="000000" className="w-full bg-slate-50 border border-slate-200 p-5 rounded-2xl text-center text-4xl font-black tracking-[0.4em] outline-none" value={setupCode} onChange={e => setSetupCode(e.target.value.replace(/\D/g, ''))} />
-                      <div className="flex gap-4">
-                        <button onClick={() => setIsSettingUp2FA(false)} className="flex-1 py-4 text-slate-400 font-bold">Cancel</button>
+                      <input type="text" maxLength={6} placeholder="000000" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl md:rounded-2xl text-center text-3xl md:text-4xl font-black tracking-[0.4em] outline-none" value={setupCode} onChange={e => setSetupCode(e.target.value.replace(/\D/g, ''))} />
+                      <div className="flex gap-3 md:gap-4">
+                        <button onClick={() => setIsSettingUp2FA(false)} className="flex-1 py-3.5 text-slate-400 font-bold text-sm">Cancel</button>
                         <button onClick={() => {
                            const totp = new OTPAuth.TOTP({ secret: tempSecret });
                            if(totp.validate({token:setupCode, window:1}) !== null) {
@@ -707,24 +727,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
                              localStorage.setItem('admin_credentials', JSON.stringify(c));
                              setSyncToken(btoa(JSON.stringify(c)));
                              setIsSettingUp2FA(false);
-                             alert("2FA Enabled Successfully!");
+                             alert("2FA Sync Complete!");
                            } else { alert("Invalid code!"); }
-                        }} className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold">Confirm</button>
+                        }} className="flex-1 bg-blue-600 text-white py-3.5 rounded-xl md:rounded-2xl font-bold text-sm">Confirm</button>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-              <div className="bg-slate-900 text-white p-10 rounded-[3.5rem] space-y-6 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-[100px]"></div>
-                <div className="flex items-center gap-4 mb-2">
-                   <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-blue-400"><RefreshCw size={24} /></div>
-                   <h3 className="text-xl font-bold">Sync Token Strategy</h3>
+
+              <div className="bg-slate-900 text-white p-6 md:p-10 rounded-[2rem] md:rounded-[3.5rem] space-y-4 md:space-y-6 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/20 blur-[80px]"></div>
+                <div className="flex items-center gap-3 md:gap-4 mb-2">
+                   {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                   <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 rounded-xl md:rounded-2xl flex items-center justify-center text-blue-400 shrink-0"><RefreshCw size={20} className="md:w-6 md:h-6" /></div>
+                   <h3 className="text-base md:text-xl font-bold">Sync Token</h3>
                 </div>
-                <p className="text-slate-400 text-sm font-medium">Use this encrypted token to bypass standard login steps on trusted devices.</p>
-                <div className="bg-slate-800 p-6 rounded-2xl text-[9px] break-all font-mono text-blue-300 relative group border border-slate-700">
+                <p className="text-slate-400 text-[11px] md:text-sm font-medium">Encrypted access key for trusted devices.</p>
+                <div className="bg-slate-800 p-4 md:p-6 rounded-xl md:rounded-2xl text-[8px] md:text-[9px] break-all font-mono text-blue-300 relative group border border-slate-700">
                   {syncToken}
-                  <button onClick={() => { navigator.clipboard.writeText(syncToken); alert("Copied!"); }} className="absolute top-2 right-2 p-3 bg-slate-700 hover:bg-blue-600 rounded-xl transition-all shadow-lg active:scale-90"><Copy size={16}/></button>
+                  {/* Fix: Replace invalid md:size responsive prop with className-based responsive sizing */}
+                  <button onClick={() => { navigator.clipboard.writeText(syncToken); alert("Copied!"); }} className="absolute top-2 right-2 p-2.5 md:p-3 bg-slate-700 hover:bg-blue-600 rounded-lg md:rounded-xl transition-all shadow-lg active:scale-90"><Copy size={14} className="md:w-4 md:h-4" /></button>
                 </div>
               </div>
             </div>
