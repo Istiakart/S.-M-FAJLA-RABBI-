@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, Blob, LiveServerMessage } from "@google/genai";
 
 const AILab: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'insights' | 'creative' | 'motion' | 'voice'>('insights');
@@ -23,7 +23,7 @@ const AILab: React.FC = () => {
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
   // --- Helpers ---
-  const blobToBase64 = (blob: Blob): Promise<string> => {
+  const blobToBase64 = (blob: window.Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -35,6 +35,7 @@ const AILab: React.FC = () => {
     });
   };
 
+  // Manual implementation of decode for Base64 as required by Live API guidelines.
   function decode(base64: string) {
     const binaryString = atob(base64);
     const len = binaryString.length;
@@ -45,6 +46,7 @@ const AILab: React.FC = () => {
     return bytes;
   }
 
+  // Manual implementation of encode for Base64 as required by Live API guidelines.
   function encode(bytes: Uint8Array) {
     let binary = '';
     const len = bytes.byteLength;
@@ -54,16 +56,17 @@ const AILab: React.FC = () => {
     return btoa(binary);
   }
 
-  // Optimized decodeAudioData to prevent buffer offset errors
+  // Optimized decodeAudioData according to Live API guidelines
   async function decodeAudioData(
     data: Uint8Array,
     ctx: AudioContext,
     sampleRate: number,
     numChannels: number,
   ): Promise<AudioBuffer> {
-    const dataInt16 = new Int16Array(data.buffer, data.byteOffset, data.length / 2);
+    const dataInt16 = new Int16Array(data.buffer);
     const frameCount = dataInt16.length / numChannels;
     const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+
     for (let channel = 0; channel < numChannels; channel++) {
       const channelData = buffer.getChannelData(channel);
       for (let i = 0; i < frameCount; i++) {
@@ -73,18 +76,6 @@ const AILab: React.FC = () => {
     return buffer;
   }
 
-  // Dynamic API Key Fetching via AI Studio Session
-  const getSecureApiKey = async (): Promise<string> => {
-    if (typeof window !== 'undefined' && (window as any).aistudio) {
-      const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-      if (!hasKey) {
-        await (window as any).aistudio.openSelectKey();
-      }
-      return (window as any).aistudio.getSelectedApiKey() || process.env.API_KEY || "";
-    }
-    return process.env.API_KEY || "";
-  };
-
   // --- Feature Implementations ---
 
   const handleInsightsSearch = async (useMaps: boolean = false) => {
@@ -92,9 +83,9 @@ const AILab: React.FC = () => {
     setIsLoading(true);
     setGroundingLinks([]);
     try {
-      const apiKey = await getSecureApiKey();
-      const ai = new GoogleGenAI({ apiKey });
-      // Model Sync: gemini-3-flash-preview for insights
+      // Create new GoogleGenAI instance right before the call to ensure correct API key usage
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Maps grounding is only supported in Gemini 2.5 series models.
       const modelName = useMaps ? 'gemini-2.5-flash' : 'gemini-3-flash-preview';
       
       const config: any = {
@@ -102,7 +93,6 @@ const AILab: React.FC = () => {
       };
 
       if (useMaps) {
-        // Precise Dhaka Coordinates for Grounding
         config.toolConfig = {
           retrievalConfig: {
             latLng: {
@@ -119,6 +109,7 @@ const AILab: React.FC = () => {
         config
       });
 
+      // Extract generated text directly from response property (not a method)
       setOutput(response.text || "Analysis complete.");
       const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
       setGroundingLinks(chunks);
@@ -134,8 +125,13 @@ const AILab: React.FC = () => {
     if (!prompt) return;
     setIsLoading(true);
     try {
-      const apiKey = await getSecureApiKey();
-      const ai = new GoogleGenAI({ apiKey });
+      // API Key Selection check for high-quality pro models as per guidelines
+      if (!(await (window as any).aistudio.hasSelectedApiKey())) {
+        await (window as any).aistudio.openSelectKey();
+      }
+
+      // Always create a new instance to pick up the updated key from the selection dialog
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-image-preview',
         contents: { parts: [{ text: prompt }] },
@@ -147,6 +143,7 @@ const AILab: React.FC = () => {
         },
       });
 
+      // Find the image part in response candidates, do not assume it is the first part
       for (const part of response.candidates?.[0]?.content?.parts || []) {
         if (part.inlineData) {
           setGeneratedImageUrl(`data:image/png;base64,${part.inlineData.data}`);
@@ -161,49 +158,17 @@ const AILab: React.FC = () => {
     }
   };
 
-  // Veo Quota with localStorage fallback
-  const checkVeoQuota = (): boolean => {
-    const usageKey = 'veo_usage_count';
-    const lastResetKey = 'veo_usage_date';
-    const today = new Date().toDateString();
-    
-    let storageAvailable = true;
-    try {
-      localStorage.setItem('test', 'test');
-      localStorage.removeItem('test');
-    } catch (e) {
-      storageAvailable = false;
-    }
-
-    if (!storageAvailable) return true; // Allow if storage is disabled to prevent blocking
-
-    let usage = parseInt(localStorage.getItem(usageKey) || '0');
-    const lastReset = localStorage.getItem(lastResetKey);
-
-    if (lastReset !== today) {
-      usage = 0;
-      localStorage.setItem(lastResetKey, today);
-      localStorage.setItem(usageKey, '0');
-    }
-
-    if (usage >= 3) {
-      alert("Veo daily quota reached. Please try again tomorrow.");
-      return false;
-    }
-    
-    localStorage.setItem(usageKey, (usage + 1).toString());
-    return true;
-  };
-
   const handleAnimateImage = async () => {
     if (!selectedFile) return;
-    if (!checkVeoQuota()) return;
-
     setIsLoading(true);
     try {
-      const apiKey = await getSecureApiKey();
+      // API Key Selection check for Veo models as per guidelines
+      if (!(await (window as any).aistudio.hasSelectedApiKey())) {
+        await (window as any).aistudio.openSelectKey();
+      }
+
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const base64Data = await blobToBase64(selectedFile);
-      const ai = new GoogleGenAI({ apiKey });
       
       let operation = await ai.models.generateVideos({
         model: 'veo-3.1-fast-generate-preview',
@@ -219,13 +184,15 @@ const AILab: React.FC = () => {
         }
       });
 
+      // Polling for video generation operation completion
       while (!operation.done) {
         await new Promise(resolve => setTimeout(resolve, 10000));
         operation = await ai.operations.getVideosOperation({ operation: operation });
       }
 
       const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-      const res = await fetch(`${downloadLink}&key=${apiKey}`);
+      // Fetch video bytes with API key appended to the URL as required for public links
+      const res = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
       const videoBlob = await res.blob();
       setGeneratedVideoUrl(URL.createObjectURL(videoBlob));
     } catch (error: any) {
@@ -240,8 +207,7 @@ const AILab: React.FC = () => {
     setIsLiveActive(true);
     setTranscription([]);
     try {
-      const apiKey = await getSecureApiKey();
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const inputCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       const outputCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       audioContextRef.current = outputCtx;
@@ -261,23 +227,25 @@ const AILab: React.FC = () => {
               const l = inputData.length;
               const int16 = new Int16Array(l);
               for (let i = 0; i < l; i++) int16[i] = inputData[i] * 32768;
-              const pcmBlob = {
+              const pcmBlob: Blob = {
                 data: encode(new Uint8Array(int16.buffer)),
                 mimeType: 'audio/pcm;rate=16000',
               };
+              // Ensure sendRealtimeInput is called only after sessionPromise resolves to prevent race conditions
               sessionPromise.then(session => session.sendRealtimeInput({ media: pcmBlob }));
             };
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputCtx.destination);
           },
-          onmessage: async (msg) => {
-            // Precise serverContent & modelTurn handling for transcription and audio
+          onmessage: async (msg: LiveServerMessage) => {
+            // Handle audio output transcription for real-time brand feedback
             if (msg.serverContent?.outputTranscription) {
               setTranscription(prev => [...prev, `Gemini: ${msg.serverContent!.outputTranscription!.text}`]);
             } else if (msg.serverContent?.inputTranscription) {
               setTranscription(prev => [...prev, `You: ${msg.serverContent!.inputTranscription!.text}`]);
             }
 
+            // Process audio bytes for low-latency playback
             const base64Audio = msg.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
             if (base64Audio) {
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, outputCtx.currentTime);
@@ -290,6 +258,7 @@ const AILab: React.FC = () => {
               sourcesRef.current.add(source);
             }
 
+            // Handle interruption signal from the model
             if (msg.serverContent?.interrupted) {
               sourcesRef.current.forEach(s => s.stop());
               sourcesRef.current.clear();
