@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import * as OTPAuth from 'otpauth';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -37,6 +38,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   
@@ -46,6 +48,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   
   const [totalVisitors, setTotalVisitors] = useState<number>(0);
+
+  // 2FA Setup State
+  const [show2FAGuide, setShow2FAGuide] = useState(false);
+  const [currentQRUrl, setCurrentQRUrl] = useState('');
 
   useEffect(() => {
     const visits = parseInt(localStorage.getItem('portfolio_total_visits') || '0', 10);
@@ -79,17 +85,78 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
+    
+    // Check credentials first
     if (loginUsername.trim().toLowerCase() !== adminCreds.username.toLowerCase() || loginPassword !== adminCreds.password) {
       setLoginError('Invalid Credentials');
       return;
     }
-    // 2FA has been disabled/bypassed as per user request
+
+    // Check 2FA if enabled
+    if (adminCreds.twoFactorEnabled) {
+      if (!otpCode) {
+        setLoginError('2FA Code Required');
+        return;
+      }
+
+      const totp = new OTPAuth.TOTP({
+        issuer: 'RabbiPortfolio',
+        label: adminCreds.username,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: adminCreds.twoFactorSecret,
+      });
+
+      const delta = totp.validate({ token: otpCode, window: 1 });
+      if (delta === null) {
+        setLoginError('Invalid 2FA Code');
+        return;
+      }
+    }
+
     setIsAuthenticated(true);
   };
 
   const showNotification = (msg: string) => {
     setSaveStatus(msg);
     setTimeout(() => setSaveStatus(null), 3000);
+  };
+
+  const generate2FA = () => {
+    // Generate a new secret
+    const secret = new OTPAuth.Secret().base32;
+    
+    // Create TOTP instance to generate URI
+    const totp = new OTPAuth.TOTP({
+      issuer: 'RabbiPortfolio',
+      label: adminCreds.username,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret: secret,
+    });
+    
+    const uri = totp.toString();
+    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(uri)}`;
+    
+    setCurrentQRUrl(qrApiUrl);
+    setShow2FAGuide(true);
+    
+    // Update credentials with the secret but wait for user confirmation to "enable" it?
+    // For simplicity, we enable it here, but typically you'd verify a code first.
+    onAdminCredsUpdate({ 
+      ...adminCreds, 
+      twoFactorSecret: secret, 
+      twoFactorEnabled: true 
+    });
+  };
+
+  const disable2FA = () => {
+    if (window.confirm("Disabling 2FA will reduce security. Continue?")) {
+      onAdminCredsUpdate({ ...adminCreds, twoFactorEnabled: false, twoFactorSecret: '' });
+      showNotification("2FA Disabled");
+    }
   };
 
   const handleSaveProject = () => {
@@ -215,6 +282,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
+            {adminCreds.twoFactorEnabled && (
+              <div className="relative group pt-2">
+                <div className="absolute -top-1 left-4 px-2 bg-blue-600 rounded-full text-[8px] font-black text-white uppercase tracking-widest z-20">Secure OTP</div>
+                <Smartphone className="absolute left-4 top-[calc(50%+4px)] -translate-y-1/2 text-blue-400" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="000 000" 
+                  className="w-full bg-blue-500/10 border border-blue-500/30 p-4 pl-12 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-blue-400 tracking-[0.5em] text-center font-black" 
+                  value={otpCode} 
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                  required 
+                />
+              </div>
+            )}
+
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-xs mt-4">Authorize</button>
           </form>
         </div>
@@ -280,8 +363,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="text-2xl md:text-3xl font-black">{currentProjects.length}</div>
                 </div>
                 <div className="bg-white p-6 rounded-3xl border shadow-sm">
-                  <div className="text-slate-400 text-[10px] font-bold uppercase mb-1">Portal Access</div>
-                  <div className="text-base md:text-lg font-black text-emerald-500 uppercase">UNRESTRICTED</div>
+                  <div className="text-slate-400 text-[10px] font-bold uppercase mb-1">Security Status</div>
+                  <div className={`text-base md:text-lg font-black ${adminCreds.twoFactorEnabled ? 'text-emerald-500' : 'text-orange-500'}`}>
+                    {adminCreds.twoFactorEnabled ? '2FA ENABLED' : '2FA DISABLED'}
+                  </div>
                 </div>
               </div>
 
@@ -480,14 +565,55 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                  </div>
 
                  <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm space-y-6">
-                    <h3 className="font-bold text-sm uppercase flex items-center gap-2"><ShieldCheck size={16} /> Login Status</h3>
-                    <div className="p-8 bg-emerald-50 text-emerald-700 rounded-3xl border border-emerald-100 text-center">
-                       <ShieldCheck className="mx-auto mb-4" size={48} />
-                       <h4 className="font-black text-xl uppercase mb-2">Security Active</h4>
-                       <p className="text-xs font-medium leading-relaxed opacity-70">The portal is currently configured for direct access via username and password. Multi-factor authentication is disabled for your convenience.</p>
-                    </div>
+                    <h3 className="font-bold text-sm uppercase flex items-center gap-2"><Smartphone size={16} /> Authenticator 2FA</h3>
+                    
+                    {adminCreds.twoFactorEnabled ? (
+                      <div className="space-y-6">
+                        <div className="p-4 bg-emerald-50 text-emerald-700 rounded-2xl font-bold text-xs text-center flex items-center justify-center gap-2 border border-emerald-100">
+                          <ShieldCheck size={16} /> PORTAL PROTECTED BY 2FA
+                        </div>
+                        <div className="p-4 bg-slate-50 border rounded-2xl">
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Secret Code (Base32)</p>
+                           <div className="flex items-center gap-2">
+                             <code className="bg-white px-3 py-2 rounded-lg border text-xs font-mono flex-1 text-blue-600 font-black truncate">{adminCreds.twoFactorSecret}</code>
+                             <button onClick={() => { navigator.clipboard.writeText(adminCreds.twoFactorSecret); showNotification("Secret Copied!"); }} className="p-2 hover:bg-white rounded-xl border text-slate-500"><Copy size={16} /></button>
+                           </div>
+                        </div>
+                        <button onClick={disable2FA} className="w-full border-2 border-red-50 text-red-500 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-red-50 transition-all">Remove 2FA Layer</button>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <p className="text-xs text-slate-500 leading-relaxed">Secure your vault by linking it to <strong className="text-slate-900">Google Authenticator</strong>. Scanned codes are refreshed every 30 seconds.</p>
+                        <button onClick={generate2FA} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">Setup Google Authenticator</button>
+                      </div>
+                    )}
                  </div>
               </div>
+
+              {show2FAGuide && (
+                <div className="fixed inset-0 z-[300] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+                  <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl animate-fade-in-up">
+                    <div className="text-center mb-8">
+                      <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4"><QrCode className="text-blue-600" size={32} /></div>
+                      <h3 className="text-xl font-black uppercase text-slate-900">Setup Authenticator</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Scan for RabbiPortfolio</p>
+                    </div>
+                    
+                    <div className="bg-slate-50 p-6 rounded-3xl mb-8 flex flex-col items-center justify-center border shadow-inner">
+                      <img src={currentQRUrl} className="w-44 h-44 rounded-xl border-4 border-white shadow-lg mb-4" alt="2FA QR Code" />
+                      <div className="text-[10px] font-black text-slate-300 bg-white px-4 py-1.5 rounded-full border">Secret: {adminCreds.twoFactorSecret}</div>
+                    </div>
+
+                    <div className="space-y-4 mb-8">
+                      <div className="flex gap-4 items-start"><div className="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">1</div><p className="text-xs text-slate-600 font-medium">Open Google Authenticator app.</p></div>
+                      <div className="flex gap-4 items-start"><div className="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">2</div><p className="text-xs text-slate-600 font-medium">Scan this QR Code using the camera.</p></div>
+                      <div className="flex gap-4 items-start"><div className="w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold shrink-0">3</div><p className="text-xs text-slate-600 font-medium">The account "RabbiPortfolio" will appear.</p></div>
+                    </div>
+                    
+                    <button onClick={() => setShow2FAGuide(false)} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-all">I've Synced Authenticator</button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>
