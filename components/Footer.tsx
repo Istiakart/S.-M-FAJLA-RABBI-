@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Mail } from 'lucide-react';
 
 interface FooterProps {
   onAdminLogin?: () => void;
@@ -52,7 +51,9 @@ const Footer: React.FC<FooterProps> = ({ onAdminLogin, logoUrl }) => {
                 className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-red-500 transition-colors group"
                 title="Send me a Mail"
               >
-                <Mail className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                <svg className="w-5 h-5 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
               </a>
               {/* LinkedIn Icon */}
               <a 
@@ -95,7 +96,9 @@ const Footer: React.FC<FooterProps> = ({ onAdminLogin, logoUrl }) => {
                 href={`mailto:${EMAIL_ADDRESS}`}
                 className="text-slate-400 flex items-center gap-3 text-sm hover:text-blue-400 transition-colors"
               >
-                <Mail className="w-5 h-5 text-blue-50" />
+                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
                 {EMAIL_ADDRESS}
               </a>
               <div className="flex gap-4 mt-8">

@@ -7,17 +7,17 @@ import { Sparkles, BrainCircuit, ExternalLink, ChevronLeft, ChevronRight, Maximi
 
 const ImageLightbox: React.FC<{ imageUrl: string; onClose: () => void }> = ({ imageUrl, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-10 bg-slate-900/95 backdrop-blur-md animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-10 bg-slate-900/95 backdrop-blur-md animate-fade-in" onClick={onClose}>
       <button 
         onClick={onClose}
-        className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all z-[210]"
+        className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all z-[510]"
       >
         <X size={24} />
       </button>
       <div className="relative max-w-5xl w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
         <img 
           src={imageUrl} 
-          className="max-h-full max-w-full object-contain rounded-lg shadow-2xl animate-fade-in-up" 
+          className="max-h-full max-w-full object-contain rounded-lg shadow-2xl animate-fade-in-up select-none" 
           alt="Full Preview"
         />
       </div>
@@ -72,48 +72,48 @@ const CaseStudyCard: React.FC<{ project: Project }> = ({ project }) => {
     <>
       <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in">
         {images.length > 0 && (
-          <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group min-h-[200px] flex items-center justify-center">
+          <div className="w-full aspect-[16/9] overflow-hidden bg-slate-900 relative group min-h-[200px] flex items-center justify-center cursor-zoom-in">
             <img 
               src={images[activeImageIdx]} 
               alt={project.title} 
-              className="w-full h-full object-contain transition-opacity duration-300 cursor-zoom-in"
+              className="w-full h-full object-contain transition-opacity duration-300"
               loading="lazy"
               onClick={() => setIsLightboxOpen(true)}
             />
             
-            {/* Zoom Icon Overlay */}
-            <div 
-              className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none"
-            >
-              <div className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white">
-                <Maximize2 size={24} />
-              </div>
-            </div>
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
-            
-            {images.length > 1 && (
-              <>
-                <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+            {/* Nav controls overlay - must be pointer-events-none on container so click reaches img */}
+            <div className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              {images.length > 1 && (
+                <>
                   <button 
                     onClick={(e) => { e.stopPropagation(); setActiveImageIdx(prev => (prev > 0 ? prev - 1 : images.length - 1)); }}
-                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto"
+                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100"
                   >
                     <ChevronLeft size={24} />
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); setActiveImageIdx(prev => (prev < images.length - 1 ? prev + 1 : 0)); }}
-                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto"
+                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-900 shadow-lg hover:bg-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100"
                   >
                     <ChevronRight size={24} />
                   </button>
-                </div>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
-                  {images.map((_, i) => (
-                    <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIdx ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
-                  ))}
-                </div>
-              </>
+                </>
+              )}
+            </div>
+
+            {/* Maximize Icon Overlay */}
+            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+              <div className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white">
+                <Maximize2 size={24} />
+              </div>
+            </div>
+
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full pointer-events-none">
+                {images.map((_, i) => (
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIdx ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
+                ))}
+              </div>
             )}
           </div>
         )}
