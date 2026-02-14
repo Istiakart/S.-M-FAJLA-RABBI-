@@ -170,37 +170,42 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
       const res = await fetch('https://jsonblob.com/api/jsonBlob', {
         method: 'POST', 
         headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
       });
       
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        throw new Error(`Server responded with ${res.status}`);
       }
 
       const location = res.headers.get('Location');
-      if (!location) {
-        // Fallback for some browsers that might hide Location header due to CORS
-        const blobData = await res.json();
-        // If the API returns the object with an ID, use it. JSONBlob usually returns 201 Created with Location.
-        throw new Error("Could not retrieve Sync ID from server response. Please try again.");
-      }
+      let id = "";
       
-      const id = location.split('/').pop();
+      if (location) {
+        id = location.split('/').pop() || "";
+      } else {
+        // Some browsers don't expose Location header, try parsing the body
+        const body = await res.json();
+        id = body.id || "";
+      }
+
       if (id) {
+        // Update all related state instantly
         setSyncId(id); 
         setSyncToken(id);
         
+        // Persist
         localStorage.setItem('rabbi_sync_blob_id', id);
         localStorage.setItem('rabbi_sync_token', id);
         
-        alert(`Success! Generated Sync ID: ${id}`);
+        alert(`Success! Generated Sync ID: ${id}. It is now saved in the Master Token field.`);
+      } else {
+        throw new Error("Could not extract Sync ID. Please try again.");
       }
     } catch (e: any) { 
-      console.error("Sync Error:", e);
-      alert(`Cloud Sync Initialization failed: ${e.message || "Unknown Network Error"}. Please check your connection.`); 
+      console.error("Cloud Sync Error:", e);
+      alert(`Error: ${e.message === 'Failed to fetch' ? 'Network Error: jsonblob.com is not responding. Please check your internet or try again later.' : e.message}`); 
     } finally { 
       setIsSyncing(false); 
     }
@@ -216,8 +221,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (!res.ok) throw new Error("Server rejected update.");
-      alert("Cloud Data Updated Successfully!");
+      if (!res.ok) throw new Error("Sync update failed.");
+      alert("Pushed Successfully!");
     } catch (e: any) { 
       console.error(e);
       alert(`Push failed: ${e.message}`); 
@@ -231,12 +236,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onProjectsUpdate }) =>
     setIsSyncing(true);
     try {
       const res = await fetch(`https://jsonblob.com/api/jsonBlob/${syncId}`);
-      if (!res.ok) throw new Error("Sync ID not found on server.");
+      if (!res.ok) throw new Error("Sync data not found.");
       const data = await res.json();
       if (data.projects) setProjects(data.projects);
       if (data.tools) setTools(data.tools);
       if (data.identity) setIdentity(data.identity);
-      alert("Data Pulled Successfully!");
+      alert("Pulled Successfully!");
     } catch (e: any) { 
       console.error(e);
       alert(`Pull failed: ${e.message}`); 
