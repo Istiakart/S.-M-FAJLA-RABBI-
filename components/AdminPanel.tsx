@@ -447,17 +447,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              {/* Vercel Blob Token Setting */}
               <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm space-y-6 max-w-xl">
                  <h3 className="text-xl font-bold flex items-center gap-2"><Server size={20} className="text-blue-500" /> Vercel Blob Settings</h3>
                  <div className="space-y-4">
                    <div>
                       <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Blob Read/Write Token</label>
                       <div className="relative">
-                        <input type={showBlobToken ? "text" : "password"} className="w-full border p-4 rounded-xl text-sm" value={blobToken} onChange={e => setBlobToken(e.target.value)} placeholder="prj_..." />
+                        <input type={showBlobToken ? "text" : "password"} className="w-full border p-4 rounded-xl text-sm" value={blobToken} onChange={setBlobToken && ((e) => setBlobToken((e.target as HTMLInputElement).value))} placeholder="prj_..." />
                         <button type="button" onClick={() => setShowBlobToken(!showBlobToken)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">{showBlobToken ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                       </div>
-                      <p className="text-[9px] text-slate-400 font-bold mt-2 leading-relaxed italic">* Get this from Vercel Dashboard -> Storage -> Blob -> Settings</p>
+                      <p className="text-[9px] text-slate-400 font-bold mt-2 leading-relaxed italic">* Get this from Vercel Dashboard &rarr; Storage &rarr; Blob &rarr; Settings</p>
                    </div>
                    <button onClick={saveBlobToken} className="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-xs">Save Storage Token</button>
                  </div>
