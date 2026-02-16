@@ -1,21 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Project, SiteIdentity, Tool, Testimonial, FAQData } from '../types';
 import { 
-  Plus, LogOut, Trash2, Sparkles, Loader2, X, 
-  ShieldCheck, User as UserIcon, Lock, Eye, 
-  EyeOff, Smartphone, Key, ExternalLink, Image as ImageIcon,
-  Edit3, Menu, ArrowLeft, QrCode, Copy, Info,
-  Users, XCircle, RefreshCcw, Check, TrendingUp, Wrench, Palette, FileText,
-  Cloud, CloudLightning, UploadCloud, Globe, Download, Share2, MessageSquare, HelpCircle,
-  Shield, Link2, Database, List, BarChart3, Server, Activity, Settings, Zap, KeyRound, AlertTriangle,
-  Wand2, Stars
+  Trash2, X, ImageIcon, Edit3, Menu, MessageSquare, HelpCircle,
+  Shield, Activity, Zap, Stars, Wrench, Palette, Save, Lock, Smartphone,
+  LayoutDashboard, FolderKanban, Quote, Fingerprint, Globe, ChevronRight,
+  TrendingUp, Database, Bell, Star, Cloud, CheckCircle2, ShieldCheck, BarChart3, Plus,
+  ImagePlus, AlertTriangle, HardDrive, Sparkles, BrainCircuit, Loader2, User, Eye, EyeOff, ExternalLink, FileText, Upload,
+  Settings, Layers, CreditCard, Box, Cpu
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import MediaUploader from './MediaUploader';
-import { uploadFile } from '../services/blobService';
 import { analyzeMarketingImage } from '../services/geminiService';
-import * as OTPAuth from 'otpauth';
+import { uploadFile } from '../services/blobService';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -34,113 +31,749 @@ interface AdminPanelProps {
 }
 
 const ANALYTICS_DATA = [
-  { name: 'Sun', visits: 400, leads: 24 },
-  { name: 'Mon', visits: 700, leads: 45 },
-  { name: 'Tue', visits: 600, leads: 38 },
-  { name: 'Wed', visits: 900, leads: 67 },
-  { name: 'Thu', visits: 1100, leads: 82 },
-  { name: 'Fri', visits: 850, leads: 54 },
-  { name: 'Sat', visits: 1300, leads: 104 },
+  { name: 'Mon', clicks: 450, conversions: 40 },
+  { name: 'Tue', clicks: 890, conversions: 72 },
+  { name: 'Wed', clicks: 320, conversions: 28 },
+  { name: 'Thu', clicks: 610, conversions: 55 },
+  { name: 'Fri', clicks: 750, conversions: 68 },
+  { name: 'Sat', clicks: 920, conversions: 85 },
+  { name: 'Sun', clicks: 540, conversions: 45 },
 ];
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ 
-  onClose, 
-  onProjectsUpdate, 
-  currentProjects, 
-  currentIdentity,
-  onIdentityUpdate,
-  currentTools,
-  onToolsUpdate,
-  testimonials,
-  onTestimonialsUpdate,
-  faqs,
-  onFaqsUpdate,
-  adminCreds,
-  onAdminCredsUpdate
+  onClose, onProjectsUpdate, currentProjects, currentIdentity, onIdentityUpdate,
+  currentTools, onToolsUpdate, testimonials, onTestimonialsUpdate, faqs, onFaqsUpdate,
+  adminCreds, onAdminCredsUpdate
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showSecurePassword, setShowSecurePassword] = useState(false);
-  const [showBlobToken, setShowBlobToken] = useState(false);
   const [loginError, setLoginError] = useState('');
-  const [blobToken, setBlobToken] = useState(localStorage.getItem('vercel_blob_token') || '');
   
-  const [activeTab, setActiveTab] = useState<'analytics' | 'projects' | 'branding' | 'testimonials' | 'faq' | 'tools' | 'security' | 'integrations'>('analytics');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'projects' | 'reviews' | 'faq' | 'stack' | 'identity' | 'security'>('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
-  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
-  const [isAiProcessing, setIsAiProcessing] = useState(false);
-  
-  const [totalVisitors, setTotalVisitors] = useState<number>(0);
+  const [blobToken, setBlobToken] = useState(localStorage.getItem('vercel_blob_token') || '');
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const aiFileInputRef = useRef<HTMLInputElement>(null);
+  const mainScrollRef = useRef<HTMLDivElement>(null);
+  const cvInputRef = useRef<HTMLInputElement>(null);
+  const [isCvUploading, setIsCvUploading] = useState(false);
 
-  const initialProject: Partial<Project> = { title: '', category: 'E-commerce', results: '', efficiency: '', description: '', imageUrls: [] };
-  const initialTestimonial: Partial<Testimonial> = { name: '', role: '', content: '', image: '', metric: '' };
-  const initialFaq: Partial<FAQData> = { question: '', answer: '' };
-  const initialTool: Partial<Tool> = { name: '', subtitle: '', icon: '' };
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
-  const [projectForm, setProjectForm] = useState<Partial<Project>>(initialProject);
-  const [testimonialForm, setTestimonialForm] = useState<Partial<Testimonial>>(initialTestimonial);
-  const [faqForm, setFaqForm] = useState<Partial<FAQData>>(initialFaq);
-  const [toolForm, setToolForm] = useState<Partial<Tool>>(initialTool);
+  const [projectForm, setProjectForm] = useState<Partial<Project>>({ title: '', category: 'E-commerce', results: '', efficiency: '', description: '', imageUrls: [] });
+  const [reviewForm, setReviewForm] = useState<Partial<Testimonial>>({ name: '', role: '', content: '', metric: '', image: '', imageUrls: [] });
+  const [faqForm, setFaqDataForm] = useState<Partial<FAQData>>({ question: '', answer: '' });
+  const [toolForm, setToolForm] = useState<Partial<Tool>>({ name: '', subtitle: '', icon: '' });
+  const [identityForm, setIdentityForm] = useState<SiteIdentity>(currentIdentity);
+  const [securityForm, setSecurityForm] = useState(adminCreds);
 
-  useEffect(() => {
-    const visits = parseInt(localStorage.getItem('portfolio_total_visits') || '0', 10);
-    setTotalVisitors(visits);
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
-    if (loginUsername.trim().toLowerCase() !== adminCreds.username.toLowerCase() || loginPassword !== adminCreds.password) {
-      setLoginError('Invalid Credentials');
-      return;
-    }
-    if (adminCreds.twoFactorEnabled) {
-      if (!otpCode) {
-        setLoginError('2FA Code Required');
-        return;
-      }
-      const totp = new OTPAuth.TOTP({ issuer: 'RabbiPortfolio', label: adminCreds.username, algorithm: 'SHA1', digits: 6, period: 30, secret: adminCreds.twoFactorSecret });
-      const delta = totp.validate({ token: otpCode, window: 1 });
-      if (delta === null) {
-        setLoginError('Invalid 2FA Code');
-        return;
-      }
-    }
-    setIsAuthenticated(true);
-  };
-
-  const showNotification = (msg: string) => {
+  const notify = (msg: string) => {
     setSaveStatus(msg);
     setTimeout(() => setSaveStatus(null), 3000);
   };
 
-  const handleAiAutoFill = async (type: 'project' | 'testimonial', imageUrl: string) => {
-    if (!imageUrl) return;
-    
-    setIsAiProcessing(true);
+  const scrollToTop = () => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginUsername.trim().toLowerCase() === adminCreds.username.toLowerCase() && loginPassword === adminCreds.password) {
+      setIsAuthenticated(true);
+    } else {
+      setLoginError('Authorization failed. Check security cipher.');
+    }
+  };
+
+  // --- REVIEWS LOGIC ---
+  const handleReviewImageAdd = (url: string) => {
+    if (!url) return;
+    const currentImages = reviewForm.imageUrls || [];
+    if (currentImages.length < 2) {
+      const updatedImages = [...currentImages, url];
+      setReviewForm({ ...reviewForm, imageUrls: updatedImages, image: updatedImages[0] });
+      notify(`Vouch asset locked.`);
+    }
+  };
+
+  const handleSaveReview = () => {
+    if (!reviewForm.name || !reviewForm.content) return alert("Required fields missing.");
+    const final: Testimonial = {
+      id: reviewForm.id || Date.now().toString(),
+      name: reviewForm.name as string,
+      role: reviewForm.role || 'Partner',
+      content: reviewForm.content as string,
+      metric: reviewForm.metric || 'ROI Verified',
+      image: reviewForm.imageUrls?.[0] || '',
+      imageUrls: reviewForm.imageUrls || []
+    };
+    if (reviewForm.id) onTestimonialsUpdate(testimonials.map(t => t.id === final.id ? final : t));
+    else onTestimonialsUpdate([final, ...testimonials]);
+    setReviewForm({ name: '', role: '', content: '', metric: '', image: '', imageUrls: [] });
+    notify("Vouch list updated.");
+  };
+
+  // --- FAQ LOGIC ---
+  const handleSaveFaq = () => {
+    if (!faqForm.question || !faqForm.answer) return alert("All logic fields mandatory.");
+    const final: FAQData = {
+      id: faqForm.id || Date.now().toString(),
+      question: faqForm.question as string,
+      answer: faqForm.answer as string
+    };
+    if (faqForm.id) onFaqsUpdate(faqs.map(f => f.id === final.id ? final : f));
+    else onFaqsUpdate([final, ...faqs]);
+    setFaqDataForm({ question: '', answer: '' });
+    notify("KB Logic synchronized.");
+  };
+
+  // --- TECH STACK LOGIC ---
+  const handleSaveTool = () => {
+    if (!toolForm.name) return alert("Toolbox resource name required.");
+    const final: Tool = {
+      id: toolForm.id || Date.now().toString(),
+      name: toolForm.name as string,
+      subtitle: toolForm.subtitle || '',
+      icon: toolForm.icon || 'https://img.icons8.com/fluency/96/wrench.png'
+    };
+    if (toolForm.id) onToolsUpdate(currentTools.map(t => t.id === final.id ? final : t));
+    else onToolsUpdate([final, ...currentTools]);
+    setToolForm({ name: '', subtitle: '', icon: '' });
+    notify("Toolbox entry updated.");
+  };
+
+  // --- PROJECT LOGIC ---
+  const handleAiAutoFill = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsAiAnalyzing(true);
+    notify("AI engine scanning marketing data...");
     try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
       const reader = new FileReader();
-      
-      reader.onloadend = async () => {
-        const base64 = (reader.result as string).split(',')[1];
-        const data = await analyzeMarketingImage(base64, blob.type);
-        
-        if (type === 'project') {
-          setProjectForm(prev => ({
-            ...prev,
-            title: data.title || prev.title,
-            category: (data.category as any) || prev.category,
-            results: data.results || prev.results,
-            efficiency: data.efficiency || prev.efficiency,
-            description: data.description || prev.description
-          }));
-        } else {
+      reader.onload = async () => {
+        const base64Data = (reader.result as string).split(',')[1];
+        const result = await analyzeMarketingImage(base64Data, file.type);
+        setProjectForm(prev => ({
+          ...prev,
+          title: result.title || prev.title,
+          category: (['E-commerce', 'Leads', 'Engagement', 'Website Build'].includes(result.category) ? result.category : 'E-commerce') as any,
+          results: result.results || prev.results,
+          efficiency: result.efficiency || prev.efficiency,
+          description: result.description || prev.description
+        }));
+        notify("AI insights applied to blueprint.");
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      notify("AI processing failed.");
+    } finally {
+      setIsAiAnalyzing(false);
+      if (aiFileInputRef.current) aiFileInputRef.current.value = '';
+    }
+  };
+
+  const handleGalleryImageAdd = (url: string) => {
+    if (!url) return;
+    const currentImages = projectForm.imageUrls || [];
+    if (currentImages.length < 10) {
+      setProjectForm({ ...projectForm, imageUrls: [...currentImages, url] });
+      notify(`Asset synced to node.`);
+    }
+  };
+
+  const handleSaveProject = () => {
+    if (!projectForm.title) return alert("Campaign title is required.");
+    const final: Project = {
+      id: projectForm.id || Date.now().toString(),
+      title: projectForm.title as string,
+      category: projectForm.category as any,
+      results: projectForm.results || '',
+      efficiency: projectForm.efficiency || '',
+      description: projectForm.description || '',
+      imageUrls: projectForm.imageUrls || [],
+    };
+    if (projectForm.id) onProjectsUpdate(currentProjects.map(p => p.id === final.id ? final : p));
+    else onProjectsUpdate([final, ...currentProjects]);
+    setProjectForm({ title: '', category: 'E-commerce', results: '', efficiency: '', description: '', imageUrls: [] });
+    notify("Portfolio entry authorized.");
+  };
+
+  const handleCvFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsCvUploading(true);
+    notify("Deploying CV PDF to cloud...");
+    try {
+      const url = await uploadFile(file, 'cv');
+      setIdentityForm(prev => ({ ...prev, cvUrl: url }));
+      notify("CV identity updated.");
+    } catch (err) {
+      console.error(err);
+      notify("Cloud protocol failure.");
+    } finally {
+      setIsCvUploading(false);
+      if (cvInputRef.current) cvInputRef.current.value = '';
+    }
+  };
+
+  if (!isAuthenticated) return (
+    <div className="fixed inset-0 bg-[#020617] z-[200] flex items-center justify-center p-4">
+      <div className="w-full max-w-[440px] bg-[#0f172a] border border-white/5 p-12 rounded-[3rem] shadow-[0_0_120px_rgba(79,70,229,0.15)] relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-indigo-600 to-transparent"></div>
+        <div className="text-center mb-10">
+          <div className="w-24 h-24 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-indigo-600/20 group-hover:scale-105 transition-transform duration-500">
+            <Shield className="text-white" size={48} />
+          </div>
+          <h1 className="text-white font-black uppercase tracking-[0.2em] text-2xl">Elite Admin</h1>
+          <p className="text-slate-500 text-[10px] mt-2 uppercase tracking-[0.4em] font-black">Authentication Node v4.1.0</p>
+        </div>
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Identity ID</label>
+            <input type="text" placeholder="Username" className="w-full bg-[#1e293b] border border-white/5 p-5 rounded-2xl text-white outline-none focus:border-indigo-500/50 transition-all font-mono placeholder-slate-700" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Secret</label>
+            <div className="relative">
+              <input type={showPassword ? "text" : "password"} placeholder="••••••••" className="w-full bg-[#1e293b] border border-white/5 p-5 rounded-2xl text-white outline-none focus:border-indigo-500/50 transition-all font-mono placeholder-slate-700" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors">
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+          {loginError && <p className="text-rose-500 text-center text-[10px] font-black uppercase tracking-widest animate-pulse">{loginError}</p>}
+          <button type="submit" className="w-full bg-indigo-600 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-indigo-500 active:scale-95 transition-all shadow-xl shadow-indigo-900/20">Authorize Entry</button>
+        </form>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-[#020617] z-[100] flex text-slate-300 font-sans selection:bg-indigo-600/30 overflow-hidden">
+      {saveStatus && <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[210] bg-white text-slate-950 px-10 py-4 rounded-full font-black text-[11px] shadow-2xl animate-fade-in-up border border-indigo-100 flex items-center gap-3 tracking-widest uppercase"><CheckCircle2 size={16} className="text-emerald-500" /> {saveStatus}</div>}
+
+      <button 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        className="fixed top-8 left-8 z-[150] p-4 bg-white text-slate-900 rounded-2xl shadow-xl hover:scale-110 active:scale-90 transition-all border border-slate-100"
+      >
+        <Menu size={20} />
+      </button>
+
+      <aside className={`fixed top-0 bottom-0 transition-all duration-500 ease-in-out bg-[#0f172a] border-r border-white/5 shadow-2xl flex flex-col z-[120] ${isSidebarOpen ? 'left-0 w-80' : '-translate-x-full w-0'}`}>
+        <div className="p-12 flex items-center gap-4 mt-20">
+          <div className="w-14 h-14 bg-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-indigo-500/20"><Cpu className="text-white" size={28} /></div>
+          <div>
+            <div className="text-white font-black uppercase text-lg leading-none tracking-tighter">Elite Node</div>
+            <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-2">v4.1.0 - Elite</div>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-6 space-y-2 overflow-y-auto no-scrollbar py-8">
+          {[
+            { id: 'dashboard', icon: LayoutDashboard, label: 'Systems' },
+            { id: 'projects', icon: Box, label: 'Portfolio' },
+            { id: 'reviews', icon: Quote, label: 'Vouch List' },
+            { id: 'faq', icon: HelpCircle, label: 'KB Logic' },
+            { id: 'stack', icon: Layers, label: 'Toolbox' },
+            { id: 'identity', icon: User, label: 'Identity' },
+            { id: 'security', icon: Lock, label: 'Security' },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as any)}
+              className={`w-full flex items-center gap-4 p-5 rounded-3xl transition-all group ${activeTab === item.id ? 'bg-[#1e293b] text-white shadow-xl border border-white/5' : 'hover:bg-white/5 text-slate-500 hover:text-slate-300'}`}
+            >
+              <item.icon size={22} className={activeTab === item.id ? 'text-indigo-400' : 'text-slate-600'} />
+              <span className="font-black text-[12px] uppercase tracking-widest">{item.label}</span>
+              {activeTab === item.id && <ChevronRight className="ml-auto opacity-50" size={16} />}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-10 border-t border-white/5 bg-[#0a0f1d]">
+          <a 
+            href="https://docs.google.com/spreadsheets/d/1JDHDIp3c3GSwhemS4VvtWSowoNLHFxAIvTf91j1zQ2g/edit?gid=1373341915#gid=1373341915" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-4 p-5 rounded-2xl bg-emerald-600/10 text-emerald-500 hover:bg-emerald-600 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest mb-4 shadow-lg group"
+          >
+            <Database size={20} className="group-hover:scale-110 transition-transform" />
+            Lead Repo
+          </a>
+          <button onClick={onClose} className="w-full flex items-center justify-center gap-3 p-5 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest shadow-lg">
+            Terminate
+          </button>
+        </div>
+      </aside>
+
+      <main ref={mainScrollRef} className={`flex-1 transition-all duration-500 overflow-y-auto bg-[#020617] relative p-12 md:p-24 no-scrollbar ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
+        <div className="max-w-7xl mx-auto space-y-20">
+          
+          {/* DASHBOARD TAB */}
+          {activeTab === 'dashboard' && (
+            <div className="animate-fade-in space-y-20">
+              <header>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="h-1 w-12 bg-indigo-500 rounded-full"></div>
+                  <p className="text-indigo-500 font-black uppercase tracking-[0.5em] text-[10px]">Active Performance Node</p>
+                </div>
+                <h2 className="text-7xl font-black text-white tracking-tighter mb-4">Dashboard.</h2>
+                <p className="text-slate-500 text-lg font-medium max-w-2xl">Oversee your digital marketing assets and technical scaling protocols.</p>
+              </header>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {[
+                  { label: 'Published Entries', count: currentProjects.length, icon: Box, color: 'indigo' },
+                  { label: 'Vouch Verifications', count: testimonials.length, icon: Quote, color: 'emerald' },
+                  { label: 'KB Logic Nodes', count: faqs.length, icon: HelpCircle, color: 'violet' }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-[#0f172a] border border-white/5 p-12 rounded-[4rem] group hover:border-indigo-500/20 transition-all shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[60px] rounded-full"></div>
+                    <stat.icon className={`text-${stat.color}-500 mb-8`} size={40} />
+                    <div className="text-7xl font-black text-white mb-4 tracking-tighter group-hover:scale-105 transition-transform duration-500">{stat.count}</div>
+                    <div className="text-slate-500 text-[12px] font-black uppercase tracking-[0.3em]">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-[#0f172a] border border-white/5 p-16 rounded-[5rem] shadow-2xl">
+                <div className="flex items-center justify-between mb-16">
+                  <div className="flex items-center gap-5">
+                    <div className="p-4 bg-indigo-500/10 rounded-2xl"><BarChart3 className="text-indigo-400" size={32} /></div>
+                    <h4 className="text-white font-black text-2xl uppercase tracking-widest">Growth Analytics</h4>
+                  </div>
+                  <div className="px-5 py-2 bg-emerald-500/10 text-emerald-500 text-[10px] font-black rounded-full uppercase tracking-widest border border-emerald-500/20">Sync v4.1.0</div>
+                </div>
+                <div className="h-[450px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={ANALYTICS_DATA}>
+                      <CartesianGrid strokeDasharray="0" vertical={false} stroke="#1e293b" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#475569', fontSize: 12, fontWeight: 800}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#475569', fontSize: 12}} />
+                      <Tooltip cursor={{fill: 'rgba(255,255,255,0.02)'}} contentStyle={{backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '24px', fontSize: '12px', fontWeight: 'bold'}} />
+                      <Bar dataKey="clicks" radius={[15, 15, 0, 0]}>
+                        {ANALYTICS_DATA.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#4f46e5' : '#6366f1'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PORTFOLIO TAB */}
+          {activeTab === 'projects' && (
+             <div className="animate-fade-in space-y-20">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+                   <div>
+                     <p className="text-indigo-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">Portfolio Module</p>
+                     <h2 className="text-7xl font-black text-white tracking-tighter">Portfolios.</h2>
+                   </div>
+                   <div className="relative group">
+                      <input type="file" ref={aiFileInputRef} onChange={handleAiAutoFill} className="hidden" accept="image/*" />
+                      <button onClick={() => aiFileInputRef.current?.click()} disabled={isAiAnalyzing} className="flex items-center gap-5 bg-white text-[#020617] px-12 py-6 rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] shadow-2xl hover:bg-slate-200 active:scale-95 transition-all">
+                        {isAiAnalyzing ? <Loader2 className="animate-spin" size={20} /> : <Sparkles className="animate-pulse" size={20} />}
+                        AI Auto-Blueprint
+                      </button>
+                   </div>
+                </div>
+                
+                <div className="bg-[#0f172a] border border-white/5 p-16 rounded-[5rem] shadow-2xl space-y-16">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                    <div className="space-y-10">
+                      <div className="space-y-4">
+                         <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Campaign Name</label>
+                         <input type="text" placeholder="Project Identity" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-indigo-500/40 font-bold transition-all text-lg" value={projectForm.title} onChange={e => setProjectForm({...projectForm, title: e.target.value})} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                           <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Category Logic</label>
+                           <select className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none font-bold appearance-none cursor-pointer focus:border-indigo-500/40" value={projectForm.category} onChange={e => setProjectForm({...projectForm, category: e.target.value as any})}>
+                             <option value="E-commerce">E-commerce</option>
+                             <option value="Leads">Leads</option>
+                             <option value="Engagement">Engagement</option>
+                             <option value="Website Build">Website Build</option>
+                           </select>
+                        </div>
+                        <div className="space-y-4">
+                           <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Growth Metric</label>
+                           <input type="text" placeholder="e.g. 7.5x ROAS" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-indigo-500/40 font-bold" value={projectForm.results} onChange={e => setProjectForm({...projectForm, results: e.target.value})} />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                         <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Strategic Log</label>
+                         <textarea placeholder="Outline the marketing logic and technical infrastructure..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none h-60 resize-none focus:border-indigo-500/40 font-medium transition-all leading-relaxed" value={projectForm.description} onChange={e => setProjectForm({...projectForm, description: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="space-y-10">
+                      <div className="flex items-center justify-between px-6">
+                        <h4 className="text-[12px] font-black uppercase text-slate-500 tracking-[0.3em] flex items-center gap-3">
+                          <ImageIcon size={18} className="text-indigo-400" /> Asset Sync ({projectForm.imageUrls?.length || 0}/10)
+                        </h4>
+                      </div>
+                      <div className="grid grid-cols-3 gap-6">
+                        {projectForm.imageUrls?.map((url, i) => (
+                          <div key={i} className="group relative aspect-square bg-[#020617] rounded-3xl overflow-hidden border border-white/5">
+                            <img src={url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-rose-600/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-sm">
+                              <button onClick={() => setProjectForm({...projectForm, imageUrls: projectForm.imageUrls?.filter((_, idx) => idx !== i)})} className="text-white hover:scale-125 transition-all"><Trash2 size={24} /></button>
+                            </div>
+                          </div>
+                        ))}
+                        {(projectForm.imageUrls?.length || 0) < 10 && <MediaUploader compact label="Sync" onUploadSuccess={handleGalleryImageAdd} />}
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={handleSaveProject} className="w-full bg-indigo-600 text-white py-8 rounded-[3rem] font-black uppercase text-[14px] tracking-[0.4em] hover:bg-indigo-500 transition-all shadow-2xl active:scale-[0.98] border border-indigo-400/20">Commit Campaign Entry</button>
+                </div>
+
+                <div className="space-y-12">
+                   <h3 className="text-4xl font-black text-white tracking-tighter flex items-center gap-5">
+                     <FolderKanban className="text-indigo-400" size={40} /> Campaign Library
+                   </h3>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                      {currentProjects.map(p => (
+                        <div key={p.id} className="bg-[#0f172a] border border-white/5 p-10 rounded-[4rem] group hover:border-indigo-500/40 transition-all flex flex-col shadow-2xl relative">
+                          <div className="aspect-[16/11] bg-[#020617] rounded-3xl mb-8 overflow-hidden border border-white/5 relative">
+                             <img src={p.imageUrls?.[0] || 'https://via.placeholder.com/800x600'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+                             <div className="absolute bottom-4 left-4 bg-[#020617]/80 backdrop-blur-md text-[9px] font-black px-4 py-2 rounded-full text-indigo-400 uppercase tracking-widest border border-white/5">{p.category}</div>
+                          </div>
+                          <div className="flex-1 space-y-2 mb-10">
+                             <div className="text-white font-black text-2xl tracking-tight truncate">{p.title}</div>
+                             <div className="text-slate-500 font-bold text-[11px] uppercase tracking-widest">{p.results}</div>
+                          </div>
+                          <div className="flex gap-4">
+                             <button onClick={() => { setProjectForm(p); scrollToTop(); }} className="flex-1 py-5 bg-white text-[#020617] rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-slate-200 transition-all">Edit</button>
+                             <button onClick={() => onProjectsUpdate(currentProjects.filter(x => x.id !== p.id))} className="p-5 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all"><Trash2 size={24} /></button>
+                          </div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
+          )}
+
+          {/* VOUCH LIST TAB */}
+          {activeTab === 'reviews' && (
+            <div className="animate-fade-in space-y-20">
+              <header>
+                <p className="text-emerald-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">Verification Node</p>
+                <h2 className="text-7xl font-black text-white tracking-tighter">Vouch List.</h2>
+              </header>
+
+              <div className="bg-[#0f172a] border border-white/5 p-16 rounded-[5rem] shadow-2xl space-y-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                  <div className="space-y-10">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                         <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Client/Partner Name</label>
+                         <input type="text" placeholder="Full Name" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-emerald-500/40 transition-all font-bold" value={reviewForm.name} onChange={e => setReviewForm({...reviewForm, name: e.target.value})} />
+                      </div>
+                      <div className="space-y-4">
+                         <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Company/Designation</label>
+                         <input type="text" placeholder="Role, Company" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-emerald-500/40 transition-all font-bold" value={reviewForm.role} onChange={e => setReviewForm({...reviewForm, role: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                       <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Success Badge</label>
+                       <input type="text" placeholder="e.g. +400% ROI Scale" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-emerald-500/40 transition-all font-bold" value={reviewForm.metric} onChange={e => setReviewForm({...reviewForm, metric: e.target.value})} />
+                    </div>
+                    <div className="space-y-4">
+                       <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Verification Feed</label>
+                       <textarea placeholder="Paste the professional feedback log..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none h-60 resize-none focus:border-emerald-500/40 font-medium transition-all leading-relaxed" value={reviewForm.content} onChange={e => setReviewForm({...reviewForm, content: e.target.value})} />
+                    </div>
+                  </div>
+                  <div className="space-y-10">
+                    <h4 className="text-[12px] font-black uppercase text-slate-500 tracking-[0.3em] px-6 flex items-center gap-3">
+                      <ImageIcon size={18} className="text-emerald-400" /> Identity Assets ({reviewForm.imageUrls?.length || 0}/2)
+                    </h4>
+                    <div className="grid grid-cols-2 gap-8">
+                      {reviewForm.imageUrls?.map((url, i) => (
+                        <div key={i} className="group relative aspect-square bg-[#020617] rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl">
+                          <img src={url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                          <button onClick={() => setReviewForm({...reviewForm, imageUrls: reviewForm.imageUrls?.filter((_, idx) => idx !== i)})} className="absolute top-6 right-6 p-4 bg-rose-500 text-white rounded-2xl hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-2xl"><Trash2 size={20} /></button>
+                          <div className="absolute bottom-6 left-6 px-5 py-2 bg-[#020617]/80 backdrop-blur-md text-[10px] font-black text-emerald-400 rounded-full uppercase tracking-widest border border-white/5">{i === 0 ? 'Avatar' : 'Proof'}</div>
+                        </div>
+                      ))}
+                      {(reviewForm.imageUrls?.length || 0) < 2 && <MediaUploader compact label="Sync" onUploadSuccess={handleReviewImageAdd} />}
+                    </div>
+                  </div>
+                </div>
+                <button onClick={handleSaveReview} className="w-full bg-emerald-600 text-white py-8 rounded-[3rem] font-black uppercase text-[14px] tracking-[0.4em] hover:bg-emerald-500 transition-all shadow-2xl active:scale-[0.98] border border-emerald-400/20">Authorize Vouch Entry</button>
+              </div>
+
+              <div className="space-y-12">
+                 <h3 className="text-4xl font-black text-white tracking-tighter flex items-center gap-5">
+                   <Quote className="text-emerald-400" size={40} /> Verified Feed
+                 </h3>
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                   {testimonials.map(t => (
+                     <div key={t.id} className="bg-[#0f172a] border border-white/5 p-12 rounded-[4rem] group hover:border-emerald-500/40 transition-all flex flex-col gap-8 shadow-2xl relative">
+                       <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-6">
+                           <div className="w-20 h-20 rounded-[1.5rem] bg-[#020617] border border-white/5 overflow-hidden shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                             <img src={t.image || t.imageUrls?.[0] || 'https://via.placeholder.com/150'} className="w-full h-full object-cover" />
+                           </div>
+                           <div>
+                              <div className="text-white font-black text-2xl tracking-tight">{t.name}</div>
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{t.role}</div>
+                           </div>
+                         </div>
+                         <div className="flex gap-4">
+                           <button onClick={() => { setReviewForm(t); scrollToTop(); }} className="p-5 bg-indigo-500/10 text-indigo-500 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all"><Edit3 size={24} /></button>
+                           <button onClick={() => onTestimonialsUpdate(testimonials.filter(x => x.id !== t.id))} className="p-5 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all"><Trash2 size={24} /></button>
+                       </div>
+                     </div>
+                     <p className="text-slate-400 text-base italic leading-relaxed font-medium">"{t.content}"</p>
+                     <div className="px-6 py-2.5 bg-emerald-500/5 text-emerald-500 text-[11px] font-black uppercase tracking-[0.2em] rounded-full border border-emerald-500/10 w-fit">
+                        {t.metric}
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* KB LOGIC TAB */}
+        {activeTab === 'faq' && (
+           <div className="animate-fade-in space-y-20">
+              <header>
+                <p className="text-violet-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">Knowledge Repository</p>
+                <h2 className="text-7xl font-black text-white tracking-tighter">KB Logic.</h2>
+              </header>
+
+              <div className="bg-[#0f172a] border border-white/5 p-16 rounded-[5rem] shadow-2xl space-y-16">
+                 <div className="space-y-10">
+                    <div className="space-y-4">
+                       <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Strategic Question</label>
+                       <input type="text" placeholder="Define methodologies..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-violet-500/40 font-bold text-lg" value={faqForm.question} onChange={e => setFaqDataForm({...faqForm, question: e.target.value})} />
+                    </div>
+                    <div className="space-y-4">
+                       <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Logic Definition (Answer)</label>
+                       <textarea placeholder="Provide the technical or strategic resolution..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none h-60 resize-none focus:border-violet-500/40 font-medium transition-all leading-relaxed" value={faqForm.answer} onChange={e => setFaqDataForm({...faqForm, answer: e.target.value})} />
+                    </div>
+                 </div>
+                 <button onClick={handleSaveFaq} className="w-full bg-white text-[#020617] py-8 rounded-[3rem] font-black uppercase text-[14px] tracking-[0.4em] hover:bg-slate-200 transition-all shadow-2xl active:scale-[0.98]">Deploy Knowledge Node</button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-8">
+                 {faqs.map(f => (
+                   <div key={f.id} className="bg-[#0f172a] border border-white/5 p-12 rounded-[4rem] flex items-center justify-between group hover:border-violet-500/20 transition-all shadow-2xl relative overflow-hidden">
+                      <div className="truncate pr-12">
+                         <div className="text-white font-black text-2xl mb-2 tracking-tight truncate">{f.question}</div>
+                         <div className="text-slate-500 text-base truncate font-medium italic">"{f.answer}"</div>
+                      </div>
+                      <div className="flex gap-4 shrink-0">
+                         <button onClick={() => { setFaqDataForm(f); scrollToTop(); }} className="p-5 bg-indigo-500/10 text-indigo-500 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all"><Edit3 size={24} /></button>
+                         <button onClick={() => onFaqsUpdate(faqs.filter(x => x.id !== f.id))} className="p-5 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all"><Trash2 size={24} /></button>
+                      </div>
+                   </div>
+                 ))}
+              </div>
+           </div>
+        )}
+
+        {/* TOOLBOX TAB */}
+        {activeTab === 'stack' && (
+           <div className="animate-fade-in space-y-20">
+              <header>
+                <p className="text-indigo-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">Technical Resources</p>
+                <h2 className="text-7xl font-black text-white tracking-tighter">Toolbox.</h2>
+              </header>
+
+              <div className="bg-[#0f172a] border border-white/5 p-16 rounded-[5rem] shadow-2xl space-y-16">
+                 <div className="grid md:grid-cols-2 gap-20">
+                    <div className="space-y-10">
+                       <div className="space-y-4">
+                          <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Resource Identity</label>
+                          <input type="text" placeholder="Tool Name" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-indigo-500/40 font-bold text-lg" value={toolForm.name} onChange={e => setToolForm({...toolForm, name: e.target.value})} />
+                       </div>
+                       <div className="space-y-4">
+                          <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Core Competency</label>
+                          <input type="text" placeholder="Functional Subtitle" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-indigo-500/40 font-bold" value={toolForm.subtitle} onChange={e => setToolForm({...toolForm, subtitle: e.target.value})} />
+                       </div>
+                       <div className="space-y-4">
+                          <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Vector URI (Icon)</label>
+                          <input type="text" placeholder="https://..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2rem] text-white outline-none focus:border-indigo-500/40 font-mono text-xs" value={toolForm.icon} onChange={e => setToolForm({...toolForm, icon: e.target.value})} />
+                       </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center bg-[#020617] rounded-[4rem] border border-white/5 p-16 group relative overflow-hidden">
+                       <div className="absolute inset-0 bg-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                       <div className="w-32 h-32 rounded-[2.5rem] bg-white p-7 flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 transition-transform duration-500 relative z-10">
+                          <img src={toolForm.icon || 'https://img.icons8.com/fluency/96/wrench.png'} className="max-w-full max-h-full object-contain" />
+                       </div>
+                       <div className="text-white font-black text-3xl tracking-tight relative z-10">{toolForm.name || 'Resource'}</div>
+                       <div className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.3em] mt-3 relative z-10">{toolForm.subtitle || 'Capability'}</div>
+                    </div>
+                 </div>
+                 <button onClick={handleSaveTool} className="w-full bg-white text-[#020617] py-8 rounded-[3rem] font-black uppercase text-[14px] tracking-[0.4em] hover:bg-slate-200 transition-all shadow-2xl">Update Toolbox Registry</button>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+                 {currentTools.map(t => (
+                   <div key={t.id} className="bg-[#0f172a] border border-white/5 p-12 rounded-[4rem] flex flex-col items-center group relative overflow-hidden transition-all hover:border-indigo-500/40 shadow-2xl shadow-black/50">
+                      <div className="w-16 h-16 mb-8 flex items-center justify-center"><img src={t.icon} className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" /></div>
+                      <div className="text-white font-black text-lg mb-1.5 tracking-tight">{t.name}</div>
+                      <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black">{t.subtitle}</div>
+                      <div className="absolute inset-0 bg-[#020617]/95 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-6 backdrop-blur-md">
+                        <button onClick={() => { setToolForm(t); scrollToTop(); }} className="p-5 bg-indigo-500 text-white rounded-2xl hover:scale-125 transition-all shadow-2xl shadow-indigo-500/40"><Edit3 size={24} /></button>
+                        <button onClick={() => onToolsUpdate(currentTools.filter(x => x.id !== t.id))} className="p-5 bg-rose-500 text-white rounded-2xl hover:scale-125 transition-all shadow-2xl shadow-rose-500/40"><Trash2 size={24} /></button>
+                      </div>
+                   </div>
+                 ))}
+              </div>
+           </div>
+        )}
+
+        {/* IDENTITY TAB */}
+        {activeTab === 'identity' && (
+          <div className="animate-fade-in space-y-20">
+            <header>
+              <p className="text-indigo-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">Identity Protocols</p>
+              <h2 className="text-7xl font-black text-white tracking-tighter">Identity.</h2>
+            </header>
+            
+            <div className="bg-[#0f172a] border border-white/5 p-20 rounded-[5rem] shadow-2xl space-y-16 max-w-6xl">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-20">
+                 <div className="space-y-6">
+                    <label className="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-2">Public Avatar</label>
+                    <MediaUploader initialUrl={identityForm.profileImageUrl} onUploadSuccess={u => setIdentityForm({...identityForm, profileImageUrl: u})} />
+                 </div>
+                 <div className="space-y-6">
+                    <label className="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-2">Agency Logo</label>
+                    <MediaUploader initialUrl={identityForm.logoUrl} onUploadSuccess={u => setIdentityForm({...identityForm, logoUrl: u})} />
+                 </div>
+                 <div className="space-y-6">
+                    <label className="text-[12px] font-black text-slate-500 uppercase tracking-widest ml-2">Cloud CV PDF</label>
+                    <div className="flex flex-col gap-8">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-700 uppercase tracking-widest ml-2">Master Link</label>
+                        <input type="text" placeholder="https://..." className="w-full bg-[#020617] border border-white/5 p-6 rounded-2xl text-white text-xs font-mono" value={identityForm.cvUrl} onChange={e => setIdentityForm({...identityForm, cvUrl: e.target.value})} />
+                      </div>
+                      <div 
+                        onClick={() => cvInputRef.current?.click()}
+                        className={`relative p-12 border-2 border-dashed rounded-[3rem] flex flex-col items-center justify-center bg-[#020617] group hover:border-indigo-500/50 transition-all cursor-pointer ${isCvUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                      >
+                        <input type="file" ref={cvInputRef} onChange={handleCvFileUpload} className="hidden" accept=".pdf" />
+                        {isCvUploading ? (
+                          <Loader2 size={40} className="text-indigo-400 animate-spin mb-4" />
+                        ) : (
+                          <FileText size={40} className="text-slate-800 mb-4 group-hover:text-indigo-400 transition-colors duration-500" />
+                        )}
+                        <span className="text-[11px] font-black uppercase text-slate-800 group-hover:text-indigo-400 tracking-[0.3em] transition-colors">
+                          {isCvUploading ? 'Uploading' : 'Upload PDF'}
+                        </span>
+                      </div>
+                    </div>
+                 </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-10">
+                 <div className="space-y-4">
+                   <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">WhatsApp Endpoint</label>
+                   <input type="text" placeholder="+88019..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2.5rem] text-white outline-none focus:border-indigo-500/40 transition-all font-mono text-lg" value={identityForm.whatsAppNumber} onChange={e => setIdentityForm({...identityForm, whatsAppNumber: e.target.value})} />
+                 </div>
+                 <div className="space-y-4">
+                   <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">LinkedIn URI</label>
+                   <input type="text" placeholder="linkedin.com/in/..." className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2.5rem] text-white outline-none focus:border-indigo-500/40 transition-all font-mono text-lg" value={identityForm.linkedInUrl} onChange={e => setIdentityForm({...identityForm, linkedInUrl: e.target.value})} />
+                 </div>
+              </div>
+              <button onClick={() => { onIdentityUpdate(identityForm); notify("Global identity synced."); }} className="w-full bg-white text-[#020617] py-8 rounded-[3rem] font-black uppercase text-[14px] tracking-[0.4em] hover:bg-slate-200 transition-all shadow-2xl active:scale-[0.98]">Deploy Global Identity Update</button>
+            </div>
+          </div>
+        )}
+
+        {/* SECURITY TAB */}
+        {activeTab === 'security' && (
+          <div className="animate-fade-in space-y-20">
+            <header>
+              <p className="text-indigo-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">Security Infrastructure</p>
+              <h2 className="text-7xl font-black text-white tracking-tighter">Security.</h2>
+            </header>
+
+            <div className="grid lg:grid-cols-2 gap-12">
+              <div className="bg-[#0f172a] border border-white/5 p-20 rounded-[5rem] shadow-2xl space-y-12">
+                <div className="flex items-center gap-5">
+                  <div className="p-4 bg-emerald-500/10 rounded-2xl"><ShieldCheck className="text-emerald-500" size={32} /></div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-widest">Access Config</h3>
+                </div>
+                <div className="space-y-10">
+                  <div className="space-y-4">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Administrator ID</label>
+                    <input type="text" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2.5rem] text-white font-mono text-lg" value={securityForm.username} onChange={e => setSecurityForm({...securityForm, username: e.target.value})} />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-4">Security Cipher</label>
+                    <div className="relative">
+                      <input type={showCurrentPassword ? "text" : "password"} className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2.5rem] text-white font-mono text-lg" value={securityForm.password} onChange={e => setSecurityForm({...securityForm, password: e.target.value})} />
+                      <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors">
+                        {showCurrentPassword ? <EyeOff size={28} /> : <Eye size={28} />}
+                      </button>
+                    </div>
+                  </div>
+                  <button onClick={() => { onAdminCredsUpdate(securityForm); notify("Master access secured."); }} className="w-full bg-emerald-600 text-white py-6 rounded-[2rem] font-black uppercase text-[12px] tracking-[0.3em] hover:bg-emerald-500 transition-all shadow-xl active:scale-[0.98]">Save Master Protocols</button>
+                </div>
+              </div>
+
+              <div className="bg-[#0f172a] border border-white/5 p-20 rounded-[5rem] shadow-2xl space-y-12">
+                <div className="flex items-center gap-5">
+                  <div className="p-4 bg-indigo-500/10 rounded-2xl"><Cloud className="text-indigo-400" size={32} /></div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-widest">Storage Nexus</h3>
+                </div>
+                <div className="space-y-10">
+                  <p className="text-sm text-slate-500 leading-relaxed font-medium">Synchronize your Vercel BLOB token to enable global cloud persistence for marketing assets.</p>
+                  <input type="password" placeholder="BLOB_READ_WRITE_TOKEN" className="w-full bg-[#020617] border border-white/5 p-7 rounded-[2.5rem] text-white font-mono text-xs focus:border-indigo-500/40" value={blobToken} onChange={e => setBlobToken(e.target.value)} />
+                  <button onClick={() => { localStorage.setItem('vercel_blob_token', blobToken); notify("Nexus linkage established."); }} className="w-full bg-white text-[#020617] py-6 rounded-[2rem] font-black uppercase text-[12px] tracking-[0.3em] hover:bg-slate-200 transition-all shadow-xl">Establish Cloud Nexus</button>
+                </div>
+              </div>
+              
+              <div className="lg:col-span-2 bg-[#0f172a] border border-white/5 p-20 rounded-[5rem] shadow-2xl space-y-16 relative overflow-hidden group">
+                <div className="flex items-center gap-5">
+                  <div className="p-4 bg-violet-500/10 rounded-2xl"><Smartphone className="text-violet-400" size={32} /></div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-widest">2FA Matrix Verification</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-24 items-center">
+                   <div className="p-16 bg-white rounded-[4rem] flex flex-col items-center shadow-2xl relative">
+                      <div className="absolute top-6 left-6 flex items-center gap-2 opacity-50">
+                        <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
+                        <span className="text-[8px] font-black text-slate-900 uppercase tracking-widest">Active Matrix</span>
+                      </div>
+                      <div className="w-64 h-64 bg-white flex items-center justify-center p-6 border-8 border-slate-50 rounded-[3rem]">
+                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=otpauth://totp/RabbiPortfolio:Admin?secret=${securityForm.twoFactorSecret}&issuer=RabbiPortfolio`} className="w-full h-full object-contain" alt="QR Logic" />
+                      </div>
+                      <code className="mt-8 text-[12px] font-mono font-black text-[#020617] tracking-[0.4em] bg-slate-100 px-8 py-4 rounded-2xl shadow-inner border border-white/50">{securityForm.twoFactorSecret}</code>
+                   </div>
+                   <div className="space-y-10">
+                      <div className="flex items-center justify-between p-12 bg-[#020617] rounded-[4rem] border border-white/5 transition-all hover:bg-black group/toggle">
+                        <div className="text-xl font-black text-white uppercase tracking-[0.2em] group-hover/toggle:text-indigo-400 transition-colors">Auth Status</div>
+                        <button onClick={() => setSecurityForm({...securityForm, twoFactorEnabled: !securityForm.twoFactorEnabled})} className={`w-24 h-12 rounded-full transition-all relative shadow-inner ${securityForm.twoFactorEnabled ? 'bg-emerald-500' : 'bg-slate-800'}`}>
+                          <div className={`absolute top-2 w-8 h-8 rounded-full bg-white transition-all shadow-2xl ${securityForm.twoFactorEnabled ? 'left-14' : 'left-2'}`} />
+                        </button>
+                      </div>
+                      <p className="text-sm text-slate-500 leading-relaxed font-medium">Link your account to a trusted authenticator device. This adds a critical 128-bit encryption layer to the administrative interface.</p>
+                      <button onClick={() => { onAdminCredsUpdate(securityForm); notify("Security integrity updated."); }} className="w-full bg-indigo-600 text-white py-10 rounded-[4rem] font-black uppercase text-[14px] tracking-[0.4em] hover:bg-indigo-500 transition-all shadow-2xl active:scale-[0.98] border border-indigo-400/20">Commit Integrity Matrix</button>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default AdminPanel;
+
           setTestimonialForm(prev => ({
             ...prev,
             name: data.title || prev.name,
