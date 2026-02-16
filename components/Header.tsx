@@ -71,19 +71,24 @@ const Header: React.FC<HeaderProps> = ({ logoUrl, googleFormUrl }) => {
           </a>
         </nav>
 
+        {/* Styled Colorful 3-Bar Menu */}
         <button 
-          className="md:hidden text-slate-900 p-2 focus:outline-none"
+          className={`md:hidden p-2.5 rounded-xl transition-all shadow-lg active:scale-90 border-2 border-white/20 flex items-center justify-center ${
+            isMobileMenuOpen 
+            ? 'bg-slate-900 text-white' 
+            : 'bg-gradient-to-tr from-indigo-600 via-purple-600 to-rose-500 text-white shadow-purple-200 hover:scale-110'
+          }`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
           aria-expanded={isMobileMenuOpen}
         >
           {isMobileMenuOpen ? (
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
           )}
         </button>

@@ -28,6 +28,13 @@ const DEFAULT_IDENTITY: SiteIdentity = {
   linkedInUrl: "https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/"
 };
 
+const INITIAL_ADMIN_CREDS = {
+  username: 'admin',
+  password: 'password',
+  twoFactorEnabled: false,
+  twoFactorSecret: 'KVKFKR3TMRQXE3S2'
+};
+
 const App: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isCvModalOpen, setIsCvModalOpen] = useState(false);
@@ -36,115 +43,41 @@ const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
   const [tools, setTools] = useState<Tool[]>(INITIAL_TOOLS);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS.map((t, i) => ({ ...t, id: `t-${i}` })));
-  const [faqs, setFaqs] = useState<FAQData[]>(INITIAL_FAQS.map((f, i) => ({ ...f, id: `f-${i}` })));
-
-  const [adminCreds, setAdminCreds] = useState(() => {
-    const saved = localStorage.getItem('portfolio_admin_creds');
-    return saved ? JSON.parse(saved) : { 
-      username: 'admin', 
-      password: 'admin123', 
-      twoFactorSecret: 'JBSWY3DPEHPK3PXP', 
-      twoFactorEnabled: false 
-    };
-  });
+  
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(
+    INITIAL_TESTIMONIALS.map((t, i) => ({ ...t, id: (t as any).id || `test-${i}` } as Testimonial))
+  );
+  const [faqs, setFaqs] = useState<FAQData[]>(
+    INITIAL_FAQS.map((f, i) => ({ ...f, id: (f as any).id || `faq-${i}` } as FAQData))
+  );
+  
+  const [adminCreds, setAdminCreds] = useState(INITIAL_ADMIN_CREDS);
 
   useEffect(() => {
-    const initializeData = async () => {
-      setIsSyncing(true);
-      const urlParams = new URLSearchParams(window.location.search);
-      let cloudUrl = urlParams.get('config') || localStorage.getItem('global_config_url');
-
-      if (cloudUrl) {
-        try {
-          const response = await fetch(cloudUrl);
-          if (response.ok) {
-            const cloudData = await response.json();
-            if (cloudData.projects) setProjects(cloudData.projects);
-            if (cloudData.identity) setIdentity({ ...DEFAULT_IDENTITY, ...cloudData.identity });
-            if (cloudData.tools) setTools(cloudData.tools);
-            if (cloudData.testimonials) setTestimonials(cloudData.testimonials);
-            if (cloudData.faqs) setFaqs(cloudData.faqs);
-            localStorage.setItem('global_config_url', cloudUrl);
-            setIsSyncing(false);
-            return;
-          }
-        } catch (e) {
-          console.error("Failed to fetch cloud config:", e);
-        }
-      }
-
-      const savedProjects = localStorage.getItem('portfolio_projects');
-      const savedIdentity = localStorage.getItem('portfolio_identity');
-      const savedTools = localStorage.getItem('portfolio_tools');
-      const savedTestimonials = localStorage.getItem('portfolio_testimonials');
-      const savedFaqs = localStorage.getItem('portfolio_faqs');
-
-      if (savedProjects) setProjects(JSON.parse(savedProjects));
-      if (savedIdentity) setIdentity({ ...DEFAULT_IDENTITY, ...JSON.parse(savedIdentity) });
-      if (savedTools) setTools(JSON.parse(savedTools));
-      if (savedTestimonials) setTestimonials(JSON.parse(savedTestimonials));
-      if (savedFaqs) setFaqs(JSON.parse(savedFaqs));
-      
-      setIsSyncing(false);
-    };
-
-    initializeData();
+    const visits = parseInt(localStorage.getItem('portfolio_total_visits') || '0', 10);
+    localStorage.setItem('portfolio_total_visits', (visits + 1).toString());
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('portfolio_projects', JSON.stringify(projects));
-  }, [projects]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio_identity', JSON.stringify(identity));
-    localStorage.setItem('portfolio_testimonials', JSON.stringify(testimonials));
-    localStorage.setItem('portfolio_faqs', JSON.stringify(faqs));
-  }, [identity, testimonials, faqs]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio_tools', JSON.stringify(tools));
-  }, [tools]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio_admin_creds', JSON.stringify(adminCreds));
-  }, [adminCreds]);
-
-  if (isAdminMode) {
-    return (
-      <AdminPanel 
-        onClose={() => setIsAdminMode(false)} 
-        onProjectsUpdate={setProjects} 
-        currentProjects={projects}
-        currentIdentity={identity}
-        onIdentityUpdate={setIdentity}
-        currentTools={tools}
-        onToolsUpdate={setTools}
-        testimonials={testimonials}
-        onTestimonialsUpdate={setTestimonials}
-        faqs={faqs}
-        onFaqsUpdate={setFaqs}
-        adminCreds={adminCreds}
-        onAdminCredsUpdate={setAdminCreds}
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen animate-fade-in bg-slate-50">
-      <Header logoUrl={identity.logoUrl} googleFormUrl={identity.googleFormUrl} />
+    <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
+      <Header 
+        logoUrl={identity.profileImageUrl} 
+        googleFormUrl={identity.googleFormUrl} 
+      />
+      
       <main>
         <Hero 
           profileImageUrl={identity.profileImageUrl} 
-          onDownloadCv={() => setIsCvModalOpen(true)} 
-          googleFormUrl={identity.googleFormUrl} 
+          onDownloadCv={() => setIsCvModalOpen(true)}
+          googleFormUrl={identity.googleFormUrl}
         />
         <About profileImageUrl={identity.profileImageUrl} />
-        <Process />
         <Services googleFormUrl={identity.googleFormUrl} />
+        {/* AILab removed from landing page as per request */}
         <Portfolio projects={projects} />
-        <Testimonials testimonials={testimonials} />
         <Tools tools={tools} />
+        <Process />
+        <Testimonials testimonials={testimonials} />
         <FAQ faqs={faqs} />
         <ZoomBooking googleFormUrl={identity.googleFormUrl} />
         <Contact 
@@ -154,16 +87,40 @@ const App: React.FC = () => {
           linkedInUrl={identity.linkedInUrl}
         />
       </main>
-      <Footer logoUrl={identity.logoUrl} onAdminLogin={() => setIsAdminMode(true)} />
-      <CVModal isOpen={isCvModalOpen} onClose={() => setIsCvModalOpen(false)} cvUrl={identity.cvUrl} />
-      
+
+      <Footer 
+        onAdminLogin={() => setIsAdminMode(true)} 
+        logoUrl={identity.profileImageUrl}
+      />
+
+      {isAdminMode && (
+        <AdminPanel 
+          onClose={() => setIsAdminMode(false)}
+          currentProjects={projects}
+          onProjectsUpdate={setProjects}
+          currentIdentity={identity}
+          onIdentityUpdate={setIdentity}
+          currentTools={tools}
+          onToolsUpdate={setTools}
+          testimonials={testimonials}
+          onTestimonialsUpdate={setTestimonials}
+          faqs={faqs}
+          onFaqsUpdate={setFaqs}
+          adminCreds={adminCreds}
+          onAdminCredsUpdate={setAdminCreds}
+        />
+      )}
+
+      <CVModal 
+        isOpen={isCvModalOpen} 
+        onClose={() => setIsCvModalOpen(false)} 
+        cvUrl={identity.cvUrl} 
+      />
+
       {isSyncing && (
-        <div className="fixed bottom-4 right-4 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in z-[100] border border-white/10">
-          <Loader2 className="animate-spin text-blue-400" size={16} />
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest leading-none">Global Sync</span>
-            <span className="text-[8px] text-slate-400 font-bold uppercase mt-1">Retrieving Cloud Data...</span>
-          </div>
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[1000] flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+          <p className="font-bold text-slate-900 uppercase tracking-widest text-xs">Synchronizing Engine...</p>
         </div>
       )}
     </div>
