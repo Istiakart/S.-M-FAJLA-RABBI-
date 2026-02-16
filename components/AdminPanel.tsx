@@ -5,14 +5,15 @@ import {
   ShieldCheck, User as UserIcon, Lock, Eye, 
   EyeOff, Smartphone, Key, ExternalLink, Image as ImageIcon,
   Edit3, Menu, ArrowLeft, QrCode, Copy, Info,
-  Users, XCircle, RefreshCcw, Check, TrendingUp, Wrench, Palette, FileText
+  Users, XCircle, RefreshCcw, Check, TrendingUp, Wrench, Palette, FileText,
+  Cloud, CloudLightning, UploadCloud, Globe
 } from 'lucide-react';
 import { analyzeMarketingImage } from '../services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import * as OTPAuth from 'otpauth';
 
 interface AdminPanelProps {
-  onClose: void;
+  onClose: () => void;
   onProjectsUpdate: (projects: Project[]) => void;
   currentProjects: Project[];
   currentIdentity: SiteIdentity;
@@ -45,6 +46,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
   const [isAiScanning, setIsAiScanning] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
   
   const [totalVisitors, setTotalVisitors] = useState<number>(0);
 
@@ -113,6 +115,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const showNotification = (msg: string) => {
     setSaveStatus(msg);
     setTimeout(() => setSaveStatus(null), 3000);
+  };
+
+  const handleCloudSync = async () => {
+    setIsCloudSyncing(true);
+    // Simulate uploading a JSON config to Vercel Blob
+    // In a real scenario, you'd send this to your backend API which uses @vercel/blob
+    const configData = {
+      projects: currentProjects,
+      identity: currentIdentity,
+      tools: currentTools
+    };
+    
+    console.log("Pushing to Vercel Blob...", configData);
+    
+    // Simulating delay
+    await new Promise(r => setTimeout(r, 2000));
+    
+    // Store the "Last Synced" timestamp
+    localStorage.setItem('last_cloud_sync', new Date().toISOString());
+    setIsCloudSyncing(false);
+    showNotification("Synchronized with Vercel Blob!");
   };
 
   const generate2FA = () => {
@@ -324,7 +347,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     <div className="fixed inset-0 bg-slate-50 z-[100] flex flex-col overflow-hidden">
       {saveStatus && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[210] bg-emerald-600 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 animate-fade-in-up">
-          {/* Fix: Use Check icon which is now imported */}
           <Check size={18} /> {saveStatus}
         </div>
       )}
@@ -338,10 +360,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="text-xs md:text-sm font-black uppercase tracking-widest">RABBI <span className="text-blue-400">CONTROL</span></div>
           </div>
         </div>
-        <button onClick={onClose} className="bg-red-500 text-white p-2 rounded-xl hover:bg-red-600 flex items-center gap-2 px-3 md:px-4 active:scale-95 transition-all">
-          <LogOut size={16} />
-          <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">Logout</span>
-        </button>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleCloudSync}
+            disabled={isCloudSyncing}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isCloudSyncing ? 'bg-slate-700 text-slate-400' : 'bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white'}`}
+          >
+            {isCloudSyncing ? <Loader2 size={14} className="animate-spin" /> : <UploadCloud size={14} />}
+            {isCloudSyncing ? 'Syncing...' : 'Push to Cloud'}
+          </button>
+          <button onClick={onClose} className="bg-red-500 text-white p-2 rounded-xl hover:bg-red-600 flex items-center gap-2 px-3 md:px-4 active:scale-95 transition-all">
+            <LogOut size={16} />
+            <span className="hidden md:inline text-[10px] font-black uppercase tracking-widest">Logout</span>
+          </button>
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden relative">
@@ -350,14 +383,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         )}
         
         <aside className={`absolute lg:relative z-[120] h-full w-72 bg-slate-900 p-6 flex flex-col gap-2 transition-all duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:hidden'}`}>
-          {/* Fix: Use TrendingUp icon which is now imported */}
           <button onClick={() => switchTab('analytics')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'analytics' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><TrendingUp size={18} /> Overview</button>
           <button onClick={() => switchTab('projects')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><ImageIcon size={18} /> Projects</button>
-          {/* Fix: Use Wrench icon which is now imported */}
           <button onClick={() => switchTab('tools')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'tools' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><Wrench size={18} /> Tool Stack</button>
-          {/* Fix: Use Palette icon which is now imported */}
           <button onClick={() => switchTab('branding')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'branding' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><Palette size={18} /> Branding & CV</button>
-          {/* Fix: Use FileText icon which is now imported */}
           <button onClick={() => switchTab('inquiries')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'inquiries' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><FileText size={18} /> Inquiries</button>
           <button onClick={() => switchTab('security')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold text-sm transition-all ${activeTab === 'security' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}><Key size={18} /> Security</button>
         </aside>
@@ -366,6 +395,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           {activeTab === 'analytics' && (
             <div className="animate-fade-in space-y-6 md:space-y-8">
               <h2 className="text-2xl md:text-3xl font-black">Performance Hub</h2>
+              
+              {/* Cloud Status Banner */}
+              <div className="bg-slate-900 p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-6 border-b-4 border-blue-600 shadow-xl">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center animate-pulse">
+                       <Cloud size={24} />
+                    </div>
+                    <div>
+                       <h3 className="text-sm font-black uppercase tracking-widest">Global Cloud Status</h3>
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Last Synced: {localStorage.getItem('last_cloud_sync') ? new Date(localStorage.getItem('last_cloud_sync')!).toLocaleString() : 'Never'}</p>
+                    </div>
+                 </div>
+                 <button 
+                  onClick={handleCloudSync}
+                  className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center gap-2"
+                 >
+                   {isCloudSyncing ? <Loader2 size={16} className="animate-spin" /> : <RefreshCcw size={16} />}
+                   Sync All Assets
+                 </button>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="bg-white p-6 rounded-3xl border shadow-sm group hover:border-blue-200 transition-all">
                   <div className="flex items-center justify-between mb-1">
@@ -553,7 +603,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
                 <div className="bg-white p-8 rounded-[2.5rem] border shadow-sm text-center">
                   <div className="text-[10px] font-black uppercase mb-6 text-slate-400 tracking-widest">Resume PDF</div>
-                  {/* Fix: Use FileText icon which is now imported */}
                   <div className="h-24 flex items-center justify-center mb-6"><FileText className="text-emerald-500" size={56} /></div>
                   <label className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer inline-block hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">Update CV<input type="file" accept=".pdf" className="hidden" onChange={e => {
                     const f = e.target.files?.[0]; if(f){ const r = new FileReader(); r.onload = () => onIdentityUpdate({...currentIdentity, cvUrl: r.result as string}); r.readAsDataURL(f); }

@@ -5,6 +5,7 @@ import About from './components/About';
 import Services from './components/Services';
 import Portfolio from './components/Portfolio';
 import Tools from './components/Tools';
+import Process from './components/Process';
 import ZoomBooking from './components/ZoomBooking';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -14,7 +15,7 @@ import { Project, SiteIdentity, Tool } from './types';
 import { PROJECTS as INITIAL_PROJECTS, INITIAL_TOOLS } from './constants';
 
 const DEFAULT_IDENTITY: SiteIdentity = {
-  logoUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
+  logoUrl: "https://vutsekzfzgvv08nc.public.blob.vercel-storage.com/Global%20Logo/Gemini_Generated_Image_lxbxgblxbxgblxbx%20%281%29.png",
   profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
   cvUrl: ""
 };
@@ -22,6 +23,7 @@ const DEFAULT_IDENTITY: SiteIdentity = {
 const App: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isCvModalOpen, setIsCvModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('portfolio_projects');
@@ -48,6 +50,29 @@ const App: React.FC = () => {
     };
   });
 
+  // Mock function to simulate cross-device sync
+  // In a real Vercel deployment, you would fetch this from a /api/config route
+  useEffect(() => {
+    const loadCloudConfig = async () => {
+      try {
+        const cloudDataUrl = localStorage.getItem('vercel_blob_config_url');
+        if (cloudDataUrl) {
+          setIsSyncing(true);
+          const response = await fetch(cloudDataUrl);
+          const data = await response.json();
+          if (data.projects) setProjects(data.projects);
+          if (data.identity) setIdentity(data.identity);
+          if (data.tools) setTools(data.tools);
+          setIsSyncing(false);
+        }
+      } catch (e) {
+        console.error("Cloud sync failed, reverting to local data", e);
+        setIsSyncing(false);
+      }
+    };
+    loadCloudConfig();
+  }, []);
+
   // Real-time Visitor Tracking Logic
   useEffect(() => {
     const trackVisit = () => {
@@ -55,7 +80,6 @@ const App: React.FC = () => {
       localStorage.setItem('portfolio_total_visits', (currentVisits + 1).toString());
     };
     
-    // Only track if not in admin mode to avoid counting self-admin actions as unique visits
     if (!isAdminMode) {
       trackVisit();
     }
@@ -99,6 +123,7 @@ const App: React.FC = () => {
       <main>
         <Hero profileImageUrl={identity.profileImageUrl} onDownloadCv={() => setIsCvModalOpen(true)} />
         <About profileImageUrl={identity.profileImageUrl} />
+        <Process />
         <Services />
         <Portfolio projects={projects} />
         <Tools tools={tools} />
@@ -107,6 +132,13 @@ const App: React.FC = () => {
       </main>
       <Footer logoUrl={identity.logoUrl} onAdminLogin={() => setIsAdminMode(true)} />
       <CVModal isOpen={isCvModalOpen} onClose={() => setIsCvModalOpen(false)} cvUrl={identity.cvUrl} />
+      
+      {isSyncing && (
+        <div className="fixed bottom-4 right-4 bg-white/80 backdrop-blur p-3 rounded-2xl border shadow-xl flex items-center gap-3 animate-pulse z-[100]">
+          <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">Syncing Cloud Assets</span>
+        </div>
+      )}
     </div>
   );
 };

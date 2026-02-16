@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Globe, 
@@ -6,171 +5,108 @@ import {
   Code2, 
   Megaphone, 
   Rocket,
-  Smartphone
+  Smartphone,
+  BarChart3,
+  Target,
+  LineChart,
+  Layers
 } from 'lucide-react';
 import { Project, Service, Tool } from './types';
 
 /**
  * Core services provided by S M Fajla Rabbi.
+ * Structured for a Performance Marketing & Growth persona.
  */
 export const SERVICES: Service[] = [
   {
-    title: "Full-Stack Web Development",
-    description: "Building fast, scalable, and modern web applications with cutting-edge technologies.",
-    icon: <Code2 className="w-6 h-6" />,
+    title: "Performance Media Buying",
+    description: "Architecting high-ROAS Meta and Google Ads funnels that turn cold traffic into loyal brand advocates.",
+    icon: <Target className="w-6 h-6" />,
     subServices: [
-      "React & Next.js Development",
-      "Full-Stack Systems (Node/Firebase)",
-      "API Integration & Management",
-      "Custom Dashboard Design"
+      "Meta Ads Scaling (6x+ ROAS)",
+      "Interest Stacking Strategy",
+      "Dynamic Retargeting Funnels",
+      "Advanced Creative Testing"
     ]
   },
   {
-    title: "Conversion-Focused UI/UX",
-    description: "Designing user interfaces that are not only beautiful but engineered for maximum conversion.",
-    icon: <Layout className="w-6 h-6" />,
+    title: "Conversion-Led Development",
+    description: "Building ultra-fast React/Next.js interfaces engineered specifically to maximize checkout completion rates.",
+    icon: <Layers className="w-6 h-6" />,
     subServices: [
-      "Modern Web Design",
-      "User Experience Optimization",
-      "Wireframing & Prototyping",
-      "Mobile-First Approach"
+      "Speed-Optimized Landers",
+      "Headless E-commerce Builds",
+      "Custom Checkout Experiences",
+      "Mobile-First Scaling"
     ]
   },
   {
-    title: "Performance Marketing (Ads)",
-    description: "Data-driven ad campaigns to drive traffic to your high-performance website.",
-    icon: <Megaphone className="w-6 h-6" />,
+    title: "Data Infrastructure & Tracking",
+    description: "Implementing server-side tracking and conversion APIs to ensure 100% data accuracy in a post-iOS14 world.",
+    icon: <BarChart3 className="w-6 h-6" />,
     subServices: [
-      "Facebook & Instagram Ads Scaling",
-      "Meta Pixel & Conversion API",
-      "ROAS-Driven Strategy",
-      "Advanced Retargeting Funnels"
+      "GTM & GA4 Configuration",
+      "Meta Conversion API (CAPI)",
+      "Pixel/Event Optimization",
+      "ROI Attribution Modeling"
     ]
   },
   {
-    title: "E-commerce Solutions",
-    description: "End-to-end online store setup with optimized checkout flows and tracking.",
-    icon: <Smartphone className="w-6 h-6" />,
+    title: "E-commerce Growth Strategy",
+    description: "Holistic brand scaling covering everything from supply chain logic to customer lifetime value (LTV) optimization.",
+    icon: <LineChart className="w-6 h-6" />,
     subServices: [
-      "Shopify & WordPress Stores",
-      "Inventory Management Sync",
-      "Payment Gateway Integration",
-      "Store SEO & Optimization"
-    ]
-  },
-  {
-    title: "Brand Growth Strategy",
-    description: "Holistic approach to growing your online brand from zero to profitable scaling.",
-    icon: <Rocket className="w-6 h-6" />,
-    subServices: [
-      "Digital Marketing Consultation",
-      "Competitor Analysis",
-      "Content Planning",
-      "ROI Tracking Setup"
+      "Retention & Email Marketing",
+      "Competitor Market Intelligence",
+      "Price Elasticity Strategy",
+      "Funnel Performance Audits"
     ]
   }
 ];
 
-/**
- * Professional Portfolio Projects.
- */
 export const PROJECTS: Project[] = [
   {
-    id: "proj-web-1",
-    title: "SaaS Analytics Dashboard",
-    category: "Website Build",
-    results: "Live Platform",
-    efficiency: "99% Lighthouse",
-    description: "A high-performance React dashboard built with Tailwind CSS, featuring real-time data visualization and secure authentication.",
-    imageUrls: ["https://images.unsplash.com/photo-1551288049-bbbda5366392?q=80&w=2070&auto=format&fit=crop"],
-    metrics: [
-      { label: "Performance", value: "99/100", description: "Core Web Vitals" },
-      { label: "Load Time", value: "0.8s", description: "LCP Optimization" },
-      { label: "Framework", value: "React/TS", description: "Next Generation Tech" }
-    ],
-    chartData: [{ name: 'Jan', value: 20 }, { name: 'Feb', value: 45 }, { name: 'Mar', value: 99 }]
-  },
-  {
     id: "proj-mkt-1",
-    title: "Fashion Brand Scale-Up",
+    title: "Lifestyle Brand Scale-Up",
     category: "E-commerce",
-    results: "$52,000 Sales",
-    efficiency: "6.4x ROAS",
-    description: "Scaled a local fashion store by combining a custom fast-loading website with a high-performance Meta Ads retargeting funnel.",
+    results: "$84,200 Sales",
+    efficiency: "7.2x ROAS",
+    description: "Executed a comprehensive scaling strategy for a premium lifestyle brand, achieving record-breaking monthly revenue through a 3-tier funnel approach.",
     imageUrls: ["https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop"],
     metrics: [
-      { label: "Revenue", value: "$52,000", description: "Monthly Growth" },
-      { label: "ROAS", value: "6.4x", description: "Ad Efficiency" },
-      { label: "CTR", value: "4.2%", description: "Creative Engagement" }
+      { label: "Growth", value: "312%", description: "Month-over-Month" },
+      { label: "ROAS", value: "7.2x", description: "Blended Return" },
+      { label: "CPA", value: "BDT 420", description: "Customer Acquisition" },
+      { label: "AOV", value: "BDT 3,850", description: "Order Value" }
     ],
-    chartData: [{ name: 'W1', value: 5000 }, { name: 'W2', value: 12000 }, { name: 'W3', value: 28000 }, { name: 'W4', value: 52000 }]
+    chartData: [{ name: 'Phase 1', value: 12000 }, { name: 'Phase 2', value: 34000 }, { name: 'Scale', value: 84200 }]
   },
   {
-    id: "proj-web-2",
-    title: "Luxury Real Estate Portal",
+    id: "proj-web-1",
+    title: "Venture-Backed SaaS Lander",
     category: "Website Build",
-    results: "Interactive Site",
-    efficiency: "SEO 100/100",
-    description: "Developed a visually stunning real estate portal with custom filtering, interactive maps, and lead capture automation.",
-    imageUrls: ["https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073&auto=format&fit=crop"],
+    results: "24% Conv. Rate",
+    efficiency: "0.6s FCP",
+    description: "Re-engineered a SaaS landing page from scratch focusing on information hierarchy and technical performance to lower acquisition costs.",
+    imageUrls: ["https://images.unsplash.com/photo-1551288049-bbbda5366392?q=80&w=2070&auto=format&fit=crop"],
     metrics: [
-      { label: "SEO", value: "100/100", description: "Search Visibility" },
-      { label: "Leads", value: "350+", description: "Monthly Inquiries" },
-      { label: "Response", value: "Instant", description: "Automated Funnel" }
+      { label: "Conversion", value: "24%", description: "Opt-in Rate" },
+      { label: "Speed", value: "98/100", description: "Mobile Insight" },
+      { label: "Time on Site", value: "4m 12s", description: "User Engagement" }
     ],
-    chartData: [{ name: 'Before', value: 30 }, { name: 'After', value: 100 }]
+    chartData: [{ name: 'Before', value: 8 }, { name: 'After', value: 24 }]
   }
 ];
 
 const AI_STUDIO_LOGO = "https://www.gstatic.com/lamda/images/gemini_sparkle_v2.svg";
 
 export const INITIAL_TOOLS: Tool[] = [
-  { 
-    id: "t1",
-    name: "React & Next.js", 
-    subtitle: "Web Apps", 
-    icon: "https://www.vectorlogo.zone/logos/reactjs/reactjs-icon.svg" 
-  },
-  { 
-    id: "t2",
-    name: "Tailwind CSS", 
-    subtitle: "Modern Design", 
-    icon: "https://www.vectorlogo.zone/logos/tailwindcss/tailwindcss-icon.svg" 
-  },
-  { 
-    id: "t3",
-    name: "TypeScript", 
-    subtitle: "Reliable Code", 
-    icon: "https://www.vectorlogo.zone/logos/typescriptlang/typescriptlang-icon.svg" 
-  },
-  { 
-    id: "t4",
-    name: "Node.js", 
-    subtitle: "Backend Systems", 
-    icon: "https://www.vectorlogo.zone/logos/nodejs/nodejs-icon.svg" 
-  },
-  { 
-    id: "t5",
-    name: "Meta Ads Manager", 
-    subtitle: "Growth Scaling", 
-    icon: "https://www.vectorlogo.zone/logos/facebook/facebook-official.svg" 
-  },
-  { 
-    id: "t6",
-    name: "Figma", 
-    subtitle: "UI/UX Design", 
-    icon: "https://www.vectorlogo.zone/logos/figma/figma-icon.svg" 
-  },
-  { 
-    id: "t7",
-    name: "WordPress", 
-    subtitle: "CMS Development", 
-    icon: "https://www.vectorlogo.zone/logos/wordpress/wordpress-icon.svg" 
-  },
-  { 
-    id: "t8",
-    name: "AI Strategy", 
-    subtitle: "Copy & Planning", 
-    icon: AI_STUDIO_LOGO 
-  }
+  { id: "t1", name: "Meta Ads Manager", subtitle: "Growth Scaling", icon: "https://www.vectorlogo.zone/logos/facebook/facebook-official.svg" },
+  { id: "t2", name: "Google Analytics 4", subtitle: "Data Intelligence", icon: "https://www.vectorlogo.zone/logos/google_analytics/google_analytics-icon.svg" },
+  { id: "t3", name: "GTM / CAPI", subtitle: "Server Tracking", icon: "https://www.vectorlogo.zone/logos/googletagmanager/googletagmanager-icon.svg" },
+  { id: "t4", name: "React / Next.js", subtitle: "High-Speed Web", icon: "https://www.vectorlogo.zone/logos/reactjs/reactjs-icon.svg" },
+  { id: "t5", name: "Shopify / Woo", subtitle: "E-comm Engine", icon: "https://www.vectorlogo.zone/logos/shopify/shopify-icon.svg" },
+  { id: "t6", name: "Tailwind CSS", subtitle: "UX Architecture", icon: "https://www.vectorlogo.zone/logos/tailwindcss/tailwindcss-icon.svg" },
+  { id: "t7", name: "Hotjar / Heatmaps", subtitle: "CRO Analysis", icon: "https://www.vectorlogo.zone/logos/hotjar/hotjar-icon.svg" },
+  { id: "t8", name: "Gemini AI", subtitle: "Content Strategy", icon: AI_STUDIO_LOGO }
 ];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileDown, Code2 } from 'lucide-react';
+import { FileDown, Code2, TrendingUp } from 'lucide-react';
 
 interface HeroProps {
   profileImageUrl: string;
@@ -20,31 +20,31 @@ const Hero: React.FC<HeroProps> = ({ profileImageUrl, onDownloadCv }) => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
               </span>
-              MARKETER & FULL-STACK DESIGNER
+              GROWTH ARCHITECT & PERFORMANCE MARKETER
             </div>
             
             <h1 className="text-3xl md:text-7xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight">
-              Scaling Brands with <br className="hidden md:block" />
+              Scaling Brands via <br className="hidden md:block" />
               <span className="gradient-text">Precision Systems.</span>
             </h1>
             
             <p className="max-w-xl mx-auto lg:mx-0 text-base md:text-xl text-slate-600 mb-8 md:mb-10 leading-relaxed font-medium">
-              I architect high-performance React applications and ROI-driven Meta Ads funnels. 6.4x Average ROAS scaling achieved.
+              I combine conversion-engineered web architecture with high-ROAS Meta Ads scaling to deliver predictable brand growth. 
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <a 
                 href="#contact" 
-                className="w-full sm:w-auto bg-blue-600 text-white px-8 md:px-10 py-4 rounded-xl text-base md:text-lg font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 text-center"
+                className="w-full sm:w-auto bg-blue-600 text-white px-8 md:px-10 py-4 rounded-xl text-base md:text-lg font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 text-center flex items-center justify-center gap-2"
               >
-                Get a Quote
+                Start Scaling Now
               </a>
               <button 
                 onClick={onDownloadCv}
                 className="w-full sm:w-auto bg-slate-900 text-white px-8 py-4 rounded-xl text-base md:text-lg font-bold hover:bg-black transition-all flex items-center justify-center gap-2 shadow-xl"
               >
                 <FileDown size={20} />
-                Get CV
+                Download Deck
               </button>
             </div>
           </div>
@@ -60,12 +60,12 @@ const Hero: React.FC<HeroProps> = ({ profileImageUrl, onDownloadCv }) => {
               </div>
               
               <div className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 bg-white p-3 md:p-6 rounded-xl shadow-xl border border-slate-100 animate-bounce-slow z-20">
-                <div className="text-blue-600 font-black text-lg md:text-3xl">100/100</div>
-                <div className="text-slate-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">Performance</div>
+                <div className="text-blue-600 font-black text-lg md:text-3xl">7.2x</div>
+                <div className="text-slate-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">Avg ROAS</div>
               </div>
               <div className="absolute top-6 -right-4 md:top-12 md:-right-6 bg-white p-3 md:p-6 rounded-xl shadow-xl border border-slate-100 z-20">
-                <div className="text-cyan-600 font-black text-lg md:text-3xl">6.4x</div>
-                <div className="text-slate-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">ROAS</div>
+                <div className="text-cyan-600 font-black text-lg md:text-3xl">312%</div>
+                <div className="text-slate-500 text-[8px] md:text-[10px] font-bold uppercase tracking-widest">Growth</div>
               </div>
             </div>
           </div>
