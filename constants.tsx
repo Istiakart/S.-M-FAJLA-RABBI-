@@ -13,10 +13,6 @@ import {
 } from 'lucide-react';
 import { Project, Service, Tool } from './types';
 
-/**
- * Core services provided by S M Fajla Rabbi.
- * Structured for a Performance Marketing & Growth persona.
- */
 export const SERVICES: Service[] = [
   {
     title: "Performance Media Buying",
@@ -95,6 +91,49 @@ export const PROJECTS: Project[] = [
       { label: "Time on Site", value: "4m 12s", description: "User Engagement" }
     ],
     chartData: [{ name: 'Before', value: 8 }, { name: 'After', value: 24 }]
+  }
+];
+
+export const TESTIMONIALS = [
+  {
+    name: "Alex Rivera",
+    role: "CEO, Nexa Brands",
+    content: "Rabbi's interest-stacking strategy completely changed our CPA. We went from $15 to $4.20 in just 3 weeks. His technical depth in Meta CAPI setup is unmatched.",
+    image: "https://i.pravatar.cc/150?u=alex",
+    metric: "4.2x ROAS Increase"
+  },
+  {
+    name: "Sarah Jenkins",
+    role: "Marketing Director, Bloom Co.",
+    content: "He didn't just build a website; he built a sales machine. Our checkout conversion rate jumped by 18% after the React migration. Truly a full-stack growth expert.",
+    image: "https://i.pravatar.cc/150?u=sarah",
+    metric: "+18% Conversion"
+  },
+  {
+    name: "Mahmudul Hasan",
+    role: "Founder, ClickNova Partner",
+    content: "Working with Rabbi on performance campaigns has been seamless. His data-first approach ensures that every BDT spent is accounted for and optimized for ROI.",
+    image: "https://i.pravatar.cc/150?u=mahmud",
+    metric: "Scalable ROI"
+  }
+];
+
+export const FAQS = [
+  {
+    question: "How do you ensure data accuracy after iOS 14 updates?",
+    answer: "I implement server-side tracking via Meta Conversions API (CAPI) and GTM Server Container. This allows us to bypass browser restrictions and achieve up to 98% event match quality."
+  },
+  {
+    question: "What's your minimum monthly ad spend for scaling?",
+    answer: "For performance scaling, I typically work with brands spending at least BDT 50,000/month. This provides enough data for the algorithm to optimize creative testing effectively."
+  },
+  {
+    question: "Do you offer both web development and ad management?",
+    answer: "Yes. In fact, I prefer it. High-performing ads require a high-converting lander. By handling both, I ensure the transition from ad click to purchase is frictionless."
+  },
+  {
+    question: "How quickly can we see results from a new campaign?",
+    answer: "We usually see initial data trends within 72 hours. However, a full scaling cycle—including creative testing and interest validation—typically takes 14 to 21 days."
   }
 ];
 

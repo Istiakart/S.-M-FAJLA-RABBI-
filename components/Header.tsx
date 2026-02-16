@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface HeaderProps {
   logoUrl: string;
+  googleFormUrl?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
+const Header: React.FC<HeaderProps> = ({ logoUrl, googleFormUrl }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -17,14 +19,12 @@ const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
   }, []);
 
   const navLinks = [
-    { name: 'About', href: '#about' },
     { name: 'Services', href: '#services' },
     { name: 'Portfolio', href: '#portfolio' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Reviews', href: '#testimonials' },
+    { name: 'FAQ', href: '#faq' },
     { name: 'Zoom Meeting', href: '#zoom-booking' },
   ];
-
-  const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeBhaQwxVKtQn3ibvqPZ7-FGnUkml9EO6P5EYBZIvWCnCoJeg/viewform?usp=publish-editor";
 
   return (
     <header 
@@ -62,10 +62,10 @@ const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
             </a>
           ))}
           <a 
-            href={GOOGLE_FORM_URL} 
+            href={googleFormUrl} 
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-md shadow-blue-100"
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-all shadow-md shadow-blue-100 animate-attention"
           >
             Contact
           </a>
@@ -106,11 +106,11 @@ const Header: React.FC<HeaderProps> = ({ logoUrl }) => {
             </a>
           ))}
           <a 
-            href={GOOGLE_FORM_URL} 
+            href={googleFormUrl} 
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="mt-2 bg-blue-600 text-white px-6 py-4 rounded-xl text-center font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+            className="mt-2 bg-blue-600 text-white px-6 py-4 rounded-xl text-center font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 animate-attention"
           >
             Contact
           </a>

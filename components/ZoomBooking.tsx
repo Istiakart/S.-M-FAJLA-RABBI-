@@ -2,8 +2,14 @@
 import React from 'react';
 import { Video, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 
-const ZoomBooking: React.FC = () => {
-  const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeBhaQwxVKtQn3ibvqPZ7-FGnUkml9EO6P5EYBZIvWCnCoJeg/viewform?usp=publish-editor";
+// Added interface to accept googleFormUrl prop from App.tsx
+interface ZoomBookingProps {
+  googleFormUrl?: string;
+}
+
+const ZoomBooking: React.FC<ZoomBookingProps> = ({ googleFormUrl }) => {
+  // Use passed googleFormUrl as the primary link, with the legacy link as a fallback
+  const GOOGLE_FORM_URL = googleFormUrl || "https://docs.google.com/forms/d/e/1FAIpQLSeBhaQwxVKtQn3ibvqPZ7-FGnUkml9EO6P5EYBZIvWCnCoJeg/viewform?usp=publish-editor";
 
   return (
     <section id="zoom-booking" className="py-24 bg-blue-900 relative overflow-hidden">
@@ -71,7 +77,7 @@ const ZoomBooking: React.FC = () => {
                   href={GOOGLE_FORM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95 mb-6"
+                  className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95 mb-6 animate-attention"
                 >
                   Book My Zoom Meeting
                 </a>

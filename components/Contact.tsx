@@ -5,9 +5,11 @@ import { FileDown } from 'lucide-react';
 interface ContactProps {
   profileImageUrl: string;
   onDownloadCv?: () => void;
+  whatsAppNumber?: string;
+  linkedInUrl?: string;
 }
 
-const Contact: React.FC<ContactProps> = ({ profileImageUrl, onDownloadCv }) => {
+const Contact: React.FC<ContactProps> = ({ profileImageUrl, onDownloadCv, whatsAppNumber, linkedInUrl }) => {
   return (
     <section id="contact" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,25 +29,25 @@ const Contact: React.FC<ContactProps> = ({ profileImageUrl, onDownloadCv }) => {
 
             <div className="flex flex-col gap-4 w-full md:w-80 shrink-0">
               <a 
-                href="https://wa.me/8801956358439" 
+                href={`https://wa.me/${whatsAppNumber}`} 
                 target="_blank" 
                 rel="noreferrer"
-                className="bg-white text-blue-600 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-slate-50 transition-all shadow-xl active:scale-95 w-full"
+                className="bg-white text-blue-600 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-slate-50 transition-all shadow-xl active:scale-95 w-full animate-attention"
               >
                 WhatsApp Me
               </a>
               <button 
                 onClick={onDownloadCv}
-                className="bg-slate-900 text-white border border-slate-700 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl active:scale-95 w-full"
+                className="bg-slate-900 text-white border border-slate-700 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl active:scale-95 w-full animate-attention"
               >
                 <FileDown size={20} />
                 Download CV
               </button>
               <a 
-                href="https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/" 
+                href={linkedInUrl} 
                 target="_blank" 
                 rel="noreferrer"
-                className="bg-blue-700 text-white border border-blue-500 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-blue-800 transition-all shadow-xl active:scale-95 w-full"
+                className="bg-blue-700 text-white border border-blue-500 px-8 py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-blue-800 transition-all shadow-xl active:scale-95 w-full animate-attention"
               >
                 LinkedIn Profile
               </a>

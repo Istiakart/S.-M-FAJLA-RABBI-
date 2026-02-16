@@ -22,6 +22,21 @@ export interface Project {
   demographics?: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  content: string;
+  image: string;
+  metric: string;
+}
+
+export interface FAQData {
+  id: string;
+  question: string;
+  answer: string;
+}
+
 export interface Visit {
   id: string;
   timestamp: string;
@@ -48,4 +63,8 @@ export interface SiteIdentity {
   logoUrl: string;
   profileImageUrl: string;
   cvUrl?: string;
+  googleFormUrl?: string;
+  googleSheetUrl?: string;
+  whatsAppNumber?: string;
+  linkedInUrl?: string;
 }

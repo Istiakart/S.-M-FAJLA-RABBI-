@@ -3,7 +3,12 @@ import React from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { SERVICES } from '../constants';
 
-const Services: React.FC = () => {
+// Added interface to accept googleFormUrl prop from App.tsx
+interface ServicesProps {
+  googleFormUrl?: string;
+}
+
+const Services: React.FC<ServicesProps> = ({ googleFormUrl }) => {
   return (
     <section id="services" className="py-24 bg-slate-50 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none select-none">
@@ -82,8 +87,9 @@ const Services: React.FC = () => {
                 My full-stack approach ensures that no lead is wasted and every BDT spent on ads returns maximum value to your business.
               </p>
             </div>
+            {/* Updated to use googleFormUrl if provided, otherwise fallback to WhatsApp */}
             <a 
-              href="https://wa.me/8801956358439" 
+              href={googleFormUrl || "https://wa.me/8801956358439"} 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-white text-blue-600 px-10 py-5 rounded-2xl font-black hover:bg-blue-50 transition-all shadow-xl shadow-blue-950/20 active:scale-95 whitespace-nowrap text-center flex items-center justify-center gap-2"
