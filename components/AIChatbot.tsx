@@ -68,8 +68,13 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
 
     try {
       // 1. API Key Setup
-      // 1. API Key Setup
       const apiKey = process.env.NEXT_PUBLIC_API_KEY || "AIzaSyA3g0Tnvt521GczxaOBNVYo8l3l2mjOARY";
+      
+      if (!apiKey) {
+        throw new Error("API Key is missing");
+      }
+
+      console.log("Initializing Gemini with Key length:", apiKey.length); // Debug log
       const ai = new GoogleGenAI({ apiKey });
       
       // 2. Chat Configuration - Using Gemini 1.5 Flash for maximum stability
@@ -101,7 +106,9 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       });
 
       // 3. Send Message
+      console.log("Sending message to Gemini...");
       const response = await chat.sendMessage({ message: userMessage });
+      console.log("Received response from Gemini");
       
       // 4. Handle Response
       const functionCalls = response.functionCalls;
