@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { Send, X, Loader2, ChevronDown } from 'lucide-react';
@@ -42,6 +41,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
     scrollToBottom();
   }, [messages]);
 
+  // Lead capture tool definition
   const saveLeadFunctionDeclaration: FunctionDeclaration = {
     name: "save_lead_details",
     parameters: {
@@ -67,11 +67,11 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
     setIsLoading(true);
 
     try {
-      // 1. API Key Setup - GitHub Deployment এর জন্য fallback কী এবং env ভেরিয়েবল চেক করা হচ্ছে
+      // 1. API Key Setup
       const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration - Gemini 3 Flash ব্যবহার করা হচ্ছে যা দ্রুত এবং বুদ্ধিমান
+      // 2. Chat Configuration
       const chat = ai.chats.create({
         model: "gemini-3-flash-preview",
         config: {
@@ -81,7 +81,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
           - সার্ভিস: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
           - প্রজেক্টস: ${projects.slice(0, 5).map(p => `${p.title} (${p.results})`).join(', ')}।
           - টেক স্ট্যাক: ${tools.slice(0, 8).map(t => t.name).join(', ')}।
-          - এজেন্সি: ClickNova IT Agency.
+          - কন্টাক্ট: WhatsApp (8801956358439), LinkedIn (https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/), Agency (ClickNova IT Agency).
           
           আপনার লক্ষ্য:
           ১. ক্লায়েন্ট যদি Rabbi-এর কাজ বা সার্ভিস নিয়ে প্রশ্ন করে, উপরের তথ্য থেকে উত্তর দিন। 
@@ -126,28 +126,6 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
 
     } catch (error) {
       console.error("Chatbot Error:", error);
-      
-      // Fallback logic for production reliability
-      try {
-        const apiKey = process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
-        const ai = new GoogleGenAI({ apiKey });
-        const model = ai.models.generateContent({
-          model: "gemini-1.5-flash",
-          contents: userMessage,
-          config: {
-            systemInstruction: "You are Rabbi's AI assistant. Briefly answer the user about Rabbi's digital marketing and web design services."
-          }
-        });
-        const res = await model;
-        if (res.text) {
-          setMessages(prev => [...prev, { role: 'model', text: res.text }]);
-          setIsLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.error("Critical Failure:", e);
-      }
-
       setMessages(prev => [...prev, { 
         role: 'model', 
         text: "দুঃখিত, আমি এই মুহূর্তে কানেক্ট হতে পারছি না। দয়া করে কিছুক্ষণ পর চেষ্টা করুন অথবা সরাসরি Rabbi-এর সাথে WhatsApp-এ (8801956358439) যোগাযোগ করুন।" 
@@ -183,8 +161,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
               </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar bg-slate-50">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50 no-scrollbar">
               {messages.map((m, i) => (
                 <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                   {m.role === 'model' && (
@@ -192,10 +170,8 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
                       <img src={profileImageUrl} alt="AI" className="w-full h-full object-cover" />
                     </div>
                   )}
-                  <div className={`max-w-[75%] p-4 rounded-3xl text-sm font-medium leading-relaxed shadow-sm ${
-                    m.role === 'user' 
-                      ? 'bg-indigo-600 text-white rounded-tr-none' 
-                      : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none'
+                  <div className={`max-w-[75%] p-4 rounded-3xl text-sm font-medium shadow-sm ${
+                    m.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none'
                   }`}>
                     {m.text}
                   </div>
@@ -203,10 +179,10 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
               ))}
               {isLoading && (
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-xl overflow-hidden shrink-0 border border-slate-200 mt-1">
+                  <div className="w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shrink-0">
                     <img src={profileImageUrl} alt="AI" className="w-full h-full object-cover" />
                   </div>
-                  <div className="bg-white border border-slate-100 p-4 rounded-3xl rounded-tl-none shadow-sm">
+                  <div className="bg-white p-4 rounded-3xl rounded-tl-none shadow-sm">
                     <Loader2 size={16} className="animate-spin text-indigo-600" />
                   </div>
                 </div>
@@ -214,7 +190,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* Input Area */}
             <div className="p-4 bg-white border-t border-slate-100">
               <div className="flex gap-2">
                 <input
@@ -222,7 +198,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
+                  placeholder="Ask me anything..."
                   className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all"
                 />
                 <button
@@ -238,20 +214,14 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
         )}
       </AnimatePresence>
 
+      {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 overflow-hidden ${
           isOpen ? 'bg-rose-500 rotate-90' : 'bg-indigo-600 hover:scale-110 border-2 border-white'
         }`}
       >
-        {isOpen ? (
-          <X className="text-white" size={28} />
-        ) : (
-          <img src={profileImageUrl} alt="Rabbi" className="w-full h-full object-cover" />
-        )}
-        {!isOpen && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full animate-pulse z-10"></div>
-        )}
+        {isOpen ? <X className="text-white" size={28} /> : <img src={profileImageUrl} alt="Rabbi" className="w-full h-full object-cover" />}
       </button>
     </div>
   );
