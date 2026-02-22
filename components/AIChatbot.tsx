@@ -77,19 +77,22 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
         model: "gemini-3-flash-preview",
         config: {
           thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // Low latency for chat
-          systemInstruction: `আপনি S M Fajla Rabbi-এর একজন প্রফেশনাল AI অ্যাসিস্ট্যান্ট। আপনি এখন Gemini 3 মডেলের শক্তিতে চালিত।
+          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. You are powered by the Gemini 3 model.
           
-          RABBI সম্পর্কে তথ্য:
-          - সার্ভিস: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
-          - প্রজেক্টস: ${projects.slice(0, 5).map(p => `${p.title} (${p.results})`).join(', ')}।
-          - টেক স্ট্যাক: ${tools.slice(0, 8).map(t => t.name).join(', ')}।
-          - কন্টাক্ট: WhatsApp (8801956358439), LinkedIn (https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/), Agency (ClickNova IT Agency).
+          CONTEXT ABOUT RABBI:
+          - Services: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
+          - Projects: ${projects.slice(0, 5).map(p => `${p.title} (${p.results})`).join(', ')}.
+          - Tech Stack: ${tools.slice(0, 8).map(t => t.name).join(', ')}.
+          - Contact: WhatsApp (8801956358439), LinkedIn (https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/), Agency (ClickNova IT Agency).
           
-          আপনার লক্ষ্য:
-          ১. ক্লায়েন্ট যদি Rabbi-এর কাজ বা সার্ভিস নিয়ে প্রশ্ন করে, উপরের তথ্য থেকে উত্তর দিন। 
-          ২. যদি ক্লায়েন্ট কাজ করতে আগ্রহী হয়, তবে তার নাম, ইমেইল/ফোন নম্বর এবং কি ধরণের কাজ প্রয়োজন তা জিজ্ঞাসা করুন।
-          ৩. ক্লায়েন্টের নাম এবং অন্তত একটি কন্টাক্ট ইনফো পাওয়ার সাথে সাথে 'save_lead_details' টুলটি কল করুন।
-          ৪. কথা বলার ধরণ হবে প্রফেশনাল এবং হেল্পফুল। বাংলা বা ইংরেজি যে ভাষায় ক্লায়েন্ট কথা বলবে, সেই ভাষাতেই উত্তর দিন।`,
+          YOUR GOALS:
+          1. Answer questions about Rabbi's services using the context above.
+          2. Collect lead details: Name, Email/Phone, and Requirements.
+          3. Use the 'save_lead_details' tool IMMEDIATELY once you have the user's name and at least one contact method.
+          
+          CRITICAL INSTRUCTION:
+          - ALWAYS reply in ENGLISH, regardless of the language the user speaks.
+          - Keep responses professional, concise, and conversion-focused.`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
         history: messages.map(m => ({
@@ -116,7 +119,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
             
             setMessages(prev => [...prev, { 
               role: 'model', 
-              text: `ধন্যবাদ ${leadData.name}! আমি আপনার তথ্যগুলো সেভ করে রেখেছি। Rabbi খুব শীঘ্রই আপনার সাথে যোগাযোগ করবেন। এছাড়া কি আর কোনো সাহায্য করতে পারি?` 
+              text: `Thank you ${leadData.name}! I have saved your information. Rabbi will contact you shortly. Is there anything else I can help you with?` 
             }]);
           }
         }
@@ -130,7 +133,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       console.error("Chatbot Error:", error);
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: "দুঃখিত, আমি এই মুহূর্তে কানেক্ট হতে পারছি না। দয়া করে কিছুক্ষণ পর চেষ্টা করুন অথবা সরাসরি Rabbi-এর সাথে WhatsApp-এ (8801956358439) যোগাযোগ করুন।" 
+        text: "Sorry, I can't connect right now. Please try again later or contact Rabbi directly on WhatsApp (8801956358439)." 
       }]);
     } finally {
       setIsLoading(false);
