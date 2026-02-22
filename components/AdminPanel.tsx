@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Project, SiteIdentity, Tool, Testimonial, FAQData } from '../types';
+import { Project, SiteIdentity, Tool, Testimonial, FAQData, Lead } from '../types';
 import { 
   Trash2, X, ImageIcon, Edit3, Menu, MessageSquare, HelpCircle,
   Shield, Activity, Zap, Stars, Wrench, Palette, Save, Lock, Smartphone,
   LayoutDashboard, FolderKanban, Quote, Fingerprint, Globe, ChevronRight,
   TrendingUp, Database, Bell, Star, Cloud, CheckCircle2, ShieldCheck, BarChart3, Plus,
   ImagePlus, AlertTriangle, HardDrive, Sparkles, BrainCircuit, Loader2, User, Eye, EyeOff, ExternalLink, FileText, Upload,
-  Settings, Layers, CreditCard, Box, Cpu, KeyRound
+  Settings, Layers, CreditCard, Box, Cpu, KeyRound, Users
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import MediaUploader from './MediaUploader';
@@ -27,6 +27,8 @@ interface AdminPanelProps {
   onTestimonialsUpdate: (testimonials: Testimonial[]) => void;
   faqs: FAQData[];
   onFaqsUpdate: (faqs: FAQData[]) => void;
+  leads: Lead[];
+  onLeadsUpdate: (leads: Lead[]) => void;
   adminCreds: any;
   onAdminCredsUpdate: (creds: any) => void;
 }
@@ -44,7 +46,7 @@ const ANALYTICS_DATA = [
 const AdminPanel: React.FC<AdminPanelProps> = ({ 
   onClose, onProjectsUpdate, currentProjects, currentIdentity, onIdentityUpdate,
   currentTools, onToolsUpdate, testimonials, onTestimonialsUpdate, faqs, onFaqsUpdate,
-  adminCreds, onAdminCredsUpdate
+  leads, onLeadsUpdate, adminCreds, onAdminCredsUpdate
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginUsername, setLoginUsername] = useState('');
@@ -52,7 +54,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [otpCode, setOtpCode] = useState('');
   const [loginError, setLoginError] = useState('');
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'projects' | 'reviews' | 'faq' | 'stack' | 'identity' | 'security' | 'bookings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'projects' | 'reviews' | 'faq' | 'stack' | 'identity' | 'security' | 'bookings' | 'leads'>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [blobToken, setBlobToken] = useState(localStorage.getItem('vercel_blob_token') || '');
@@ -295,6 +297,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             { id: 'faq', icon: HelpCircle, label: 'KB Logic' },
             { id: 'stack', icon: Layers, label: 'Toolbox' },
             { id: 'bookings', icon: ExternalLink, label: 'Bookings' },
+            { id: 'leads', icon: Users, label: 'AI Leads' },
             { id: 'identity', icon: User, label: 'Identity' },
             { id: 'security', icon: Lock, label: 'Security' },
           ].map((item) => (
@@ -346,6 +349,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 {[
                   { label: 'Portfolios', count: currentProjects.length, icon: Box, color: 'indigo' },
                   { label: 'Vouch List', count: testimonials.length, icon: Quote, color: 'emerald' },
+                  { label: 'AI Leads', count: leads.length, icon: Users, color: 'rose' },
                   { label: 'Toolbox', count: currentTools.length, icon: Layers, color: 'violet' }
                 ].map((stat, i) => (
                   <div key={i} className="bg-[#0f172a] border border-white/5 p-12 rounded-[4rem] shadow-2xl relative overflow-hidden group hover:border-indigo-500/20 transition-all">
@@ -662,6 +666,75 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     Open Master Sheet <ExternalLink size={18} />
                   </a>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* AI LEADS */}
+          {activeTab === 'leads' && (
+            <div className="animate-fade-in space-y-20">
+              <header>
+                <p className="text-rose-400 font-black uppercase tracking-[0.5em] text-[10px] mb-4">AI Assistant Intelligence</p>
+                <h2 className="text-7xl font-black text-white tracking-tighter">AI Leads.</h2>
+              </header>
+              <div className="space-y-8">
+                {leads.length === 0 ? (
+                  <div className="bg-[#0f172a] border border-white/5 p-20 rounded-[4rem] text-center">
+                    <Users className="text-slate-700 mx-auto mb-6" size={64} />
+                    <p className="text-slate-500 font-black uppercase tracking-widest text-sm">No leads captured yet by AI.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6">
+                    {leads.map(lead => (
+                      <div key={lead.id} className="bg-[#0f172a] border border-white/5 p-10 rounded-[3rem] shadow-xl group hover:border-rose-500/30 transition-all">
+                        <div className="flex flex-col md:flex-row justify-between gap-8">
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center">
+                                <User className="text-rose-500" size={24} />
+                              </div>
+                              <div>
+                                <h4 className="text-2xl font-black text-white">{lead.name}</h4>
+                                <p className="text-rose-400 font-bold text-[10px] uppercase tracking-widest">{lead.businessName || 'Individual'}</p>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              {lead.email && (
+                                <div className="flex items-center gap-3 text-slate-400">
+                                  <Globe size={16} className="text-slate-600" />
+                                  <span className="font-mono">{lead.email}</span>
+                                </div>
+                              )}
+                              {lead.phone && (
+                                <div className="flex items-center gap-3 text-slate-400">
+                                  <Smartphone size={16} className="text-slate-600" />
+                                  <span className="font-mono">{lead.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                            {lead.requirements && (
+                              <div className="bg-[#020617] p-6 rounded-2xl border border-white/5">
+                                <p className="text-slate-300 text-sm italic leading-relaxed">"{lead.requirements}"</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col justify-between items-end gap-6">
+                            <div className="text-right">
+                              <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Captured On</div>
+                              <div className="text-slate-400 font-mono text-xs">{new Date(lead.timestamp).toLocaleString()}</div>
+                            </div>
+                            <button 
+                              onClick={() => onLeadsUpdate(leads.filter(l => l.id !== lead.id))}
+                              className="p-4 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-lg"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

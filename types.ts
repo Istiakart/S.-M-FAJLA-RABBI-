@@ -69,3 +69,13 @@ export interface SiteIdentity {
   whatsAppNumber?: string;
   linkedInUrl?: string;
 }
+
+export interface Lead {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  businessName?: string;
+  requirements?: string;
+  timestamp: string;
+}
