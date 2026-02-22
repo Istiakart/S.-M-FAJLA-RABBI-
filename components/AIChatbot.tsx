@@ -21,9 +21,11 @@ interface Message {
 interface AIChatbotProps {
   onLeadCapture: (lead: LeadDetails) => void;
   profileImageUrl: string;
+  projects: any[];
+  tools: any[];
 }
 
-const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl }) => {
+const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, projects, tools }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'model', text: "Hi! I'm Rabbi's AI assistant. How can I help you scale your brand today?" }
@@ -65,27 +67,28 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
     setIsLoading(true);
 
     try {
-      // 1. API Key Setup - Prioritize the provided key if environment variables are missing or restricted
+      // 1. API Key Setup - Prioritize the provided key
       const apiKey = process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration - Using gemini-flash-latest for maximum compatibility
+      // 2. Chat Configuration - Using gemini-3-flash-preview for best performance
       const chat = ai.chats.create({
-        model: "gemini-flash-latest",
+        model: "gemini-3-flash-preview",
         config: {
           systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. 
-          Your goal is to:
-          1. Answer questions about Rabbi's services (Meta/Google Ads scaling, React/Next.js development, GTM/CAPI tracking).
-          2. Provide info about his portfolio (e.g., scaling a lifestyle brand to 7.2x ROAS).
-          3. Collect lead details (Name, Email/Phone, Business Name, Requirements) when a user shows interest in working together.
-          4. Use the 'save_lead_details' tool as soon as you have enough information to identify a lead.
           
-          Rabbi's Contact Info:
-          - WhatsApp: 8801956358439
-          - LinkedIn: https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/
-          - Agency: ClickNova IT Agency
+          CONTEXT ABOUT RABBI:
+          - Services: Meta/Google Ads scaling, React/Next.js development, GTM/CAPI tracking.
+          - Portfolio Highlights: ${projects.slice(0, 3).map(p => `${p.title} (${p.results})`).join(', ')}.
+          - Tech Stack: ${tools.slice(0, 5).map(t => t.name).join(', ')}.
+          - Contact: WhatsApp (8801956358439), LinkedIn (https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/), Agency (ClickNova IT Agency).
           
-          Be professional, helpful, and conversion-focused.`,
+          YOUR GOALS:
+          1. Answer questions accurately using the context above. If you don't know something, suggest a Zoom call.
+          2. Be proactive in collecting lead details: Name, Email/Phone, Business Name, and Requirements.
+          3. Use the 'save_lead_details' tool IMMEDIATELY once you have the user's name and at least one contact method or requirement.
+          
+          TONE: Professional, energetic, and conversion-focused.`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
         history: messages.map(m => ({

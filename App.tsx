@@ -113,6 +113,8 @@ const App: React.FC = () => {
       <AIChatbot 
         onLeadCapture={handleLeadCapture} 
         profileImageUrl={identity.profileImageUrl} 
+        projects={projects}
+        tools={tools}
       />
 
       {isAdminMode && (
