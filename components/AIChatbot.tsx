@@ -67,37 +67,26 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
     setIsLoading(true);
 
     try {
-      // 1. API Key Setup - Using environment variable from Vercel
-      const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+      // 1. API Key Setup - Checking multiple possible sources for Vercel/Vite compatibility
+      const apiKey = 
+        (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_API_KEY : null) || 
+        (import.meta.env ? import.meta.env.VITE_API_KEY : null) ||
+        "AIzaSyA3g0Tnvt521GczxaOBNVYo8l3l2mjOARY";
       
-      if (!apiKey) {
-        throw new Error("Gemini API Key is missing. Please set NEXT_PUBLIC_API_KEY in Vercel settings.");
+      if (!apiKey || apiKey.length < 10) {
+        throw new Error("Invalid or missing API Key");
       }
 
-      console.log("Initializing Gemini..."); 
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration - Using Gemini 3 Flash (Latest)
+      // 2. Chat Configuration
       const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. You are powered by Gemini 3 Flash.
-          
-          CONTEXT ABOUT RABBI:
-          - Services: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
-          - Projects: ${projects.slice(0, 5).map(p => `${p.title} (${p.results})`).join(', ')}.
-          - Tech Stack: ${tools.slice(0, 8).map(t => t.name).join(', ')}.
-          - Contact: WhatsApp (8801956358439), LinkedIn (https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/), Agency (ClickNova IT Agency).
-          
-          YOUR GOALS:
-          1. Answer questions about Rabbi's services using the context above.
-          2. Collect lead details: Name, Email/Phone, and Requirements.
-          3. Use the 'save_lead_details' tool IMMEDIATELY once you have the user's name and at least one contact method.
-          
-          CRITICAL INSTRUCTION:
-          - ALWAYS reply in ENGLISH.
-          - Keep responses professional, concise, and conversion-focused.`,
+          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi. 
+          Respond ONLY in English. Be professional and concise.
+          Services: Meta/Google Ads, Web Design, Tracking.
+          Goal: Answer questions and collect lead info (Name, Contact, Needs).`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
         history: messages.map(m => ({
@@ -107,9 +96,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       });
 
       // 3. Send Message
-      console.log("Sending message to Gemini...");
       const response = await chat.sendMessage({ message: userMessage });
-      console.log("Received response from Gemini");
       
       // 4. Handle Response
       const functionCalls = response.functionCalls;
@@ -136,11 +123,12 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
         throw new Error("No response from AI");
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chatbot Error:", error);
+      const errorMessage = error?.message || "Unknown error";
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: "Sorry, I can't connect right now. Please try again later or contact Rabbi directly on WhatsApp (8801956358439)." 
+        text: `Error: ${errorMessage}. Please try again or contact Rabbi on WhatsApp (8801956358439).` 
       }]);
     } finally {
       setIsLoading(false);
