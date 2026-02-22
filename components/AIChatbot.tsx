@@ -65,10 +65,13 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
     setIsLoading(true);
 
     try {
-      // Use GEMINI_API_KEY for the default free-tier access
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      // 1. API Key Setup
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY || process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
+      const ai = new GoogleGenAI({ apiKey });
+      
+      // 2. Chat Configuration (using the correct SDK pattern for this environment)
       const chat = ai.chats.create({
-        model: "gemini-flash-latest",
+        model: "gemini-3-flash-preview",
         config: {
           systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. 
           Your goal is to:
@@ -82,7 +85,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
           - LinkedIn: https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/
           - Agency: ClickNova IT Agency
           
-          Be professional, helpful, and conversion-focused. If asked about pricing, mention that it depends on the project scope and suggest booking a Zoom call via the button on the site.`,
+          Be professional, helpful, and conversion-focused.`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
         history: messages.map(m => ({
@@ -91,13 +94,12 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
         }))
       });
 
+      // 3. Send Message
       const response = await chat.sendMessage({ message: userMessage });
       
-      if (!response || !response.text && (!response.functionCalls || response.functionCalls.length === 0)) {
-        throw new Error("Empty response from AI");
-      }
-
+      // 4. Check for function calls (using property access as per guidelines)
       const functionCalls = response.functionCalls;
+      
       if (functionCalls && functionCalls.length > 0) {
         for (const call of functionCalls) {
           if (call.name === 'save_lead_details') {
@@ -107,19 +109,24 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
               timestamp: new Date().toISOString()
             });
             
-            // Add a friendly confirmation message to the chat
             setMessages(prev => [...prev, { 
               role: 'model', 
-              text: `Got it, ${leadData.name}! I've saved your details. Rabbi will review your requirements and get back to you soon. Is there anything else I can help you with?` 
+              text: `Got it, ${leadData.name}! I've saved your details. Rabbi will review your requirements and get back to you soon.` 
             }]);
           }
         }
       } else {
-        setMessages(prev => [...prev, { role: 'model', text: response.text || "I'm here to help!" }]);
+        // 5. Handle text response (using property access)
+        const text = response.text;
+        setMessages(prev => [...prev, { role: 'model', text: text || "I'm here to help!" }]);
       }
+
     } catch (error) {
       console.error("Chatbot Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "I'm having a bit of trouble connecting right now. Please try again in a moment or reach out to Rabbi directly via WhatsApp!" }]);
+      setMessages(prev => [...prev, { 
+        role: 'model', 
+        text: "I'm having a bit of trouble connecting right now. Please try again or contact Rabbi via WhatsApp." 
+      }]);
     } finally {
       setIsLoading(false);
     }
