@@ -27,7 +27,8 @@ export interface Testimonial {
   name: string;
   role: string;
   content: string;
-  image: string;
+  image: string; // Primary avatar image
+  imageUrls?: string[]; // Support for multiple proof images (max 2)
   metric: string;
 }
 

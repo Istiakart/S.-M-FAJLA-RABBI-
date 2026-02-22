@@ -73,7 +73,6 @@ const App: React.FC = () => {
         />
         <About profileImageUrl={identity.profileImageUrl} />
         <Services googleFormUrl={identity.googleFormUrl} />
-        {/* AILab removed from landing page as per request */}
         <Portfolio projects={projects} />
         <Tools tools={tools} />
         <Process />

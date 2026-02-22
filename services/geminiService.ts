@@ -2,35 +2,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 /**
- * Generates a professional summary for marketing case studies.
- */
-export const generateCaseStudySummary = async (stats: string) => {
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Process these campaign metrics: ${stats}`,
-      config: {
-        systemInstruction: "Act as a senior growth marketing expert. Transform raw metrics into a professional one-sentence case study insight (max 60 words). Focus on ROI and precision.",
-        temperature: 0.7,
-      }
-    });
-    return response.text || "Summary generation completed.";
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return "The AI is currently processing data.";
-  }
-};
-
-/**
- * Extracts structured marketing data from an image using Gemini Vision.
+ * Extracts structured marketing data from an image using Gemini Flash.
  */
 export const analyzeMarketingImage = async (base64Data: string, mimeType: string) => {
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      // Fix: Ensure contents follows the correct multi-part structure using a 'parts' array.
       contents: {
         parts: [
           {
@@ -40,7 +18,7 @@ export const analyzeMarketingImage = async (base64Data: string, mimeType: string
             },
           },
           {
-            text: "Extract marketing data from this screenshot. Focus on Campaign Name, Total Results (e.g., messages, leads, reach), and Efficiency (e.g., cost per result). Return the data in a clear structured way.",
+            text: "Analyze this marketing dashboard or screenshot. Extract: 1. A professional title for the campaign. 2. Category (E-commerce, Leads, or Engagement). 3. Total Results (e.g., 'BDT 50k Sales' or '120 Leads'). 4. Efficiency (e.g., '6.5x ROAS' or 'BDT 12/Lead'). 5. A one-sentence description of the strategy used. Be precise and professional.",
           },
         ],
       },
@@ -50,19 +28,42 @@ export const analyzeMarketingImage = async (base64Data: string, mimeType: string
           type: Type.OBJECT,
           properties: {
             title: { type: Type.STRING, description: "The likely campaign or project name" },
-            category: { type: Type.STRING, description: "E-commerce, Leads, or Engagement" },
-            results: { type: Type.STRING, description: "Total results with unit, e.g. '142 Messages'" },
-            efficiency: { type: Type.STRING, description: "Cost per result, e.g. 'BDT 8.20/Conv'" },
-            description: { type: Type.STRING, description: "A short 1-sentence summary of the performance seen in the image" },
+            category: { type: Type.STRING, description: "One of: E-commerce, Leads, Engagement, Website Build" },
+            results: { type: Type.STRING, description: "Total results with unit" },
+            efficiency: { type: Type.STRING, description: "Cost per result or ROAS" },
+            description: { type: Type.STRING, description: "A professional summary of what is seen in the image" },
           },
           required: ["title", "category", "results", "efficiency", "description"],
         },
       },
     });
 
-    return JSON.parse(response.text || "{}");
+    const text = response.text;
+    if (!text) throw new Error("No response from AI");
+    return JSON.parse(text);
   } catch (error) {
-    console.error("Vision AI Error:", error);
+    console.error("Gemini Vision AI Error:", error);
     throw error;
+  }
+};
+
+/**
+ * Generates a professional summary for marketing case studies.
+ */
+export const generateCaseStudySummary = async (stats: string) => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Generate a growth marketing insight for these metrics: ${stats}`,
+      config: {
+        systemInstruction: "You are a senior digital marketing strategist. Provide a short, high-impact insight (max 40 words) focusing on business growth and technical efficiency.",
+        temperature: 0.7,
+      }
+    });
+    return response.text || "Insight generated successfully.";
+  } catch (error) {
+    console.error("Gemini Summary Error:", error);
+    return "Analyzing performance trends...";
   }
 };

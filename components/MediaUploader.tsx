@@ -1,125 +1,136 @@
 
-import React, { useState, useRef } from 'react';
-import { Upload, X, Check, Loader2, ImageIcon, FileText } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, X, Loader2, Plus, ImagePlus } from 'lucide-react';
 import { uploadFile } from '../services/blobService';
 
 interface MediaUploaderProps {
   onUploadSuccess: (url: string) => void;
+  initialUrl?: string;
   label?: string;
   folder?: string;
-  accept?: string;
+  compact?: boolean;
 }
 
 const MediaUploader: React.FC<MediaUploaderProps> = ({ 
   onUploadSuccess, 
-  label = "Upload Asset", 
+  initialUrl,
+  label = "Add", 
   folder = "general",
-  accept = "image/*"
+  compact = false
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // If an initial URL is provided (like editing a profile pic), show it.
+    // Otherwise, keep it empty for the "+" button behavior.
+    setPreviewUrl(initialUrl || null);
+    setFile(null);
+  }, [initialUrl]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setStatus('idle');
       const reader = new FileReader();
       reader.onloadend = () => setPreviewUrl(reader.result as string);
       reader.readAsDataURL(selectedFile);
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (!file) return;
+    
     setIsUploading(true);
     try {
       const url = await uploadFile(file, folder);
-      setPreviewUrl(url);
+      
+      // IMPORTANT: Notify parent of success
       onUploadSuccess(url);
-      setStatus('success');
+      
+      // RESET internal state so the "+" button reappears for the next image
+      setFile(null);
+      setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      
     } catch (err) {
       console.error(err);
-      setStatus('error');
+      alert("Upload failed. Please check your connection or storage token.");
     } finally {
       setIsUploading(false);
     }
   };
 
-  const clear = () => {
+  const clear = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setFile(null);
     setPreviewUrl(null);
-    setStatus('idle');
     if (fileInputRef.current) fileInputRef.current.value = '';
+    // If this was an existing image being cleared, notify parent
+    if (!file) onUploadSuccess('');
+  };
+
+  const triggerFileInput = () => {
+    if (!isUploading && !previewUrl) {
+      fileInputRef.current?.click();
+    }
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full">
       <div 
-        className={`relative group border-2 border-dashed rounded-[2rem] p-6 transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer
-          ${status === 'success' ? 'border-emerald-200 bg-emerald-50/30' : 
-            status === 'error' ? 'border-red-200 bg-red-50/30' : 
-            'border-slate-200 bg-slate-50/50 hover:border-blue-400 hover:bg-white'}`}
-        onClick={() => !file && fileInputRef.current?.click()}
+        onClick={triggerFileInput}
+        className={`relative border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden group
+          ${compact ? 'aspect-square w-full' : 'aspect-square w-full'}
+          ${previewUrl ? 'border-blue-500/50 bg-blue-50/10' : 'border-slate-700/50 bg-slate-800/50 hover:border-blue-500 hover:bg-blue-500/10 shadow-inner'}`}
       >
         <input 
           type="file" 
           ref={fileInputRef} 
           onChange={handleFileChange} 
           className="hidden" 
-          accept={accept}
+          accept="image/*" 
         />
 
         {previewUrl ? (
-          <div className="relative w-full max-w-[200px] aspect-square rounded-2xl overflow-hidden shadow-2xl border-4 border-white animate-fade-in">
-            <img src={previewUrl} className="w-full h-full object-cover" alt="Preview" />
-            <button 
-              onClick={(e) => { e.stopPropagation(); clear(); }}
-              className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-colors"
-            >
-              <X size={14} />
-            </button>
+          <div className="relative w-full h-full group">
+            <img src={previewUrl} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Preview" />
+            <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <button 
+                onClick={clear}
+                className="p-2.5 bg-rose-500 text-white rounded-xl shadow-lg hover:scale-110 active:scale-90 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="py-4 space-y-3">
-            <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto text-slate-400 group-hover:text-blue-500 transition-colors">
-              <Upload size={28} />
+          <div className="flex flex-col items-center gap-2 text-slate-500 group-hover:text-blue-500 transition-all pointer-events-none">
+            <div className="p-3 bg-slate-900/50 rounded-full border border-slate-700 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-lg">
+               <Plus size={24} />
             </div>
-            <div>
-              <p className="text-sm font-bold text-slate-900">{label}</p>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Drag & Drop or Click</p>
-            </div>
+            <span className="text-[9px] font-black uppercase tracking-widest leading-tight">{label}</span>
+          </div>
+        )}
+
+        {isUploading && (
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 p-2 text-center">
+            <Loader2 size={24} className="text-blue-500 animate-spin mb-2" />
+            <span className="text-[8px] font-black text-white uppercase tracking-widest">Uploading...</span>
           </div>
         )}
       </div>
 
-      {file && status !== 'success' && (
-        <button
-          onClick={handleUpload}
-          disabled={isUploading}
-          className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl hover:bg-black transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+      {file && !isUploading && (
+        <button 
+          onClick={handleUpload} 
+          className="w-full mt-3 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-900/20 hover:bg-emerald-500 active:scale-95 animate-fade-in-up"
         >
-          {isUploading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Syncing to Cloud...
-            </>
-          ) : (
-            <>
-              <Check size={16} />
-              Confirm Upload
-            </>
-          )}
+          Confirm & Add
         </button>
-      )}
-
-      {status === 'success' && (
-        <div className="flex items-center justify-center gap-2 text-emerald-600 font-bold text-[10px] uppercase tracking-widest animate-fade-in">
-          <Check size={14} /> Verified in Vercel Blob
-        </div>
       )}
     </div>
   );
