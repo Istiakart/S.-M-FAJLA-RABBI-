@@ -67,28 +67,27 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
     setIsLoading(true);
 
     try {
-      // 1. API Key Setup - Prioritize the provided key
-      const apiKey = process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
+      // 1. API Key Setup - GitHub Deployment এর জন্য fallback কী এবং env ভেরিয়েবল চেক করা হচ্ছে
+      const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration - Using gemini-3-flash-preview for best performance
+      // 2. Chat Configuration - Gemini 3 Flash ব্যবহার করা হচ্ছে যা দ্রুত এবং বুদ্ধিমান
       const chat = ai.chats.create({
         model: "gemini-3-flash-preview",
         config: {
-          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. 
+          systemInstruction: `আপনি S M Fajla Rabbi-এর একজন প্রফেশনাল AI অ্যাসিস্ট্যান্ট। আপনার কাজ হলো Rabbi-এর সার্ভিস সম্পর্কে ক্লায়েন্টদের জানানো এবং তাদের তথ্য সংগ্রহ করা।
           
-          CONTEXT ABOUT RABBI:
-          - Services: Meta/Google Ads scaling, React/Next.js development, GTM/CAPI tracking.
-          - Portfolio Highlights: ${projects.slice(0, 3).map(p => `${p.title} (${p.results})`).join(', ')}.
-          - Tech Stack: ${tools.slice(0, 5).map(t => t.name).join(', ')}.
-          - Contact: WhatsApp (8801956358439), LinkedIn (https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/), Agency (ClickNova IT Agency).
+          RABBI সম্পর্কে তথ্য:
+          - সার্ভিস: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
+          - প্রজেক্টস: ${projects.slice(0, 5).map(p => `${p.title} (${p.results})`).join(', ')}।
+          - টেক স্ট্যাক: ${tools.slice(0, 8).map(t => t.name).join(', ')}।
+          - এজেন্সি: ClickNova IT Agency.
           
-          YOUR GOALS:
-          1. Answer questions accurately using the context above. If you don't know something, suggest a Zoom call.
-          2. Be proactive in collecting lead details: Name, Email/Phone, Business Name, and Requirements.
-          3. Use the 'save_lead_details' tool IMMEDIATELY once you have the user's name and at least one contact method or requirement.
-          
-          TONE: Professional, energetic, and conversion-focused.`,
+          আপনার লক্ষ্য:
+          ১. ক্লায়েন্ট যদি Rabbi-এর কাজ বা সার্ভিস নিয়ে প্রশ্ন করে, উপরের তথ্য থেকে উত্তর দিন। 
+          ২. যদি ক্লায়েন্ট কাজ করতে আগ্রহী হয়, তবে তার নাম, ইমেইল/ফোন নম্বর এবং কি ধরণের কাজ প্রয়োজন তা জিজ্ঞাসা করুন।
+          ৩. ক্লায়েন্টের নাম এবং অন্তত একটি কন্টাক্ট ইনফো পাওয়ার সাথে সাথে 'save_lead_details' টুলটি কল করুন।
+          ৪. কথা বলার ধরণ হবে প্রফেশনাল এবং হেল্পফুল। বাংলা বা ইংরেজি যে ভাষায় ক্লায়েন্ট কথা বলবে, সেই ভাষাতেই উত্তর দিন।`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
         history: messages.map(m => ({
@@ -100,8 +99,9 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       // 3. Send Message
       const response = await chat.sendMessage({ message: userMessage });
       
-      // 4. Check for function calls
+      // 4. Handle Response
       const functionCalls = response.functionCalls;
+      const text = response.text;
       
       if (functionCalls && functionCalls.length > 0) {
         for (const call of functionCalls) {
@@ -114,44 +114,43 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
             
             setMessages(prev => [...prev, { 
               role: 'model', 
-              text: `Got it, ${leadData.name}! I've saved your details. Rabbi will review your requirements and get back to you soon.` 
+              text: `ধন্যবাদ ${leadData.name}! আমি আপনার তথ্যগুলো সেভ করে রেখেছি। Rabbi খুব শীঘ্রই আপনার সাথে যোগাযোগ করবেন। এছাড়া কি আর কোনো সাহায্য করতে পারি?` 
             }]);
           }
         }
-      } else {
-        // 5. Handle text response
-        const text = response.text;
-        if (!text) {
-          throw new Error("No response text received");
-        }
+      } else if (text) {
         setMessages(prev => [...prev, { role: 'model', text: text }]);
+      } else {
+        throw new Error("No response from AI");
       }
 
     } catch (error) {
       console.error("Chatbot Error:", error);
-      // Fallback to a simpler model if the latest one fails (e.g. quota or region issues)
+      
+      // Fallback logic for production reliability
       try {
         const apiKey = process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
         const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash", // Fallback to 1.5 if 3/latest fails
+        const model = ai.models.generateContent({
+          model: "gemini-1.5-flash",
           contents: userMessage,
           config: {
-            systemInstruction: "You are Rabbi's AI assistant. Briefly answer the user's question about Rabbi's web design and marketing services."
+            systemInstruction: "You are Rabbi's AI assistant. Briefly answer the user about Rabbi's digital marketing and web design services."
           }
         });
-        if (response.text) {
-          setMessages(prev => [...prev, { role: 'model', text: response.text }]);
+        const res = await model;
+        if (res.text) {
+          setMessages(prev => [...prev, { role: 'model', text: res.text }]);
           setIsLoading(false);
           return;
         }
-      } catch (fallbackError) {
-        console.error("Fallback Error:", fallbackError);
+      } catch (e) {
+        console.error("Critical Failure:", e);
       }
-      
+
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: "I'm having a bit of trouble connecting right now. Please try again or contact Rabbi via WhatsApp at 8801956358439." 
+        text: "দুঃখিত, আমি এই মুহূর্তে কানেক্ট হতে পারছি না। দয়া করে কিছুক্ষণ পর চেষ্টা করুন অথবা সরাসরি Rabbi-এর সাথে WhatsApp-এ (8801956358439) যোগাযোগ করুন।" 
       }]);
     } finally {
       setIsLoading(false);
