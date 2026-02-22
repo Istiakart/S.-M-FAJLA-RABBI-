@@ -67,14 +67,14 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
     setIsLoading(true);
 
     try {
-      // 1. API Key Setup
-      const apiKey = process.env.NEXT_PUBLIC_API_KEY || "AIzaSyA3g0Tnvt521GczxaOBNVYo8l3l2mjOARY";
+      // 1. API Key Setup - Using environment variable from Vercel
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY;
       
       if (!apiKey) {
-        throw new Error("API Key is missing");
+        throw new Error("Gemini API Key is missing. Please set NEXT_PUBLIC_API_KEY in Vercel settings.");
       }
 
-      console.log("Initializing Gemini with Key length:", apiKey.length); // Debug log
+      console.log("Initializing Gemini..."); 
       const ai = new GoogleGenAI({ apiKey });
       
       // 2. Chat Configuration - Using Gemini 3 Flash (Latest)
