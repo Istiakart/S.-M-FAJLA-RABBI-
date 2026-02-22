@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
-import { MessageSquare, Send, X, User, Bot, Loader2, ChevronDown } from 'lucide-react';
+import { Send, X, Loader2, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface LeadDetails {
@@ -65,13 +65,13 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
     setIsLoading(true);
 
     try {
-      // 1. API Key Setup
-      const apiKey = process.env.NEXT_PUBLIC_API_KEY || process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
+      // 1. API Key Setup - Prioritize the provided key if environment variables are missing or restricted
+      const apiKey = process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration (using the correct SDK pattern for this environment)
+      // 2. Chat Configuration - Using gemini-flash-latest for maximum compatibility
       const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         config: {
           systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. 
           Your goal is to:
@@ -97,7 +97,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
       // 3. Send Message
       const response = await chat.sendMessage({ message: userMessage });
       
-      // 4. Check for function calls (using property access as per guidelines)
+      // 4. Check for function calls
       const functionCalls = response.functionCalls;
       
       if (functionCalls && functionCalls.length > 0) {
@@ -116,16 +116,39 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
           }
         }
       } else {
-        // 5. Handle text response (using property access)
+        // 5. Handle text response
         const text = response.text;
-        setMessages(prev => [...prev, { role: 'model', text: text || "I'm here to help!" }]);
+        if (!text) {
+          throw new Error("No response text received");
+        }
+        setMessages(prev => [...prev, { role: 'model', text: text }]);
       }
 
     } catch (error) {
       console.error("Chatbot Error:", error);
+      // Fallback to a simpler model if the latest one fails (e.g. quota or region issues)
+      try {
+        const apiKey = process.env.API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
+        const ai = new GoogleGenAI({ apiKey });
+        const response = await ai.models.generateContent({
+          model: "gemini-1.5-flash", // Fallback to 1.5 if 3/latest fails
+          contents: userMessage,
+          config: {
+            systemInstruction: "You are Rabbi's AI assistant. Briefly answer the user's question about Rabbi's web design and marketing services."
+          }
+        });
+        if (response.text) {
+          setMessages(prev => [...prev, { role: 'model', text: response.text }]);
+          setIsLoading(false);
+          return;
+        }
+      } catch (fallbackError) {
+        console.error("Fallback Error:", fallbackError);
+      }
+      
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: "I'm having a bit of trouble connecting right now. Please try again or contact Rabbi via WhatsApp." 
+        text: "I'm having a bit of trouble connecting right now. Please try again or contact Rabbi via WhatsApp at 8801956358439." 
       }]);
     } finally {
       setIsLoading(false);
@@ -196,7 +219,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Type your message..."
                   className="flex-1 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all"
                 />
