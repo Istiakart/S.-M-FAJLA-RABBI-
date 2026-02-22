@@ -65,9 +65,10 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Use GEMINI_API_KEY for the default free-tier access
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        model: "gemini-flash-latest",
         config: {
           systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. 
           Your goal is to:
@@ -92,6 +93,10 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
 
       const response = await chat.sendMessage({ message: userMessage });
       
+      if (!response || !response.text && (!response.functionCalls || response.functionCalls.length === 0)) {
+        throw new Error("Empty response from AI");
+      }
+
       const functionCalls = response.functionCalls;
       if (functionCalls && functionCalls.length > 0) {
         for (const call of functionCalls) {
@@ -102,11 +107,11 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
               timestamp: new Date().toISOString()
             });
             
-            // Send a confirmation back to the model
-            const toolResponse = await chat.sendMessage({
-              message: "I have saved your details. Rabbi will get back to you soon. Is there anything else you'd like to know?"
-            });
-            setMessages(prev => [...prev, { role: 'model', text: toolResponse.text || "Details saved!" }]);
+            // Add a friendly confirmation message to the chat
+            setMessages(prev => [...prev, { 
+              role: 'model', 
+              text: `Got it, ${leadData.name}! I've saved your details. Rabbi will review your requirements and get back to you soon. Is there anything else I can help you with?` 
+            }]);
           }
         }
       } else {
@@ -114,7 +119,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl })
       }
     } catch (error) {
       console.error("Chatbot Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "Sorry, I'm having some trouble connecting. Please try again or contact Rabbi directly via WhatsApp." }]);
+      setMessages(prev => [...prev, { role: 'model', text: "I'm having a bit of trouble connecting right now. Please try again in a moment or reach out to Rabbi directly via WhatsApp!" }]);
     } finally {
       setIsLoading(false);
     }
