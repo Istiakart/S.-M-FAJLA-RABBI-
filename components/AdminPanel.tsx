@@ -281,8 +281,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     <div className="fixed inset-0 bg-[#020617] z-[100] flex text-slate-300 font-sans overflow-hidden">
       {saveStatus && <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[210] bg-white text-slate-950 px-10 py-4 rounded-full font-black text-[11px] shadow-2xl animate-fade-in-up border border-indigo-100 flex items-center gap-3 tracking-widest uppercase"><CheckCircle2 size={16} className="text-emerald-500" /> {saveStatus}</div>}
 
-      <aside className={`fixed top-0 bottom-0 transition-all duration-500 bg-[#0f172a] border-r border-white/5 shadow-2xl flex flex-col z-[120] ${isSidebarOpen ? 'left-0 w-80' : '-translate-x-full w-0'}`}>
-        <div className="p-12 flex items-center gap-4 mt-10">
+      <button 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        className="fixed top-8 left-8 z-[160] p-4 bg-indigo-600 text-white rounded-2xl shadow-2xl hover:scale-110 transition-all flex items-center justify-center group border border-white/20"
+      >
+        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      <aside className={`fixed top-0 bottom-0 left-0 w-80 bg-[#0f172a] border-r border-white/5 shadow-2xl flex flex-col z-[150] transition-transform duration-500 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-12 flex items-center gap-4 mt-20">
           <div className="w-14 h-14 bg-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-indigo-500/20"><Cpu className="text-white" size={28} /></div>
           <div>
             <div className="text-white font-black uppercase text-lg leading-none tracking-tighter">Elite Node</div>
@@ -316,22 +323,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       </aside>
 
-      <main ref={mainScrollRef} className={`flex-1 transition-all duration-500 overflow-y-auto bg-[#020617] relative no-scrollbar ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
-        <div className="sticky top-0 z-[130] bg-[#020617]/80 backdrop-blur-md border-b border-white/5 p-6 flex items-center justify-between">
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-            className="p-3 bg-[#0f172a] border border-white/5 rounded-xl text-white hover:bg-indigo-600 transition-all shadow-xl"
-          >
-            <Menu size={20} />
-          </button>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden md:block">
-              <div className="text-white font-black text-[10px] uppercase tracking-widest">Administrator</div>
-              <div className="text-indigo-400 font-bold text-[8px] uppercase tracking-[0.3em]">System Level Access</div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-black text-white text-xs">AD</div>
-          </div>
-        </div>
+      <main ref={mainScrollRef} className="flex-1 transition-all duration-500 overflow-y-auto bg-[#020617] relative no-scrollbar">
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[145]" 
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
         
         <div className="max-w-7xl mx-auto p-12 md:p-24 space-y-20">
           
