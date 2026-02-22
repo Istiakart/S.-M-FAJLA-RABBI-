@@ -72,12 +72,11 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       const apiKey = process.env.NEXT_PUBLIC_API_KEY || "AIzaSyA3g0Tnvt521GczxaOBNVYo8l3l2mjOARY";
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration - Using Gemini 3 Flash
+      // 2. Chat Configuration - Using Gemini 1.5 Flash for maximum stability
       const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         config: {
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // Low latency for chat
-          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. You are powered by the Gemini 3 model.
+          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer.
           
           CONTEXT ABOUT RABBI:
           - Services: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
@@ -91,7 +90,7 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
           3. Use the 'save_lead_details' tool IMMEDIATELY once you have the user's name and at least one contact method.
           
           CRITICAL INSTRUCTION:
-          - ALWAYS reply in ENGLISH, regardless of the language the user speaks.
+          - ALWAYS reply in ENGLISH.
           - Keep responses professional, concise, and conversion-focused.`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
