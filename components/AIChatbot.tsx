@@ -77,11 +77,12 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       console.log("Initializing Gemini with Key length:", apiKey.length); // Debug log
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration - Using Gemini 1.5 Flash for maximum stability
+      // 2. Chat Configuration - Using Gemini 3 Flash (Latest)
       const chat = ai.chats.create({
-        model: "gemini-1.5-flash",
+        model: "gemini-3-flash-preview",
         config: {
-          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer.
+          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+          systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi, a Full-Stack Web Designer and Performance Marketer. You are powered by Gemini 3 Flash.
           
           CONTEXT ABOUT RABBI:
           - Services: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
