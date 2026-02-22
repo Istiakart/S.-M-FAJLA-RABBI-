@@ -79,14 +79,15 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
 
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration
+      // 2. Chat Configuration - Using the most stable model name
       const chat = ai.chats.create({
         model: "gemini-1.5-flash",
         config: {
           systemInstruction: `You are a professional AI Assistant for S M Fajla Rabbi. 
           Respond ONLY in English. Be professional and concise.
-          Services: Meta/Google Ads, Web Design, Tracking.
-          Goal: Answer questions and collect lead info (Name, Contact, Needs).`,
+          Rabbi's Services: Meta/Google Ads, Web Design, Tracking.
+          Goal: Answer questions and collect lead info (Name, Contact, Needs).
+          Once you have Name and Phone/Email, use save_lead_details.`,
           tools: [{ functionDeclarations: [saveLeadFunctionDeclaration] }],
         },
         history: messages.map(m => ({
