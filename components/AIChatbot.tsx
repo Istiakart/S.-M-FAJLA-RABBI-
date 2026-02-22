@@ -217,14 +217,24 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
       </AnimatePresence>
 
       {/* Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 overflow-hidden ${
-          isOpen ? 'bg-rose-500 rotate-90' : 'bg-indigo-600 hover:scale-110 border-2 border-white'
-        }`}
-      >
-        {isOpen ? <X className="text-white" size={28} /> : <img src={profileImageUrl} alt="Rabbi" className="w-full h-full object-cover" />}
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 overflow-hidden ${
+            isOpen ? 'bg-rose-500 rotate-90' : 'bg-indigo-600 hover:scale-110 border-2 border-white'
+          }`}
+        >
+          {isOpen ? <X className="text-white" size={28} /> : <img src={profileImageUrl} alt="Rabbi" className="w-full h-full object-cover" />}
+        </button>
+        
+        {/* Online Indicator */}
+        {!isOpen && (
+          <span className="absolute top-0 right-0 flex h-5 w-5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-5 w-5 bg-green-500 border-2 border-white"></span>
+          </span>
+        )}
+      </div>
     </div>
   );
 };
