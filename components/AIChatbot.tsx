@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
+import { GoogleGenAI, Type, FunctionDeclaration, ThinkingLevel } from "@google/genai";
 import { Send, X, Loader2, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -68,14 +68,16 @@ const AIChatbot: React.FC<AIChatbotProps> = ({ onLeadCapture, profileImageUrl, p
 
     try {
       // 1. API Key Setup
-      const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || "AIzaSyAXsXit7N8bHkZTI2CaSmUrOTh12-zd8SM";
+      // 1. API Key Setup
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY || "AIzaSyA3g0Tnvt521GczxaOBNVYo8l3l2mjOARY";
       const ai = new GoogleGenAI({ apiKey });
       
-      // 2. Chat Configuration
+      // 2. Chat Configuration - Using Gemini 3 Flash
       const chat = ai.chats.create({
         model: "gemini-3-flash-preview",
         config: {
-          systemInstruction: `আপনি S M Fajla Rabbi-এর একজন প্রফেশনাল AI অ্যাসিস্ট্যান্ট। আপনার কাজ হলো Rabbi-এর সার্ভিস সম্পর্কে ক্লায়েন্টদের জানানো এবং তাদের তথ্য সংগ্রহ করা।
+          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // Low latency for chat
+          systemInstruction: `আপনি S M Fajla Rabbi-এর একজন প্রফেশনাল AI অ্যাসিস্ট্যান্ট। আপনি এখন Gemini 3 মডেলের শক্তিতে চালিত।
           
           RABBI সম্পর্কে তথ্য:
           - সার্ভিস: Meta & Google Ads Scaling, Full-Stack Web Design (React/Next.js), GTM/CAPI Tracking.
