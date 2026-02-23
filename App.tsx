@@ -14,7 +14,6 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import CVModal from './components/CVModal';
-import AIChatbot from './components/AIChatbot';
 import { Loader2 } from 'lucide-react';
 import { Project, SiteIdentity, Tool, Testimonial, FAQData, Lead } from './types';
 import { PROJECTS as INITIAL_PROJECTS, INITIAL_TOOLS, TESTIMONIALS as INITIAL_TESTIMONIALS, FAQS as INITIAL_FAQS } from './constants';
@@ -108,13 +107,6 @@ const App: React.FC = () => {
       <Footer 
         onAdminLogin={() => setIsAdminMode(true)} 
         logoUrl={identity.profileImageUrl}
-      />
-
-      <AIChatbot 
-        onLeadCapture={handleLeadCapture} 
-        profileImageUrl={identity.profileImageUrl} 
-        projects={projects}
-        tools={tools}
       />
 
       {isAdminMode && (
