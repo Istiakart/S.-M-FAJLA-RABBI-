@@ -9,10 +9,13 @@ export const analyzeMarketingImage = async (base64Data: string, mimeType: string
     // Flexible API Key detection
     const apiKey = 
       (process.env as any)?.GEMINI_API_KEY || 
+      (process.env as any)?.VITE_GEMINI_API_KEY ||
       (import.meta as any).env?.VITE_GEMINI_API_KEY ||
-      ""; // Fallback to empty, will throw if missing
+      "";
 
-    if (!apiKey) throw new Error("Gemini API Key is missing");
+    if (!apiKey) {
+      throw new Error("Gemini API Key is missing. Please set GEMINI_API_KEY or VITE_GEMINI_API_KEY in your environment variables.");
+    }
 
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
@@ -62,10 +65,13 @@ export const generateCaseStudySummary = async (stats: string) => {
   try {
     const apiKey = 
       (process.env as any)?.GEMINI_API_KEY || 
+      (process.env as any)?.VITE_GEMINI_API_KEY ||
       (import.meta as any).env?.VITE_GEMINI_API_KEY ||
       "";
 
-    if (!apiKey) throw new Error("Gemini API Key is missing");
+    if (!apiKey) {
+      throw new Error("Gemini API Key is missing. Please set GEMINI_API_KEY or VITE_GEMINI_API_KEY in your environment variables.");
+    }
 
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
