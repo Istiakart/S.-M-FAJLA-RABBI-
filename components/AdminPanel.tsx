@@ -198,28 +198,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleAiAutoFill = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
     setIsAiAnalyzing(true);
     notify("AI scanning marketing data...");
+    
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Data = (reader.result as string).split(',')[1];
-        const result = await analyzeMarketingImage(base64Data, file.type);
-        setProjectForm(prev => ({
-          ...prev,
-          title: result.title || prev.title,
-          category: (['E-commerce', 'Leads', 'Engagement', 'Website Build'].includes(result.category) ? result.category : 'E-commerce') as any,
-          results: result.results || prev.results,
-          efficiency: result.efficiency || prev.efficiency,
-          description: result.description || prev.description
-        }));
-        notify("AI insights applied.");
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      notify("AI failure.");
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const result = await analyzeMarketingImage(base64Data, file.type);
+      
+      setProjectForm(prev => ({
+        ...prev,
+        title: result.title || prev.title,
+        category: (['E-commerce', 'Leads', 'Engagement', 'Website Build'].includes(result.category) ? result.category : 'E-commerce') as any,
+        results: result.results || prev.results,
+        efficiency: result.efficiency || prev.efficiency,
+        description: result.description || prev.description
+      }));
+      
+      notify("AI insights applied.");
+    } catch (err: any) {
+      console.error("AI Auto-fill error:", err);
+      notify(`AI failure: ${err.message || 'Unknown error'}`);
     } finally {
       setIsAiAnalyzing(false);
+      if (aiFileInputRef.current) aiFileInputRef.current.value = '';
     }
   };
 

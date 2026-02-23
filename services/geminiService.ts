@@ -6,7 +6,15 @@ import { GoogleGenAI, Type } from "@google/genai";
  */
 export const analyzeMarketingImage = async (base64Data: string, mimeType: string) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Flexible API Key detection
+    const apiKey = 
+      (process.env as any)?.GEMINI_API_KEY || 
+      (import.meta as any).env?.VITE_GEMINI_API_KEY ||
+      ""; // Fallback to empty, will throw if missing
+
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: {
@@ -52,7 +60,14 @@ export const analyzeMarketingImage = async (base64Data: string, mimeType: string
  */
 export const generateCaseStudySummary = async (stats: string) => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = 
+      (process.env as any)?.GEMINI_API_KEY || 
+      (import.meta as any).env?.VITE_GEMINI_API_KEY ||
+      "";
+
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Generate a growth marketing insight for these metrics: ${stats}`,
