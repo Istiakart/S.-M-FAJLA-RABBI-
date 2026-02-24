@@ -68,6 +68,7 @@ export interface SiteIdentity {
   googleSheetUrl?: string;
   whatsAppNumber?: string;
   linkedInUrl?: string;
+  blobToken?: string;
 }
 
 export interface Lead {

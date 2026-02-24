@@ -9,7 +9,9 @@ export const uploadFile = async (file: File | Blob, folder: string = 'uploads') 
   const filename = `${folder}/${Date.now()}-${(file as File).name || 'blob'}`;
   
   // Try to get token from localStorage (set via Admin Panel) or process.env
-  const token = localStorage.getItem('vercel_blob_token') || (process.env as any).BLOB_READ_WRITE_TOKEN;
+  const token = localStorage.getItem('vercel_blob_token') || 
+                (process.env as any).BLOB_READ_WRITE_TOKEN || 
+                'vercel_blob_rw_VUtsEkzfzGVv08nc_NMqC7duv3gRz9PojgHDMQ5kdRgT0Lu';
 
   if (!token || token === 'undefined' || token === 'null') {
     console.warn("Vercel Blob Token is missing. Switching to Local Preview Mode (images will not persist after refresh).");

@@ -39,6 +39,7 @@ const INITIAL_ADMIN_CREDS = {
 const App: React.FC = () => {
   const [isCvModalOpen, setIsCvModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(true);
+  const hasLoaded = React.useRef(false);
   
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
@@ -62,7 +63,12 @@ const App: React.FC = () => {
         const data = await response.json();
         if (data) {
           if (data.projects) setProjects(data.projects);
-          if (data.identity) setIdentity(data.identity);
+          if (data.identity) {
+            setIdentity(data.identity);
+            if (data.identity.blobToken) {
+              localStorage.setItem('vercel_blob_token', data.identity.blobToken);
+            }
+          }
           if (data.tools) setTools(data.tools);
           if (data.testimonials) setTestimonials(data.testimonials);
           if (data.faqs) setFaqs(data.faqs);
@@ -72,6 +78,7 @@ const App: React.FC = () => {
       } catch (error) {
         console.error("Failed to load data:", error);
       } finally {
+        hasLoaded.current = true;
         setIsSyncing(false);
       }
     };
@@ -80,6 +87,7 @@ const App: React.FC = () => {
 
   // Save data to server
   const saveData = async (updates: any) => {
+    if (!hasLoaded.current) return;
     try {
       const currentData = {
         projects,
@@ -134,6 +142,16 @@ const App: React.FC = () => {
   const handleAdminCredsUpdate = (newCreds: any) => {
     setAdminCreds(newCreds);
     saveData({ adminCreds: newCreds });
+  };
+
+  const handleLeadCapture = (leadData: Omit<Lead, 'id'>) => {
+    const newLead: Lead = {
+      ...leadData,
+      id: Date.now().toString()
+    };
+    const newLeads = [newLead, ...leads];
+    setLeads(newLeads);
+    saveData({ leads: newLeads });
   };
 
   useEffect(() => {

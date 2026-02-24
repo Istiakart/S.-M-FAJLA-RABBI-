@@ -77,6 +77,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [identityForm, setIdentityForm] = useState<SiteIdentity>(currentIdentity);
   const [securityForm, setSecurityForm] = useState(adminCreds);
 
+  useEffect(() => {
+    setIdentityForm(currentIdentity);
+    if (currentIdentity.blobToken) {
+      setBlobToken(currentIdentity.blobToken);
+    }
+  }, [currentIdentity]);
+
   const notify = (msg: string) => {
     setSaveStatus(msg);
     setTimeout(() => setSaveStatus(null), 3000);
@@ -813,7 +820,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}
                       </button>
                     </div>
-                    <button onClick={() => { localStorage.setItem('vercel_blob_token', blobToken); notify("Nexus link established."); }} className="w-full bg-white text-[#020617] py-6 rounded-2xl font-black uppercase text-[12px] tracking-widest hover:bg-slate-200 shadow-xl">Establish Cloud Nexus</button>
+                    <button onClick={() => { 
+                      localStorage.setItem('vercel_blob_token', blobToken); 
+                      onIdentityUpdate({ ...currentIdentity, blobToken });
+                      notify("Nexus link established."); 
+                    }} className="w-full bg-white text-[#020617] py-6 rounded-2xl font-black uppercase text-[12px] tracking-widest hover:bg-slate-200 shadow-xl">Establish Cloud Nexus</button>
                   </div>
                 </div>
                 <div className="lg:col-span-2 bg-[#0f172a] border border-white/5 p-16 rounded-[4rem] shadow-2xl space-y-12">
