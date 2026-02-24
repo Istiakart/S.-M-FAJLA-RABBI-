@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -36,9 +37,8 @@ const INITIAL_ADMIN_CREDS = {
 };
 
 const App: React.FC = () => {
-  const [isAdminMode, setIsAdminMode] = useState(false);
   const [isCvModalOpen, setIsCvModalOpen] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(true);
   
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [identity, setIdentity] = useState<SiteIdentity>(DEFAULT_IDENTITY);
@@ -51,23 +51,89 @@ const App: React.FC = () => {
     INITIAL_FAQS.map((f, i) => ({ ...f, id: (f as any).id || `faq-${i}` } as FAQData))
   );
   
-  const [leads, setLeads] = useState<Lead[]>(() => {
-    const saved = localStorage.getItem('rabbi_leads');
-    return saved ? JSON.parse(saved) : [];
-  });
-  
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [adminCreds, setAdminCreds] = useState(INITIAL_ADMIN_CREDS);
 
+  // Load data from server
   useEffect(() => {
-    localStorage.setItem('rabbi_leads', JSON.stringify(leads));
-  }, [leads]);
-
-  const handleLeadCapture = (leadData: Omit<Lead, 'id'>) => {
-    const newLead: Lead = {
-      ...leadData,
-      id: Date.now().toString()
+    const loadData = async () => {
+      try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+        if (data) {
+          if (data.projects) setProjects(data.projects);
+          if (data.identity) setIdentity(data.identity);
+          if (data.tools) setTools(data.tools);
+          if (data.testimonials) setTestimonials(data.testimonials);
+          if (data.faqs) setFaqs(data.faqs);
+          if (data.leads) setLeads(data.leads);
+          if (data.adminCreds) setAdminCreds(data.adminCreds);
+        }
+      } catch (error) {
+        console.error("Failed to load data:", error);
+      } finally {
+        setIsSyncing(false);
+      }
     };
-    setLeads(prev => [newLead, ...prev]);
+    loadData();
+  }, []);
+
+  // Save data to server
+  const saveData = async (updates: any) => {
+    try {
+      const currentData = {
+        projects,
+        identity,
+        tools,
+        testimonials,
+        faqs,
+        leads,
+        adminCreds,
+        ...updates
+      };
+      await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentData)
+      });
+    } catch (error) {
+      console.error("Failed to save data:", error);
+    }
+  };
+
+  const handleProjectsUpdate = (newProjects: Project[]) => {
+    setProjects(newProjects);
+    saveData({ projects: newProjects });
+  };
+
+  const handleIdentityUpdate = (newIdentity: SiteIdentity) => {
+    setIdentity(newIdentity);
+    saveData({ identity: newIdentity });
+  };
+
+  const handleToolsUpdate = (newTools: Tool[]) => {
+    setTools(newTools);
+    saveData({ tools: newTools });
+  };
+
+  const handleTestimonialsUpdate = (newTestimonials: Testimonial[]) => {
+    setTestimonials(newTestimonials);
+    saveData({ testimonials: newTestimonials });
+  };
+
+  const handleFaqsUpdate = (newFaqs: FAQData[]) => {
+    setFaqs(newFaqs);
+    saveData({ faqs: newFaqs });
+  };
+
+  const handleLeadsUpdate = (newLeads: Lead[]) => {
+    setLeads(newLeads);
+    saveData({ leads: newLeads });
+  };
+
+  const handleAdminCredsUpdate = (newCreds: any) => {
+    setAdminCreds(newCreds);
+    saveData({ adminCreds: newCreds });
   };
 
   useEffect(() => {
@@ -76,72 +142,80 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
-      <Header 
-        logoUrl={identity.profileImageUrl} 
-        googleFormUrl={identity.googleFormUrl} 
-      />
-      
-      <main>
-        <Hero 
-          profileImageUrl={identity.profileImageUrl} 
-          onDownloadCv={() => setIsCvModalOpen(true)}
-          googleFormUrl={identity.googleFormUrl}
-        />
-        <About profileImageUrl={identity.profileImageUrl} />
-        <Services googleFormUrl={identity.googleFormUrl} />
-        <Portfolio projects={projects} />
-        <Tools tools={tools} />
-        <Process />
-        <Testimonials testimonials={testimonials} />
-        <FAQ faqs={faqs} />
-        <ZoomBooking googleFormUrl={identity.googleFormUrl} />
-        <Contact 
-          profileImageUrl={identity.profileImageUrl} 
-          onDownloadCv={() => setIsCvModalOpen(true)}
-          whatsAppNumber={identity.whatsAppNumber}
-          linkedInUrl={identity.linkedInUrl}
-        />
-      </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={
+          <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
+            <Header 
+              logoUrl={identity.profileImageUrl} 
+              googleFormUrl={identity.googleFormUrl} 
+            />
+            
+            <main>
+              <Hero 
+                profileImageUrl={identity.profileImageUrl} 
+                onDownloadCv={() => setIsCvModalOpen(true)}
+                googleFormUrl={identity.googleFormUrl}
+              />
+              <About profileImageUrl={identity.profileImageUrl} />
+              <Services googleFormUrl={identity.googleFormUrl} />
+              <Portfolio projects={projects} />
+              <Tools tools={tools} />
+              <Process />
+              <Testimonials testimonials={testimonials} />
+              <FAQ faqs={faqs} />
+              <ZoomBooking googleFormUrl={identity.googleFormUrl} />
+              <Contact 
+                profileImageUrl={identity.profileImageUrl} 
+                onDownloadCv={() => setIsCvModalOpen(true)}
+                whatsAppNumber={identity.whatsAppNumber}
+                linkedInUrl={identity.linkedInUrl}
+              />
+            </main>
 
-      <Footer 
-        onAdminLogin={() => setIsAdminMode(true)} 
-        logoUrl={identity.profileImageUrl}
-      />
+            <Footer 
+              onAdminLogin={() => {}} 
+              logoUrl={identity.profileImageUrl}
+            />
 
-      {isAdminMode && (
-        <AdminPanel 
-          onClose={() => setIsAdminMode(false)}
-          currentProjects={projects}
-          onProjectsUpdate={setProjects}
-          currentIdentity={identity}
-          onIdentityUpdate={setIdentity}
-          currentTools={tools}
-          onToolsUpdate={setTools}
-          testimonials={testimonials}
-          onTestimonialsUpdate={setTestimonials}
-          faqs={faqs}
-          onFaqsUpdate={setFaqs}
-          leads={leads}
-          onLeadsUpdate={setLeads}
-          adminCreds={adminCreds}
-          onAdminCredsUpdate={setAdminCreds}
-        />
-      )}
+            <CVModal 
+              isOpen={isCvModalOpen} 
+              onClose={() => setIsCvModalOpen(false)} 
+              cvUrl={identity.cvUrl} 
+            />
 
-      <CVModal 
-        isOpen={isCvModalOpen} 
-        onClose={() => setIsCvModalOpen(false)} 
-        cvUrl={identity.cvUrl} 
-      />
+            {isSyncing && (
+              <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[1000] flex flex-col items-center justify-center">
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+                <p className="font-bold text-slate-900 uppercase tracking-widest text-xs">Synchronizing Engine...</p>
+              </div>
+            )}
+          </div>
+        } />
 
-      {isSyncing && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[1000] flex flex-col items-center justify-center">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-          <p className="font-bold text-slate-900 uppercase tracking-widest text-xs">Synchronizing Engine...</p>
-        </div>
-      )}
-    </div>
+        <Route path="/admin" element={
+          <AdminPanel 
+            onClose={() => window.location.href = '/'}
+            currentProjects={projects}
+            onProjectsUpdate={handleProjectsUpdate}
+            currentIdentity={identity}
+            onIdentityUpdate={handleIdentityUpdate}
+            currentTools={tools}
+            onToolsUpdate={handleToolsUpdate}
+            testimonials={testimonials}
+            onTestimonialsUpdate={handleTestimonialsUpdate}
+            faqs={faqs}
+            onFaqsUpdate={handleFaqsUpdate}
+            leads={leads}
+            onLeadsUpdate={handleLeadsUpdate}
+            adminCreds={adminCreds}
+            onAdminCredsUpdate={handleAdminCredsUpdate}
+          />
+        } />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

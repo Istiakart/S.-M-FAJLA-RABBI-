@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Project, SiteIdentity, Tool, Testimonial, FAQData, Lead } from '../types';
 import { 
   Trash2, X, ImageIcon, Edit3, Menu, MessageSquare, HelpCircle,
@@ -48,6 +49,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   currentTools, onToolsUpdate, testimonials, onTestimonialsUpdate, faqs, onFaqsUpdate,
   leads, onLeadsUpdate, adminCreds, onAdminCredsUpdate
 }) => {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -330,7 +332,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           ))}
         </nav>
         <div className="p-10 border-t border-white/5">
-          <button onClick={onClose} className="w-full flex items-center justify-center gap-3 p-5 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest">Terminate</button>
+          <button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-3 p-5 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest">Terminate</button>
         </div>
       </aside>
 
