@@ -21,9 +21,10 @@ async function startServer() {
   app.get("/api/data", async (req, res) => {
     try {
       const data = await fs.readFile(DATA_FILE, "utf-8");
+      console.log("Data loaded successfully from", DATA_FILE);
       res.json(JSON.parse(data));
     } catch (error) {
-      // If file doesn't exist, return null or empty object
+      console.log("No data file found, returning default state.");
       res.json(null);
     }
   });
@@ -31,6 +32,7 @@ async function startServer() {
   app.post("/api/data", async (req, res) => {
     try {
       await fs.writeFile(DATA_FILE, JSON.stringify(req.body, null, 2));
+      console.log("Data saved successfully to", DATA_FILE);
       res.json({ success: true });
     } catch (error) {
       console.error("Save Error:", error);

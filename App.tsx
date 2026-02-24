@@ -62,7 +62,16 @@ const App: React.FC = () => {
         const response = await fetch('/api/data');
         const data = await response.json();
         if (data) {
-          if (data.projects) setProjects(data.projects);
+          if (data.projects) {
+            // Merge saved projects with initial projects to ensure new ones show up
+            const merged = [...data.projects];
+            INITIAL_PROJECTS.forEach(p => {
+              if (!merged.find(mp => mp.id === p.id)) {
+                merged.push(p);
+              }
+            });
+            setProjects(merged);
+          }
           if (data.identity) {
             setIdentity(data.identity);
             if (data.identity.blobToken) {

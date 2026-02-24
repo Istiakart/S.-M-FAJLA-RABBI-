@@ -8,7 +8,7 @@ import {
   LayoutDashboard, FolderKanban, Quote, Fingerprint, Globe, ChevronRight,
   TrendingUp, Database, Bell, Star, Cloud, CheckCircle2, ShieldCheck, BarChart3, Plus,
   ImagePlus, AlertTriangle, HardDrive, Sparkles, BrainCircuit, Loader2, User, Eye, EyeOff, ExternalLink, FileText, Upload,
-  Settings, Layers, CreditCard, Box, Cpu, KeyRound, Users
+  Settings, Layers, CreditCard, Box, Cpu, KeyRound, Users, RefreshCw
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import MediaUploader from './MediaUploader';
@@ -356,12 +356,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           {/* DASHBOARD */}
           {activeTab === 'dashboard' && (
             <div className="animate-fade-in space-y-20">
-              <header>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="h-1 w-12 bg-indigo-500 rounded-full"></div>
-                  <p className="text-indigo-500 font-black uppercase tracking-[0.5em] text-[10px]">System Summary</p>
+              <header className="flex justify-between items-end">
+                <div>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="h-1 w-12 bg-indigo-500 rounded-full"></div>
+                    <p className="text-indigo-500 font-black uppercase tracking-[0.5em] text-[10px]">System Summary</p>
+                  </div>
+                  <h2 className="text-7xl font-black text-white tracking-tighter">Overview.</h2>
                 </div>
-                <h2 className="text-7xl font-black text-white tracking-tighter">Overview.</h2>
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="flex items-center gap-3 bg-slate-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-700 transition-all border border-white/5"
+                >
+                  <RefreshCw size={14} /> Force Sync
+                </button>
               </header>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                 {[
@@ -376,6 +384,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div className="text-slate-500 text-[12px] font-black uppercase tracking-[0.3em]">{stat.label}</div>
                   </div>
                 ))}
+              </div>
+
+              <div className="bg-[#0f172a] border border-white/5 p-16 rounded-[4rem] shadow-2xl">
+                <div className="flex items-center gap-4 mb-12">
+                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white"><Shield size={20} /></div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-widest">System Integrity</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-12">
+                  <div className="p-10 bg-[#020617] rounded-[3rem] border border-white/5 space-y-6">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Database Persistence</span>
+                      <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[9px] font-black uppercase tracking-widest">Active</span>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">Your data is synchronized to a local JSON database on the server. Every change is also backed up to your browser's local storage for double redundancy.</p>
+                  </div>
+                  <div className="p-10 bg-[#020617] rounded-[3rem] border border-white/5 space-y-6">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Media Storage (Nexus)</span>
+                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${blobToken ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                        {blobToken ? 'Connected' : 'Local Only'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                      {blobToken 
+                        ? "Vercel Blob is active. All uploaded images are stored in the cloud and will persist globally across all devices." 
+                        : "No Blob token detected. Images will only be stored temporarily in your browser session and may disappear on refresh."}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-[#0f172a] border border-white/5 p-12 rounded-[4rem] shadow-2xl">

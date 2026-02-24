@@ -62,7 +62,54 @@ export const SERVICES: Service[] = [
 
 export const PROJECTS: Project[] = [
   {
-    id: "proj-mkt-1",
+    id: "103",
+    title: "ROI-Focused Sales Engine",
+    category: "E-commerce",
+    results: "142 Conversions",
+    efficiency: "BDT 8.20 CPA",
+    description: "Strategic messaging campaign optimized for direct sales, leveraging data-driven audience segmentation and creative testing to minimize acquisition costs.",
+    imageUrls: ["https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop"],
+    metrics: [
+      { label: "Conversions", value: "142", description: "Messaging" },
+      { label: "CPA", value: "BDT 8.20", description: "Cost Per Lead" },
+      { label: "Spend", value: "BDT 1,164", description: "Total Budget" },
+      { label: "Reach", value: "36.8K", description: "Target Audience" }
+    ],
+    chartData: [{ name: '18-24', value: 45000 }, { name: '25-34', value: 12000 }, { name: '45-54', value: 2000 }]
+  },
+  {
+    id: "102",
+    title: "Tasbih Shop Meta Scaling",
+    category: "Leads",
+    results: "30,151 Clicks",
+    efficiency: "$0.15 CPC",
+    description: "High-performance Meta Ads campaign for a niche e-commerce brand, achieving massive reach and low-cost acquisition through interest-stacking.",
+    imageUrls: ["https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2074&auto=format&fit=crop"],
+    metrics: [
+      { label: "Clicks", value: "30,151", description: "Link Clicks" },
+      { label: "CTR", value: "5.58%", description: "Click Through" },
+      { label: "Reach", value: "13,198", description: "Unique People" },
+      { label: "CPC", value: "$0.15", description: "Cost Per Click" }
+    ],
+    chartData: [{ name: 'Clicks', value: 30151 }, { name: 'Reach', value: 13198 }]
+  },
+  {
+    id: "101",
+    title: "Elite Performance Dashboard",
+    category: "Website Build",
+    results: "119 Impressions",
+    efficiency: "5.5% CTR",
+    description: "Custom-built marketing intelligence dashboard featuring real-time user tracking, interaction timelines, and conversion rate optimization metrics.",
+    imageUrls: ["https://images.unsplash.com/photo-1551288049-bbbda5366392?q=80&w=2070&auto=format&fit=crop"],
+    metrics: [
+      { label: "Impressions", value: "119", description: "Total Views" },
+      { label: "Live Users", value: "6", description: "Active Now" },
+      { label: "Click Rate", value: "5.5%", description: "Engagement" }
+    ],
+    chartData: [{ name: 'Feb 10', value: 25 }, { name: 'Feb 11', value: 48 }, { name: 'Feb 12', value: 32 }]
+  },
+  {
+    id: "100",
     title: "Lifestyle Brand Scale-Up",
     category: "E-commerce",
     results: "$84,200 Sales",
@@ -78,7 +125,7 @@ export const PROJECTS: Project[] = [
     chartData: [{ name: 'Phase 1', value: 12000 }, { name: 'Phase 2', value: 34000 }, { name: 'Scale', value: 84200 }]
   },
   {
-    id: "proj-web-1",
+    id: "99",
     title: "Venture-Backed SaaS Lander",
     category: "Website Build",
     results: "24% Conv. Rate",
