@@ -20,8 +20,8 @@ import { Project, SiteIdentity, Tool, Testimonial, FAQData, Lead } from './types
 import { PROJECTS as INITIAL_PROJECTS, INITIAL_TOOLS, TESTIMONIALS as INITIAL_TESTIMONIALS, FAQS as INITIAL_FAQS } from './constants';
 
 const DEFAULT_IDENTITY: SiteIdentity = {
-  logoUrl: "https://vutsekzfzgvv08nc.public.blob.vercel-storage.com/Global%20Logo/Gemini_Generated_Image_lxbxgblxbxgblxbx%20%281%29.png",
-  profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1772064000&v=beta&t=IwBiTqYtuTzrpjLaMJshM6rhwMQ0bX2R6lT8IrNo5BA",
+  logoUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1773878400&v=beta&t=Yzrel8f6ESTICr5jX1mDC0IaIujjxT4nBme-xhsmKS8",
+  profileImageUrl: "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1773878400&v=beta&t=Yzrel8f6ESTICr5jX1mDC0IaIujjxT4nBme-xhsmKS8",
   cvUrl: "",
   googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSeBhaQwxVKtQn3ibvqPZ7-FGnUkml9EO6P5EYBZIvWCnCoJeg/viewform",
   googleSheetUrl: "https://docs.google.com/spreadsheets/d/1JDHDIp3c3GSwhemS4VvtWSowoNLHFxAIvTf91j1zQ2g/edit?gid=1373341915#gid=1373341915",

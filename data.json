@@ -1,0 +1,335 @@
+{
+  "projects": [
+    {
+      "id": "103",
+      "title": "ROI-Focused Sales Engine",
+      "category": "E-commerce",
+      "results": "142 Conversions",
+      "efficiency": "BDT 8.20 CPA",
+      "description": "Strategic messaging campaign optimized for direct sales, leveraging data-driven audience segmentation and creative testing to minimize acquisition costs.",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop"
+      ],
+      "metrics": [
+        {
+          "label": "Conversions",
+          "value": "142",
+          "description": "Messaging"
+        },
+        {
+          "label": "CPA",
+          "value": "BDT 8.20",
+          "description": "Cost Per Lead"
+        },
+        {
+          "label": "Spend",
+          "value": "BDT 1,164",
+          "description": "Total Budget"
+        },
+        {
+          "label": "Reach",
+          "value": "36.8K",
+          "description": "Target Audience"
+        }
+      ],
+      "chartData": [
+        {
+          "name": "18-24",
+          "value": 45000
+        },
+        {
+          "name": "25-34",
+          "value": 12000
+        },
+        {
+          "name": "45-54",
+          "value": 2000
+        }
+      ]
+    },
+    {
+      "id": "102",
+      "title": "Tasbih Shop Meta Scaling",
+      "category": "Leads",
+      "results": "30,151 Clicks",
+      "efficiency": "$0.15 CPC",
+      "description": "High-performance Meta Ads campaign for a niche e-commerce brand, achieving massive reach and low-cost acquisition through interest-stacking.",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2074&auto=format&fit=crop"
+      ],
+      "metrics": [
+        {
+          "label": "Clicks",
+          "value": "30,151",
+          "description": "Link Clicks"
+        },
+        {
+          "label": "CTR",
+          "value": "5.58%",
+          "description": "Click Through"
+        },
+        {
+          "label": "Reach",
+          "value": "13,198",
+          "description": "Unique People"
+        },
+        {
+          "label": "CPC",
+          "value": "$0.15",
+          "description": "Cost Per Click"
+        }
+      ],
+      "chartData": [
+        {
+          "name": "Clicks",
+          "value": 30151
+        },
+        {
+          "name": "Reach",
+          "value": 13198
+        }
+      ]
+    },
+    {
+      "id": "101",
+      "title": "Elite Performance Dashboard",
+      "category": "Website Build",
+      "results": "119 Impressions",
+      "efficiency": "5.5% CTR",
+      "description": "Custom-built marketing intelligence dashboard featuring real-time user tracking, interaction timelines, and conversion rate optimization metrics.",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1551288049-bbbda5366392?q=80&w=2070&auto=format&fit=crop"
+      ],
+      "metrics": [
+        {
+          "label": "Impressions",
+          "value": "119",
+          "description": "Total Views"
+        },
+        {
+          "label": "Live Users",
+          "value": "6",
+          "description": "Active Now"
+        },
+        {
+          "label": "Click Rate",
+          "value": "5.5%",
+          "description": "Engagement"
+        }
+      ],
+      "chartData": [
+        {
+          "name": "Feb 10",
+          "value": 25
+        },
+        {
+          "name": "Feb 11",
+          "value": 48
+        },
+        {
+          "name": "Feb 12",
+          "value": 32
+        }
+      ]
+    },
+    {
+      "id": "100",
+      "title": "Lifestyle Brand Scale-Up",
+      "category": "E-commerce",
+      "results": "$84,200 Sales",
+      "efficiency": "7.2x ROAS",
+      "description": "Executed a comprehensive scaling strategy for a premium lifestyle brand, achieving record-breaking monthly revenue through a 3-tier funnel approach.",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop"
+      ],
+      "metrics": [
+        {
+          "label": "Growth",
+          "value": "312%",
+          "description": "Month-over-Month"
+        },
+        {
+          "label": "ROAS",
+          "value": "7.2x",
+          "description": "Blended Return"
+        },
+        {
+          "label": "CPA",
+          "value": "BDT 420",
+          "description": "Customer Acquisition"
+        },
+        {
+          "label": "AOV",
+          "value": "BDT 3,850",
+          "description": "Order Value"
+        }
+      ],
+      "chartData": [
+        {
+          "name": "Phase 1",
+          "value": 12000
+        },
+        {
+          "name": "Phase 2",
+          "value": 34000
+        },
+        {
+          "name": "Scale",
+          "value": 84200
+        }
+      ]
+    },
+    {
+      "id": "99",
+      "title": "Venture-Backed SaaS Lander",
+      "category": "Website Build",
+      "results": "24% Conv. Rate",
+      "efficiency": "0.6s FCP",
+      "description": "Re-engineered a SaaS landing page from scratch focusing on information hierarchy and technical performance to lower acquisition costs.",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1551288049-bbbda5366392?q=80&w=2070&auto=format&fit=crop"
+      ],
+      "metrics": [
+        {
+          "label": "Conversion",
+          "value": "24%",
+          "description": "Opt-in Rate"
+        },
+        {
+          "label": "Speed",
+          "value": "98/100",
+          "description": "Mobile Insight"
+        },
+        {
+          "label": "Time on Site",
+          "value": "4m 12s",
+          "description": "User Engagement"
+        }
+      ],
+      "chartData": [
+        {
+          "name": "Before",
+          "value": 8
+        },
+        {
+          "name": "After",
+          "value": 24
+        }
+      ]
+    }
+  ],
+  "identity": {
+    "logoUrl": "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1773878400&v=beta&t=Yzrel8f6ESTICr5jX1mDC0IaIujjxT4nBme-xhsmKS8",
+    "profileImageUrl": "https://media.licdn.com/dms/image/v2/D5603AQE_fwNq-orBwQ/profile-displayphoto-crop_800_800/B56Zv2bSypKkAI-/0/1769365909615?e=1773878400&v=beta&t=Yzrel8f6ESTICr5jX1mDC0IaIujjxT4nBme-xhsmKS8",
+    "cvUrl": "https://vutsekzfzgvv08nc.public.blob.vercel-storage.com/cv/1772134658671-SM_Fajla_Rabbi_CV-ZayC90l5lbaJjf7tqoCi0le9peaG4e.pdf",
+    "googleFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSeBhaQwxVKtQn3ibvqPZ7-FGnUkml9EO6P5EYBZIvWCnCoJeg/viewform",
+    "googleSheetUrl": "https://docs.google.com/spreadsheets/d/1JDHDIp3c3GSwhemS4VvtWSowoNLHFxAIvTf91j1zQ2g/edit?gid=1373341915#gid=1373341915",
+    "whatsAppNumber": "8801956358439",
+    "linkedInUrl": "https://www.linkedin.com/in/s-m-fajla-rabbi-0ba589367/"
+  },
+  "tools": [
+    {
+      "id": "t1",
+      "name": "Meta Ads Manager",
+      "subtitle": "Growth Scaling",
+      "icon": "https://www.vectorlogo.zone/logos/facebook/facebook-official.svg"
+    },
+    {
+      "id": "t2",
+      "name": "Google Analytics 4",
+      "subtitle": "Data Intelligence",
+      "icon": "https://www.vectorlogo.zone/logos/google_analytics/google_analytics-icon.svg"
+    },
+    {
+      "id": "t3",
+      "name": "GTM / CAPI",
+      "subtitle": "Server Tracking",
+      "icon": "https://www.vectorlogo.zone/logos/googletagmanager/googletagmanager-icon.svg"
+    },
+    {
+      "id": "t4",
+      "name": "React / Next.js",
+      "subtitle": "High-Speed Web",
+      "icon": "https://www.vectorlogo.zone/logos/reactjs/reactjs-icon.svg"
+    },
+    {
+      "id": "t5",
+      "name": "Shopify / Woo",
+      "subtitle": "E-comm Engine",
+      "icon": "https://www.vectorlogo.zone/logos/shopify/shopify-icon.svg"
+    },
+    {
+      "id": "t6",
+      "name": "Tailwind CSS",
+      "subtitle": "UX Architecture",
+      "icon": "https://www.vectorlogo.zone/logos/tailwindcss/tailwindcss-icon.svg"
+    },
+    {
+      "id": "t7",
+      "name": "Hotjar / Heatmaps",
+      "subtitle": "CRO Analysis",
+      "icon": "https://www.vectorlogo.zone/logos/hotjar/hotjar-icon.svg"
+    },
+    {
+      "id": "t8",
+      "name": "Gemini AI",
+      "subtitle": "Content Strategy",
+      "icon": "https://www.gstatic.com/lamda/images/gemini_sparkle_v2.svg"
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "Alex Rivera",
+      "role": "CEO, Nexa Brands",
+      "content": "Rabbi's interest-stacking strategy completely changed our CPA. We went from $15 to $4.20 in just 3 weeks. His technical depth in Meta CAPI setup is unmatched.",
+      "image": "https://i.pravatar.cc/150?u=alex",
+      "metric": "4.2x ROAS Increase",
+      "id": "test-0"
+    },
+    {
+      "name": "Sarah Jenkins",
+      "role": "Marketing Director, Bloom Co.",
+      "content": "He didn't just build a website; he built a sales machine. Our checkout conversion rate jumped by 18% after the React migration. Truly a full-stack growth expert.",
+      "image": "https://i.pravatar.cc/150?u=sarah",
+      "metric": "+18% Conversion",
+      "id": "test-1"
+    },
+    {
+      "name": "Mahmudul Hasan",
+      "role": "Founder, ClickNova Partner",
+      "content": "Working with Rabbi on performance campaigns has been seamless. His data-first approach ensures that every BDT spent is accounted for and optimized for ROI.",
+      "image": "https://i.pravatar.cc/150?u=mahmud",
+      "metric": "Scalable ROI",
+      "id": "test-2"
+    }
+  ],
+  "faqs": [
+    {
+      "question": "How do you ensure data accuracy after iOS 14 updates?",
+      "answer": "I implement server-side tracking via Meta Conversions API (CAPI) and GTM Server Container. This allows us to bypass browser restrictions and achieve up to 98% event match quality.",
+      "id": "faq-0"
+    },
+    {
+      "question": "What's your minimum monthly ad spend for scaling?",
+      "answer": "For performance scaling, I typically work with brands spending at least BDT 50,000/month. This provides enough data for the algorithm to optimize creative testing effectively.",
+      "id": "faq-1"
+    },
+    {
+      "question": "Do you offer both web development and ad management?",
+      "answer": "Yes. In fact, I prefer it. High-performing ads require a high-converting lander. By handling both, I ensure the transition from ad click to purchase is frictionless.",
+      "id": "faq-2"
+    },
+    {
+      "question": "How quickly can we see results from a new campaign?",
+      "answer": "We usually see initial data trends within 72 hours. However, a full scaling cycle—including creative testing and interest validation—typically takes 14 to 21 days.",
+      "id": "faq-3"
+    }
+  ],
+  "leads": [],
+  "adminCreds": {
+    "username": "admin",
+    "password": "password",
+    "twoFactorEnabled": false,
+    "twoFactorSecret": "KVKFKR3TMRQXE3S2"
+  }
+}
